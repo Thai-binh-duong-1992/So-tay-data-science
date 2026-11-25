@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sổ tay Nghiên cứu Khoa học</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap" rel="stylesheet">
+<style>
+/*
+VOICE: clinical, calm, exact; a working tool for a cardiologist between ward rounds.
+IDEA: an annotated journal reprint: crimson masthead, white paper, yellow highlighter marks you tap.
+PICTURE: the intake card and the highlighted article itself; marks are the visual signature.
+COLOUR and TYPE: crimson masthead, white or near-black paper, highlighter yellow, pink for new terms; Source Serif 4 titles, Be Vietnam Pro text.
+LAYOUT: sticky tab bar; intake card beside a short how-to; results as cards; glossary and checklists as readable columns.
+*/
+:root{color-scheme:light dark;
+--bg:light-dark(#ffffff,#131316);--ink:light-dark(#1b1b20,#ececef);--mute:light-dark(#5c5c66,#a6a6b0);
+--line:light-dark(#e4e2dd,#2d2d34);--panel:light-dark(#f6f5f2,#1c1c21);--card:light-dark(#ffffff,#18181c);
+--crim:#8e1b2c;--crimd:#6d1422;--acc:light-dark(#a3182f,#ff93a3);
+--hl:light-dark(#ffe47e,#5c4b12);--hl2:light-dark(#ffd3da,#5a1f2a);
+--ok:light-dark(#1b6a44,#73d6a4);--okb:light-dark(#e3f3ea,#163326);--no:light-dark(#a3182f,#ff93a3);--nob:light-dark(#fbe6e9,#3a1a20);--unk:light-dark(#7a5d00,#e6c766);--unkb:light-dark(#fbf1d3,#352d12)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Be Vietnam Pro",system-ui,sans-serif;overflow-x:clip}
+h1,h2,h3,h4{font-family:"Source Serif 4",Georgia,serif;line-height:1.15;margin:0;text-wrap:balance}
+a{color:var(--acc)}
+button{font:inherit;cursor:pointer}
+button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #f2b705;outline-offset:2px}
+.mast{background:var(--crim);color:#fff}
+.mi{max-width:1240px;margin:0 auto;padding:22px max(4vw,16px) 14px;display:flex;gap:18px;align-items:center}
+.mi svg{flex:none;width:62px;height:62px}
+.mi h1{font-size:clamp(28px,4vw,44px);font-weight:700;color:#fff}
+.mi p{margin:4px 0 0;color:#f6d9de;font-size:15px}
+.tabs{position:sticky;top:0;z-index:20;background:var(--crimd);display:flex;gap:4px;overflow-x:auto;padding:0 max(4vw,16px);scrollbar-width:none}
+.tabw{position:sticky;top:0;z-index:20;background:var(--crimd)}
+.tabs a{flex:none;color:#f3d3d8;text-decoration:none;padding:13px 14px 11px;font-weight:500;font-size:15px;border-bottom:3px solid transparent;min-height:44px}
+.tabs a[aria-current=page]{color:#fff;border-color:#ffe47e}
+.tabs a span:not(:empty){background:#ffe47e;color:#3b2a00;border-radius:10px;padding:0 7px;font-size:12px;margin-left:4px}
+.band{max-width:1240px;margin:0 auto;padding:clamp(22px,3vw,40px) max(4vw,16px)}
+.ingrid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:24px;align-items:start}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px}
+.in{box-shadow:0 10px 30px -18px rgba(60,10,20,.35);padding:22px}
+.seg{display:flex;gap:6px;background:var(--panel);padding:5px;border-radius:10px;margin-bottom:18px;flex-wrap:wrap}
+.seg button{flex:1 1 120px;border:0;background:transparent;color:var(--mute);padding:10px 12px;border-radius:7px;font-weight:500;min-height:44px}
+.seg button[aria-pressed=true]{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.15)}
+label{display:block;font-weight:600;margin-bottom:8px}
+input[type=text],input[type=search],input[type=number],textarea{width:100%;font:16px/1.5 inherit;font-family:inherit;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:9px;padding:12px 14px}
+textarea{resize:vertical;min-height:170px}
+.hint{color:var(--mute);font-size:14px;margin:8px 0 0}
+.drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:150px;border:2px dashed var(--line);border-radius:12px;background:var(--panel);font-weight:500;text-align:center;padding:18px;cursor:pointer}
+.drop.on{border-color:var(--acc)}
+.drop input{position:absolute;opacity:0;width:1px;height:1px}
+#thumbs{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}#thumbs span{font-size:13px;background:var(--panel);border-radius:6px;padding:3px 8px}
+.acts{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:18px}
+.pri,.sec{border-radius:9px;padding:11px 18px;font-weight:600;min-height:44px;border:1.5px solid var(--crim)}
+.pri{background:var(--crim);color:#fff}.sec{background:transparent;color:var(--acc);border-color:var(--line)}
+.pri:disabled,.sec:disabled{opacity:.55;cursor:default}
+.sm{padding:7px 12px;min-height:38px;font-size:14px}
+#stat{font-size:14px;color:var(--mute);flex:1 1 220px}#stat.err{color:var(--no)}
+#bStop{background:none;border:0;color:var(--acc);text-decoration:underline;min-height:44px}
+.how h3{font-size:22px;margin-bottom:10px}
+.how ol{margin:0 0 16px;padding-left:20px}.how li{margin-bottom:8px}
+.legend{display:flex;flex-direction:column;gap:6px;font-size:14px;align-items:flex-start}
+.note{font-size:14px;color:var(--mute)}
+mark.t{background:var(--hl);color:inherit;border-radius:3px;padding:0 2px;cursor:pointer;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+mark.t:hover{box-shadow:inset 0 -2px 0 var(--crim)}
+mark.t.nw{background:var(--hl2);border-bottom:2px dashed var(--acc)}
+#result{border-top:1px solid var(--line)}
+.rhead h2{font-size:clamp(24px,3.2vw,36px);margin:12px 0 8px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.badge{background:var(--crim);color:#fff;border-radius:6px;padding:3px 10px;font-size:13px;font-weight:600}
+.pill{border-radius:20px;padding:3px 11px;font-size:13px;font-weight:500;background:var(--panel)}
+.pill.ok{background:var(--okb);color:var(--ok)}.pill.no{background:var(--nob);color:var(--no)}.pill.unk{background:var(--unkb);color:var(--unk)}
+.cite{color:var(--mute);font-size:14px;margin:0 0 12px}
+.bl{font-family:"Source Serif 4",Georgia,serif;font-size:clamp(19px,2.2vw,23px);line-height:1.4;border-left:4px solid #e8c040;padding:4px 0 4px 16px;margin:16px 0;max-width:62em}
+.warn{background:var(--unkb);color:var(--ink);border-radius:9px;padding:10px 14px;font-size:14px}
+.racts{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 4px}
+.subtabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin:22px 0 18px;overflow-x:auto}
+.subtabs button{flex:none;background:none;border:0;border-bottom:3px solid transparent;padding:10px 14px;color:var(--mute);font-weight:600;min-height:44px}
+.subtabs button[aria-selected=true]{color:var(--ink);border-color:var(--crim)}
+.subtabs i{font-style:normal;background:var(--hl2);color:var(--acc);border-radius:10px;padding:0 7px;font-size:12px}
+.ag{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.ag .wide{grid-column:1/-1}
+.card h3{font-size:19px;margin-bottom:10px}
+.card p{margin:0 0 10px}
+.pico{width:100%;border-collapse:collapse;margin-top:6px;font-size:15px}
+.pico th{width:36px;text-align:left;vertical-align:top;color:var(--acc);font-family:"Source Serif 4",serif;font-size:18px;padding:7px 0}
+.pico td{padding:7px 0;border-top:1px solid var(--line)}
+.lbl{font-weight:600}.eff{font-size:17px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:8px;margin:12px 0 8px}
+.tiles div{background:var(--panel);border-radius:9px;padding:10px 12px}
+.tiles span{display:block;font-size:13px;color:var(--mute)}.tiles b{font-family:"Source Serif 4",serif;font-size:26px;white-space:nowrap}
+.mini{font-size:14px;color:var(--mute)}
+.or{margin:8px 0 0;padding-left:18px;font-size:15px}.or li{margin-bottom:6px}.or span{color:var(--mute)}
+.procon{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;grid-column:1/-1}
+.procon ul{margin:0;padding-left:18px}.procon li{margin-bottom:7px}
+.okh{color:var(--ok)}.noh{color:var(--no)}
+.clh{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px;align-items:baseline}
+.cla{list-style:none;margin:6px 0 10px;padding:0}
+.cla li{display:grid;grid-template-columns:92px minmax(0,1fr);gap:12px;padding:12px 0;border-top:1px solid var(--line)}
+.cla p{margin:4px 0 0;font-size:15px}
+.ans{border-radius:6px;font-size:13px;font-weight:600;text-align:center;padding:4px 6px;align-self:start;white-space:nowrap}
+.ans.yes{background:var(--okb);color:var(--ok)}.ans.no{background:var(--nob);color:var(--no)}.ans.unk{background:var(--unkb);color:var(--unk)}
+.disc{font-size:13px;color:var(--mute);margin-top:14px}
+.doc{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:clamp(18px,3vw,36px);max-width:78ch;font-size:16.5px;line-height:1.75}
+.doc h4{font-size:19px;margin:22px 0 8px;color:var(--acc)}.doc h4:first-child{margin-top:0}
+.doc p{margin:0 0 14px}
+.tbl{font-size:14px;background:var(--panel);border-radius:8px;padding:10px 12px;margin:0 0 14px;overflow-x:auto;line-height:1.6}.sep{color:var(--mute)}
+.empty{color:var(--mute);padding:20px 0}
+.ntl,.gg{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,330px),1fr));gap:14px}
+.nt,.term{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;content-visibility:auto;contain-intrinsic-size:auto 200px}
+.nt{border-color:var(--hl2)}
+.ph b,.term h4{font-family:"Source Serif 4",serif;font-size:19px;font-weight:700}
+.ph span,.term h4 span{display:block;font-family:"Be Vietnam Pro",sans-serif;font-size:14px;font-weight:500;color:var(--acc);margin-top:2px}
+.pc{color:var(--mute);font-size:13px;margin:4px 0 8px}
+.term .al{font-size:13px;color:var(--mute);margin:4px 0 6px}
+.term p,.nt p,#pop p{margin:6px 0;font-size:15px}
+.pe b,.pp b{font-weight:600}.pp b{color:var(--no)}
+.pa{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}
+.done{font-size:14px;color:var(--ok);font-weight:600}
+.ut{font-size:13px;color:var(--mute);margin-top:8px}
+.lnkb{background:none;border:0;color:var(--acc);text-decoration:underline;padding:4px}
+#pop{position:fixed;z-index:50;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;box-shadow:0 18px 40px -12px rgba(0,0,0,.35);max-height:70vh;overflow:auto}
+#pop.sheet{left:0;right:0;bottom:0;top:auto;border-radius:16px 16px 0 0;max-height:65vh;padding-bottom:max(18px,env(safe-area-inset-bottom))}
+#pop .x{margin-left:auto;background:none;border:0;font-size:26px;line-height:1;color:var(--mute);min-width:44px;min-height:38px}
+#pop .pc{display:block}
+.toolbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:16px 0 10px}
+.toolbar input{flex:1 1 280px}
+.chiprow{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 18px}
+.chip{border:1.5px solid var(--line);background:var(--card);color:var(--ink);border-radius:20px;padding:7px 14px;font-size:14px;min-height:40px}
+.chip i{font-style:normal;color:var(--mute);font-size:12px}
+.chip[aria-pressed=true]{background:var(--crim);border-color:var(--crim);color:#fff}.chip[aria-pressed=true] i{color:#f6d9de}
+.gh{font-size:24px;margin:28px 0 12px;padding-bottom:6px;border-bottom:2px solid var(--crim)}
+.vh{font-size:clamp(26px,3vw,36px);margin-bottom:6px}
+.vsub{color:var(--mute);margin:0 0 8px;max-width:70ch}
+.clwrap{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:28px;align-items:start}
+.clmeta h3{font-size:26px;margin-bottom:6px}
+.grp{font-size:20px;margin:24px 0 8px;padding:6px 0 6px 12px;border-left:4px solid var(--crim)}
+.grp.gB{border-color:#e8c040}.grp.gC{border-color:var(--ok)}.grp.gD{border-color:var(--line)}
+.qs{list-style:none;margin:0;padding:0}
+.qs li{display:grid;grid-template-columns:46px minmax(0,1fr);gap:10px;padding:14px 0;border-top:1px solid var(--line)}
+.qs b{font-size:16.5px}.qs p{margin:6px 0 0;font-size:15px}
+.qid{font-family:"Source Serif 4",serif;font-weight:700;color:var(--acc);font-size:18px}
+.k{font-weight:600}.k.red{color:var(--no)}
+.side{position:sticky;top:64px;display:flex;flex-direction:column;gap:16px}
+.calc .row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.calc label{font-size:14px;font-weight:500}
+#cOut{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}
+#cOut div{background:var(--panel);border-radius:9px;padding:8px 12px}#cOut span{display:block;font-size:13px;color:var(--mute)}#cOut b{font-family:"Source Serif 4",serif;font-size:24px}
+.rep{width:100%;border-collapse:collapse;font-size:14px}
+.rep th,.rep td{text-align:left;padding:8px 6px;border-top:1px solid var(--line);vertical-align:top}
+.rep th{color:var(--mute);font-weight:500;border-top:0}
+.pp-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;padding:18px 0;border-top:1px solid var(--line)}
+.pp-item h4{font-size:20px;margin-bottom:4px}.pp-item p{margin:4px 0}
+#libNote{color:var(--mute);font-size:14px}
+@media(max-width:900px){.ingrid,.clwrap{grid-template-columns:minmax(0,1fr)}.side{position:static}.tabs,.tabw{position:static}}
+@media(max-width:640px){.ag,.procon{grid-template-columns:minmax(0,1fr)}.cla li{grid-template-columns:minmax(0,1fr);gap:6px}.ans{justify-self:start}.pp-item{grid-template-columns:minmax(0,1fr)}.mi svg{width:46px;height:46px}.in{padding:16px}}
+@media(prefers-reduced-motion:no-preference){#pop:not([hidden]){animation:rise .16s ease-out}@keyframes rise{from{opacity:0;transform:translateY(6px)}}}
+</style>
+</head>
+<body>
+<header class="mast">
+<div class="mi">
+<svg viewBox="0 0 64 64" aria-hidden="true"><rect x="10" y="6" width="38" height="50" rx="4" fill="#fff"/><rect x="16" y="15" width="26" height="3" rx="1.5" fill="#d9c9cc"/><rect x="14.5" y="22" width="22" height="6" rx="2" fill="#ffe47e"/><rect x="16" y="23.5" width="19" height="3" rx="1.5" fill="#8e1b2c"/><rect x="16" y="32" width="26" height="3" rx="1.5" fill="#d9c9cc"/><rect x="16" y="39" width="18" height="3" rx="1.5" fill="#d9c9cc"/><circle cx="44" cy="42" r="10" fill="none" stroke="#ffe47e" stroke-width="4"/><path d="M51 49l7 7" stroke="#ffe47e" stroke-width="5" stroke-linecap="round"/></svg>
+<div><h1>Sổ tay Nghiên cứu Khoa học</h1><p>Tra thuật ngữ, thẩm định bài báo theo bảng câu hỏi, lưu lại bài đã đọc</p></div>
+</div>
+</header>
+<div class="tabw"><nav class="tabs" id="tabs" aria-label="Các phần"><a href="#phan-tich">Phân tích bài báo</a><a href="#tu-dien">Từ điển thuật ngữ</a><a href="#cau-hoi">Bảng câu hỏi thẩm định</a><a href="#thu-vien">Thư viện<span id="libN"></span></a></nav></div>
+<main>
+<section id="v-phan-tich">
+<div class="band">
+<div class="ingrid">
+<div class="card in">
+<div class="seg" role="group" aria-label="Cách đưa bài báo vào"><button data-m="link" aria-pressed="true">Link · PMID · DOI</button><button data-m="text" aria-pressed="false">Dán văn bản</button><button data-m="img" aria-pressed="false">Ảnh chụp · PDF</button></div>
+<div class="mode" data-m="link"><label for="inLink">Link bài báo, PMID, PMCID hoặc DOI</label><input type="text" id="inLink" inputmode="url" autocomplete="off" placeholder="https://pubmed.ncbi.nlm.nih.gov/31535829/"><p class="hint">Lấy qua PubMed: bài có bản miễn phí trên PubMed Central thì lấy toàn văn, còn lại chỉ có abstract. Link trang tạp chí dùng được nếu địa chỉ có DOI.</p></div>
+<div class="mode" data-m="text" hidden><label for="inText">Dán văn bản bài báo</label><textarea id="inText" placeholder="Dán abstract, hoặc tốt hơn là cả Methods và Results…"></textarea><p class="hint">Bỏ phần References cho gọn. Tối đa khoảng 60.000 ký tự được gửi cho Claude.</p></div>
+<div class="mode" data-m="img" hidden><label class="drop" id="drop" for="inFile"><span id="dropTxt">Chọn ảnh chụp các trang (tối đa 8) hoặc 1 file PDF</span><span class="hint">Có thể kéo thả, hoặc dán ảnh chụp màn hình bằng Ctrl+V</span><input type="file" id="inFile" accept="image/*,application/pdf" multiple></label><div id="thumbs"></div></div>
+<div class="acts"><button class="pri" id="bGo">Phân tích</button><button class="sec" id="bHl">Chỉ highlight</button><button id="bStop" hidden>Dừng</button><span id="stat" role="status" aria-live="polite"></span></div>
+</div>
+<aside class="how">
+<h3>Cách dùng</h3>
+<ol><li><b>Phân tích</b>: Claude chấm bài theo bảng câu hỏi đúng thiết kế, nêu điểm mạnh, hạn chế, tính ARR/NNT và tìm thuật ngữ mới. Bài tự lưu vào Thư viện.</li><li><b>Chỉ highlight</b>: tô thuật ngữ có trong từ điển, không tốn lượt Claude (trừ khi đọc chữ từ ảnh).</li><li>Chạm vào chữ được tô để xem định nghĩa, ví dụ tim mạch và chỗ dễ nhầm.</li></ol>
+<div class="legend"><mark class="t">thuật ngữ có trong từ điển</mark><mark class="t nw">thuật ngữ mới, chờ anh duyệt</mark></div>
+<p class="note">Từ điển hiện có <b id="termCount"></b> thuật ngữ gốc cùng các thuật ngữ anh duyệt thêm.</p>
+<p class="note" id="capNote"></p>
+</aside>
+</div>
+</div>
+<div class="band" id="result" hidden></div>
+</section>
+
+<section id="v-tu-dien" hidden><div class="band">
+<h2 class="vh">Từ điển thuật ngữ</h2>
+<p class="vsub">Định nghĩa tiếng Việt, ví dụ tim mạch và chỗ hay hiểu sai. Số liệu ghi “ví dụ giả định” là minh hoạ; các số có tên thử nghiệm lấy từ bài gốc.</p>
+<div class="toolbar"><input type="search" id="gq" placeholder="Tìm: hazard ratio, ITT, độ nhạy…" aria-label="Tìm thuật ngữ"><span class="mini" id="gcount"></span></div>
+<div class="chiprow" id="gchips"></div>
+<div id="glist"></div>
+</div></section>
+
+<section id="v-cau-hoi" hidden><div class="band">
+<h2 class="vh">Bảng câu hỏi thẩm định</h2>
+<p class="vsub">Mỗi bộ chia ba câu hỏi lớn: kết quả có đáng tin không, kết quả là gì, có áp dụng cho BN của tôi không. Kèm chỗ cần tìm trong bài và cờ đỏ.</p>
+<div class="chiprow" id="clchips"></div>
+<div class="clwrap">
+<div id="clbody"></div>
+<div class="side">
+<div class="card calc"><h3>Tính nhanh ARR, NNT</h3><div class="row"><div><label for="cT">Nhóm can thiệp (%)</label><input type="number" id="cT" inputmode="decimal" step="0.1" value="16.3"></div><div><label for="cC">Nhóm chứng (%)</label><input type="number" id="cC" inputmode="decimal" step="0.1" value="21.2"></div></div><div id="cOut"></div><p class="mini">Mặc định là kết cục chính của DAPA-HF (trung vị 18,2 tháng).</p></div>
+<div class="card"><h3>Hướng dẫn báo cáo và công cụ đánh giá</h3><table class="rep"><thead><tr><th>Thiết kế</th><th>Báo cáo</th><th>Đánh giá sai lệch</th></tr></thead><tbody id="rep"></tbody></table></div>
+</div>
+</div>
+</div></section>
+
+<section id="v-thu-vien" hidden><div class="band">
+<h2 class="vh">Thư viện bài đã đọc</h2>
+<p class="vsub">Bài đã phân tích tự lưu ở đây, riêng cho tài khoản của anh. Mở lại không tốn thêm lượt Claude.</p>
+<p id="libNote"></p>
+<div id="lib"></div>
+</div></section>
+</main>
+<div id="pop" role="dialog" aria-label="Định nghĩa thuật ngữ" hidden></div>
+<script>
+const CATS=[["tk","Thiết kế nghiên cứu"],["tn","Thử nghiệm lâm sàng"],["hq","Đo lường hiệu quả & thống kê"],["sl","Sai lệch & gây nhiễu"],["sc","Sống còn"],["cd","Chẩn đoán & tiên lượng"],["tq","Tổng quan & phân tích gộp"],["kc","Khuyến cáo & mức bằng chứng"],["kt","Kinh tế y tế"]];
+/* [nhóm, thuật ngữ, biến thể (|), tên Việt, định nghĩa, ví dụ, dễ nhầm] */
+const TERMS=[
+["tk","Randomized controlled trial","RCT|randomised controlled trial|randomized trial|randomised trial|randomized controlled trials","Thử nghiệm ngẫu nhiên có đối chứng","Người tham gia được chia ngẫu nhiên vào nhóm can thiệp hoặc nhóm chứng rồi theo dõi kết cục. Ngẫu nhiên hoá cân bằng cả yếu tố nhiễu đã biết lẫn chưa biết, nên đây là thiết kế mạnh nhất để kết luận nhân quả.","DAPA-HF chia ngẫu nhiên 4744 BN suy tim EF ≤40% vào dapagliflozin hoặc placebo.","RCT vẫn sai lệch được nếu không che giấu phân bổ, mất dấu nhiều, hoặc dân số quá chọn lọc."],
+["tk","Cohort study","cohort|prospective cohort|retrospective cohort|cohort studies","Nghiên cứu đoàn hệ","Theo dõi một nhóm người theo thời gian, so tỷ lệ biến cố giữa người có và không có phơi nhiễm (thuốc, yếu tố nguy cơ). Có thể tiến cứu hoặc hồi cứu từ hồ sơ.","Theo dõi BN sau PCI có và không dùng statin liều cao, so tỷ lệ MACE sau 1 năm.","Không ngẫu nhiên nên luôn phải nghĩ tới gây nhiễu; kết luận là “có liên quan”, chưa phải nhân quả."],
+["tk","Case-control study","case control|case–control|case-control","Nghiên cứu bệnh–chứng","Bắt đầu từ kết cục: chọn nhóm có bệnh (ca) và nhóm không bệnh (chứng), rồi nhìn ngược lại xem tỷ lệ phơi nhiễm khác nhau ra sao. Hiệu quả với bệnh hiếm; đo bằng OR.","So tỷ lệ từng dùng NSAID ở BN nhồi máu cơ tim với người không nhồi máu cùng tuổi, giới.","Dễ dính recall bias và sai lệch khi chọn nhóm chứng; không tính được tỷ lệ mới mắc."],
+["tk","Cross-sectional study","cross sectional|cross-sectional","Nghiên cứu cắt ngang","Đo phơi nhiễm và kết cục ở cùng một thời điểm, như chụp một tấm ảnh quần thể. Dùng để ước tính tỷ lệ hiện mắc.","Tỷ lệ tăng huyết áp chưa kiểm soát ở BN khám ngoại trú trong một tháng.","Không biết cái nào có trước nên không suy luận nhân quả."],
+["tk","Registry","registries|registry-based","Sổ bộ (registry)","Cơ sở dữ liệu thu thập có hệ thống các BN cùng bệnh hoặc cùng thủ thuật, thường từ nhiều trung tâm, phản ánh thực hành đời thực.","Sổ bộ can thiệp mạch vành dùng để theo dõi tỷ lệ huyết khối stent.","Chất lượng phụ thuộc độ đầy đủ của dữ liệu; vẫn là nghiên cứu quan sát."],
+["tk","Case series","case report|case reports|case series","Báo cáo ca / loạt ca","Mô tả một hoặc vài BN có đặc điểm đáng chú ý, không có nhóm so sánh.","Loạt ca viêm cơ tim xuất hiện sau tiêm một loại vaccine.","Gợi ý giả thuyết, không chứng minh được hiệu quả hay nguyên nhân."],
+["tk","Prospective","prospectively","Tiến cứu","Dữ liệu được thu thập từ lúc bắt đầu nghiên cứu trở về sau, theo kế hoạch định trước.","","“Tiến cứu” không đồng nghĩa với “ngẫu nhiên”."],
+["tk","Retrospective","retrospectively","Hồi cứu","Dùng dữ liệu có sẵn (bệnh án, HIS) để trả lời câu hỏi đặt ra sau khi sự việc đã xảy ra.","Rà HIS 3 năm để so biến chứng mạch máu giữa đường quay và đường đùi.","Điểm yếu chính là dữ liệu thiếu và ghi chép không đồng nhất."],
+["tk","Pragmatic trial","pragmatic|explanatory trial","Thử nghiệm thực dụng","RCT tiến hành trong điều kiện gần thực hành thường quy (tiêu chuẩn chọn rộng, can thiệp linh hoạt) để trả lời “có hiệu quả ngoài đời không”. Đối lập với thử nghiệm giải thích (explanatory) trong điều kiện lý tưởng.","","Kết quả khái quát tốt hơn nhưng hiệu quả thường nhỏ hơn thử nghiệm lý tưởng."],
+["tk","Crossover trial","cross-over|crossover design|crossover","Thử nghiệm bắt chéo","Mỗi người lần lượt nhận cả hai can thiệp theo thứ tự ngẫu nhiên, có giai đoạn rửa thuốc (washout) ở giữa; mỗi người là chứng của chính mình.","So hai thuốc hạ áp trên cùng một BN, mỗi thuốc 4 tuần.","Chỉ hợp với bệnh mạn ổn định và thuốc hết tác dụng nhanh; không dùng cho kết cục tử vong."],
+["tk","Cluster randomized trial","cluster-randomized|cluster randomised|cluster-randomised|cluster trial","Thử nghiệm ngẫu nhiên theo cụm","Ngẫu nhiên hoá theo đơn vị (bệnh viện, khoa, xã) thay vì từng người.","Chia ngẫu nhiên 40 bệnh viện áp dụng hoặc không áp dụng quy trình tái tưới máu nhanh.","Phân tích phải tính đến tương quan trong cụm, nếu không CI sẽ hẹp giả tạo."],
+["tk","Factorial design","factorial","Thiết kế giai thừa","Thử hai can thiệp cùng lúc: BN được ngẫu nhiên hoá hai lần (A hay không A, B hay không B), tạo thành 4 nhóm.","Ví dụ giả định: thuốc A so với placebo, kèm mục tiêu huyết áp chặt so với chuẩn, trong cùng một thử nghiệm.","Giả định hai can thiệp không tương tác; nếu có tương tác thì khó diễn giải."],
+["tk","Non-inferiority trial","noninferiority|non-inferiority|non-inferiority margin|noninferior|non-inferior","Thử nghiệm không kém hơn","Chứng minh can thiệp mới không kém can thiệp chuẩn quá một ngưỡng định trước (non-inferiority margin), thường vì nó rẻ, an toàn hay tiện hơn. Kết luận dựa vào cận trên của CI so với ngưỡng.","Ví dụ giả định: DAPT 1 tháng so với 12 tháng, ngưỡng là chênh tuyệt đối 2% MACE.","Ngưỡng quá rộng làm “không kém hơn” vô nghĩa. ITT có thể làm hai nhóm giống nhau giả tạo, nên cần xem cả per-protocol."],
+["tk","Superiority trial","superiority","Thử nghiệm vượt trội","Mục tiêu chứng minh can thiệp tốt hơn đối chứng.","","“Không chứng minh được khác biệt” không có nghĩa là “chứng minh không khác biệt”."],
+["tk","Equivalence trial","equivalence","Thử nghiệm tương đương","Chứng minh hai can thiệp khác nhau không quá một ngưỡng định trước ở cả hai chiều.","So thuốc generic với thuốc gốc.",""],
+["tk","Trial phase","phase 3|phase III|phase 2|phase II|phase 4|phase IV","Pha thử nghiệm","Pha I: an toàn, liều, trên ít người. Pha II: tín hiệu hiệu quả, chọn liều. Pha III: RCT lớn trên kết cục lâm sàng để được cấp phép. Pha IV: theo dõi sau khi lưu hành.","DAPA-HF là thử nghiệm pha 3.","Kết quả pha II (thường dùng kết cục thay thế) hay bị pha III bác bỏ."],
+["tk","Target trial emulation","target trial|trial emulation","Mô phỏng thử nghiệm đích","Phân tích dữ liệu quan sát theo khung của một RCT tưởng tượng (tiêu chuẩn chọn, thời điểm 0, chiến lược điều trị) để tránh các sai lệch kinh điển như immortal time bias.","","Vẫn không xử lý được yếu tố nhiễu chưa đo."],
+["tk","Real-world evidence","RWE|real-world data|real world evidence|real-world","Bằng chứng đời thực","Bằng chứng từ dữ liệu ngoài thử nghiệm: hồ sơ điện tử, sổ bộ, dữ liệu bảo hiểm. Bổ sung cho RCT về dân số rộng và an toàn dài hạn.","","“Đời thực” không tự động đáng tin hơn; chất lượng phụ thuộc thiết kế phân tích."],
+["tn","Randomization","randomisation|randomized|randomised|randomly assigned|random assignment|randomly allocated|randomisation","Phân bổ ngẫu nhiên","Chia nhóm bằng cơ chế ngẫu nhiên (máy tính) để mỗi người có cùng xác suất vào mỗi nhóm, nhờ đó các yếu tố tiên lượng cân bằng giữa các nhóm.","","Chia theo ngày chẵn lẻ hay số hồ sơ là “giả ngẫu nhiên”, dễ bị thao túng."],
+["tn","Allocation concealment","concealed allocation|concealment of allocation|allocation was concealed","Che giấu phân bổ","Người tuyển BN không biết trước BN tiếp theo sẽ vào nhóm nào, thường nhờ hệ thống ngẫu nhiên trung tâm qua web hoặc điện thoại. Khác với làm mù.","Phân bổ qua hệ thống ngẫu nhiên tương tác trên web (IWRS).","Thiếu che giấu phân bổ làm phóng đại hiệu quả. Luôn làm được, kể cả khi không làm mù được."],
+["tn","Blinding","blinded|double-blind|double blind|single-blind|masked|masking|triple-blind","Làm mù","Giữ kín việc ai nhận can thiệp nào với BN, người điều trị, người đánh giá kết cục và/hoặc người phân tích.","ORBITA so PCI với thủ thuật giả (sham) để làm mù BN khi đánh giá đau thắt ngực.","“Mù đôi” không nói rõ ai bị làm mù; đọc Methods để biết."],
+["tn","Open-label","open label|unblinded","Nhãn mở","Không làm mù: BN và bác sĩ đều biết nhóm điều trị. Hay gặp khi so thủ thuật với thuốc.","So can thiệp mạch vành với điều trị nội khoa thường là nhãn mở.","Chấp nhận được nếu kết cục khách quan (tử vong) hoặc được thẩm định mù; đáng lo với kết cục chủ quan."],
+["tn","PROBE design","PROBE","Thiết kế PROBE","Prospective Randomized Open Blinded End-point: ngẫu nhiên, nhãn mở, nhưng kết cục do hội đồng đánh giá mù. Phổ biến trong thử nghiệm tim mạch.","","Làm mù người đánh giá không ngăn được việc bác sĩ quyết định nhập viện khác nhau giữa hai nhóm."],
+["tn","Stratified randomization","stratified|stratification|block randomization|permuted blocks|stratified randomisation","Ngẫu nhiên phân tầng / theo khối","Phân tầng: ngẫu nhiên riêng trong từng tầng (vd có/không đái tháo đường) để cân bằng yếu tố quan trọng. Theo khối: giữ số BN hai nhóm cân bằng sau mỗi khối.","Phân tầng theo đái tháo đường để hai nhóm có tỷ lệ ĐTĐ tương đương.",""],
+["tn","Intention-to-treat","ITT|intention to treat|intention-to-treat analysis|intent-to-treat|intent to treat","Phân tích theo ý định điều trị","Phân tích mọi BN theo nhóm được phân bổ ban đầu, bất kể có dùng thuốc, bỏ thuốc hay chuyển nhóm. Giữ nguyên lợi ích của ngẫu nhiên hoá.","BN nhóm nội khoa sau đó được PCI vẫn được tính vào nhóm nội khoa.","Là phân tích chính cho thử nghiệm vượt trội; thử nghiệm không kém hơn cần xem thêm per-protocol."],
+["tn","Per-protocol analysis","per-protocol|per protocol|as-treated|as treated","Phân tích theo đề cương","Chỉ phân tích BN tuân thủ đúng can thiệp được phân bổ (per-protocol), hoặc theo can thiệp thực nhận (as-treated).","","Phá vỡ ngẫu nhiên hoá nên dễ sai lệch; dùng để kiểm tra độ vững."],
+["tn","Modified intention-to-treat","mITT|modified ITT|modified intention to treat","ITT hiệu chỉnh","Biến thể của ITT, loại một số BN (vd chưa nhận liều nào).","","Đọc kỹ ai bị loại; nếu loại sau khi biết nhóm thì có thể sai lệch."],
+["tn","Placebo","placebo-controlled|sham|sham procedure|sham-controlled","Giả dược / thủ thuật giả","Chất không có hoạt tính hoặc thủ thuật giả, giúp làm mù và tách hiệu quả thật khỏi hiệu ứng mong đợi.","","So với placebo khác với so với thuốc chuẩn đang dùng (active comparator); hỏi đối chứng có phù hợp không."],
+["tn","Primary endpoint","primary outcome|primary end point|primary efficacy outcome|primary end-point|primary outcomes","Kết cục chính","Kết cục định trước, dùng để tính cỡ mẫu và trả lời câu hỏi chính. Kết luận của thử nghiệm dựa trên kết cục này.","DAPA-HF: gộp suy tim nặng lên hoặc tử vong tim mạch.","Nếu kết cục chính âm tính, các kết cục phụ “dương tính” chỉ là gợi ý."],
+["tn","Secondary endpoint","secondary outcome|secondary outcomes|secondary end point|secondary endpoints","Kết cục phụ","Kết cục định trước nhưng không dùng để tính cỡ mẫu; lực thống kê thường thấp hơn.","","Kiểm định nhiều kết cục phụ làm tăng nguy cơ dương tính giả."],
+["tn","Composite endpoint","composite outcome|composite","Kết cục gộp","Gộp nhiều biến cố (tử vong, nhồi máu, đột quỵ…) thành một kết cục để tăng số biến cố và giảm cỡ mẫu.","MACE là kết cục gộp kinh điển.","Xem lợi ích đến từ thành phần nào; nếu chủ yếu từ thành phần “mềm” (tái thông mạch) thì kém thuyết phục."],
+["tn","MACE","major adverse cardiovascular events|major adverse cardiac events|MACCE","Biến cố tim mạch nặng","Kết cục gộp hay dùng trong tim mạch, thường gồm tử vong tim mạch, nhồi máu cơ tim, đột quỵ; có nghiên cứu thêm tái thông mạch hoặc nhập viện.","","Định nghĩa MACE khác nhau giữa các bài; không so trực tiếp con số MACE giữa các thử nghiệm."],
+["tn","Hard endpoint","hard outcome|hard outcomes|soft endpoint|hard endpoints","Kết cục cứng","Kết cục khách quan, quan trọng với BN, ít bị đánh giá chủ quan: tử vong, nhồi máu, đột quỵ. Kết cục “mềm”: nhập viện, đau ngực, tái thông mạch do bác sĩ quyết định.","",""],
+["tn","Surrogate endpoint","surrogate outcome|surrogate marker|surrogate","Kết cục thay thế","Chỉ số trung gian (LDL-C, huyết áp, FFR, ngoại tâm thu) dùng thay cho kết cục lâm sàng thật.","CAST: encainide và flecainide giảm ngoại tâm thu thất sau nhồi máu nhưng lại làm tăng tử vong.","Cải thiện chỉ số không bảo đảm cải thiện sống còn."],
+["tn","Subgroup analysis","subgroup|subgroups|subgroup analyses","Phân tích phân nhóm","So hiệu quả điều trị trong các nhóm nhỏ (tuổi, giới, ĐTĐ…), thường trình bày bằng forest plot.","","Chỉ tin khi được định trước, số lượng ít, p tương tác thấp, hợp lý sinh học và lặp lại được. Phần lớn là ngẫu nhiên."],
+["tn","P for interaction","interaction p|P for heterogeneity|test for interaction|p-interaction|P interaction","Giá trị p tương tác","Kiểm định xem hiệu quả có thật sự khác giữa các phân nhóm không. Đọc phân nhóm bằng p tương tác, không so p riêng của từng nhóm.","Nam p=0,01, nữ p=0,20 nhưng p tương tác 0,6: không có bằng chứng hiệu quả khác theo giới.",""],
+["tn","Loss to follow-up","lost to follow-up|loss to follow up|dropout|drop-out|withdrew consent","Mất dấu","BN không còn được theo dõi đến hết nghiên cứu.","","Quy tắc thô: >20%, hoặc chênh giữa hai nhóm, là đáng lo. Nếu số mất dấu lớn hơn chênh lệch số biến cố thì kết luận có thể đảo ngược."],
+["tn","Interim analysis","interim analyses|stopped early|early stopping|early termination|DSMB|data monitoring committee|data and safety monitoring board","Phân tích giữa kỳ / dừng sớm","Hội đồng giám sát độc lập (DSMB) xem dữ liệu giữa chừng, có thể dừng thử nghiệm sớm vì lợi ích, nguy hại hoặc vô ích.","","Dừng sớm vì lợi ích, nhất là khi ít biến cố, thường phóng đại hiệu quả."],
+["tn","Sample size","sample size calculation|power calculation|statistical power|underpowered|adequately powered","Cỡ mẫu và lực thống kê","Cỡ mẫu tính trước dựa trên tỷ lệ biến cố dự kiến, hiệu quả kỳ vọng, alpha (thường 0,05) và lực (thường 80–90%). Lực là xác suất phát hiện được hiệu quả nếu nó thật sự tồn tại.","","Nghiên cứu thiếu lực mà “không có ý nghĩa” không chứng minh được là không có hiệu quả."],
+["tn","CONSORT","CONSORT diagram|CONSORT statement|CONSORT flow diagram","CONSORT","Hướng dẫn báo cáo RCT, kèm sơ đồ luồng BN từ sàng lọc, phân bổ, theo dõi đến phân tích.","","Sơ đồ CONSORT là chỗ nhanh nhất để kiểm tra mất dấu và chuyển nhóm."],
+["tn","Trial registration","ClinicalTrials.gov|NCT number|preregistration|pre-registration|prospectively registered","Đăng ký thử nghiệm","Đăng ký đề cương (kết cục chính, cỡ mẫu) trước khi tuyển BN, vd trên ClinicalTrials.gov (mã NCT).","","So kết cục chính trong bài với bản đăng ký để phát hiện đổi kết cục (outcome switching)."],
+["tn","Run-in period","run-in|run in period|lead-in period","Giai đoạn dẫn nhập","Giai đoạn trước ngẫu nhiên hoá cho BN dùng thử thuốc để loại người không tuân thủ hoặc không dung nạp.","","Làm hiệu quả và độ dung nạp trong bài tốt hơn ngoài đời."],
+["tn","Adjudication","adjudicated|clinical events committee|endpoint committee|event adjudication","Thẩm định biến cố","Hội đồng chuyên gia, thường được làm mù, xác định từng biến cố có đúng định nghĩa kết cục không.","",""],
+["hq","Absolute risk reduction","ARR|absolute risk difference|risk difference|absolute reduction|absolute difference","Giảm nguy cơ tuyệt đối","Hiệu số tỷ lệ biến cố giữa nhóm chứng và nhóm can thiệp: ARR = CER − EER.","DAPA-HF: 21,2% − 16,3% = 4,9% sau trung vị 18,2 tháng.","Luôn đi kèm thời gian theo dõi; ARR 5% sau 1 năm khác với 5% sau 5 năm."],
+["hq","Relative risk reduction","RRR","Giảm nguy cơ tương đối","Phần trăm nguy cơ giảm so với nhóm chứng: RRR = ARR / CER = 1 − RR.","DAPA-HF: 4,9 / 21,2 ≈ 23%.","RRR nghe ấn tượng hơn ARR. Cùng RRR 25% nhưng ARR rất khác ở BN nguy cơ thấp và nguy cơ cao."],
+["hq","Relative risk","risk ratio|RR|risk ratios|relative risks","Nguy cơ tương đối","Tỷ số tỷ lệ biến cố nhóm can thiệp so với nhóm chứng: RR = EER / CER. RR < 1: giảm nguy cơ; RR = 1: không khác.","16,3 / 21,2 ≈ 0,77.",""],
+["hq","Number needed to treat","NNT","Số cần điều trị","Số BN cần điều trị trong khoảng thời gian nghiên cứu để tránh được 1 biến cố: NNT = 1 / ARR.","DAPA-HF: 1 / 0,049 ≈ 21 BN trong khoảng 18 tháng để tránh 1 biến cố kết cục chính.","NNT vô nghĩa nếu không nêu thời gian và kết cục; luôn làm tròn lên."],
+["hq","Number needed to harm","NNH","Số cần để gây hại","Số BN cần điều trị để xảy ra thêm 1 biến cố có hại: NNH = 1 / hiệu số tỷ lệ tác dụng phụ.","Ví dụ giả định: chảy máu nặng 3% so với 2% → NNH = 100.","Đặt NNT cạnh NNH để cân lợi – hại."],
+["hq","Odds ratio","OR|odds ratios|adjusted odds ratio","Tỷ số chênh","Tỷ số giữa odds (xác suất có / xác suất không) của hai nhóm. Dùng trong nghiên cứu bệnh–chứng và hồi quy logistic.","","Khi biến cố phổ biến (>10%), OR phóng đại so với RR; đừng đọc OR như RR."],
+["hq","Hazard ratio","HR|hazard ratios|adjusted hazard ratio","Tỷ số nguy cơ tức thời","Tỷ số tốc độ xảy ra biến cố tại mỗi thời điểm giữa hai nhóm, ước lượng từ mô hình Cox; có tính đến thời gian xảy ra biến cố.","DAPA-HF: HR 0,74 (95% CI 0,65–0,85): tốc độ biến cố ở nhóm dapagliflozin thấp hơn khoảng 26%.","HR giả định tỷ lệ nguy cơ không đổi theo thời gian; hai đường KM bắt chéo là dấu hiệu vi phạm."],
+["hq","Confidence interval","CI|95% CI|confidence intervals|95% confidence interval","Khoảng tin cậy","Khoảng giá trị hợp lý của hiệu quả thật. 95% CI: nếu lặp lại nghiên cứu nhiều lần, 95% số khoảng tính được sẽ chứa giá trị thật.","HR 0,74 (0,65–0,85): khoảng không chứa 1 nên có ý nghĩa thống kê; cận gần 1 nhất (0,85) vẫn là lợi ích đáng kể.","Với tỷ số (HR, RR, OR) mốc là 1; với hiệu số (ARR, MD) mốc là 0. CI rộng nghĩa là ước lượng kém chính xác."],
+["hq","P value","p-value|p value|P-value|P values|p-values","Giá trị p","Xác suất thấy kết quả ít nhất cực đoan như vậy nếu thật sự không có khác biệt (giả thuyết H0 đúng).","P<0,001 trong DAPA-HF: rất khó có kết quả như vậy nếu thuốc không có tác dụng.","p không cho biết độ lớn hiệu quả hay xác suất giả thuyết đúng; p=0,06 không phải “gần có ý nghĩa”."],
+["hq","Statistical significance","statistically significant|clinically significant|clinical significance|clinically meaningful|clinically relevant","Ý nghĩa thống kê và ý nghĩa lâm sàng","Có ý nghĩa thống kê: khó xảy ra do ngẫu nhiên. Có ý nghĩa lâm sàng: hiệu quả đủ lớn để thay đổi quyết định cho BN.","Ví dụ giả định: hạ HA tâm thu 1 mmHg với p<0,001 ở 50.000 người có ý nghĩa thống kê nhưng ít ý nghĩa lâm sàng.",""],
+["hq","Type I error","type 1 error|false-positive finding","Sai lầm loại I","Kết luận có khác biệt trong khi thật ra không có (dương tính giả). Mức chấp nhận là alpha, thường 5%.","","Càng nhiều kiểm định, sai lầm loại I càng cộng dồn."],
+["hq","Type II error","type 2 error|beta error","Sai lầm loại II","Kết luận không có khác biệt trong khi thật ra có (âm tính giả), thường do thiếu cỡ mẫu. Lực = 1 − beta.","",""],
+["hq","Multiple comparisons","multiplicity|multiple testing|Bonferroni|hierarchical testing|hierarchical testing procedure","Đa so sánh","Kiểm định càng nhiều giả thuyết, càng dễ có ít nhất một kết quả “có ý nghĩa” do ngẫu nhiên. Cách kiểm soát: hiệu chỉnh Bonferroni, kiểm định theo thứ bậc định trước.","Với 20 kiểm định độc lập ở alpha 0,05, kỳ vọng khoảng 1 kết quả dương tính giả.","Kết cục phụ chỉ được kiểm định chính thức khi các bước trước trong thứ bậc dương tính."],
+["hq","Standard deviation","SD|standard deviations|standard error|SE","Độ lệch chuẩn","Mức phân tán của dữ liệu quanh trung bình. Nếu phân phối chuẩn, trung bình ± 2 SD chứa khoảng 95% giá trị. Sai số chuẩn (SE) đo độ chính xác của chính giá trị trung bình.","Tuổi 66 ± 11 năm.","Đừng nhầm SD với SE: SE luôn nhỏ hơn và không mô tả độ phân tán của BN."],
+["hq","Interquartile range","IQR|interquartile ranges","Khoảng tứ phân vị","Khoảng từ bách phân vị 25 đến 75, chứa 50% giá trị ở giữa; đi kèm trung vị khi dữ liệu lệch.","Ví dụ giả định: NT-proBNP trung vị 1400 (IQR 850–2600) pg/mL.",""],
+["hq","Median","medians","Trung vị","Giá trị đứng giữa khi xếp dữ liệu theo thứ tự; ít bị ảnh hưởng bởi giá trị cực đoan.","Thời gian theo dõi trung vị 18,2 tháng (DAPA-HF).",""],
+["hq","Mean difference","MD|standardized mean difference|SMD|mean differences","Hiệu trung bình","Chênh lệch giá trị trung bình giữa hai nhóm với biến liên tục. SMD chuẩn hoá theo SD để gộp các thang đo khác nhau.","Ví dụ giả định: LVEF tăng thêm 3,5% (95% CI 1,2–5,8) so với nhóm chứng.",""],
+["hq","Multivariable regression","multivariable|multivariate|logistic regression|linear regression|adjusted analysis|regression model|multivariable analysis","Hồi quy đa biến","Mô hình ước lượng liên quan giữa phơi nhiễm và kết cục, đồng thời hiệu chỉnh cho các biến khác (tuổi, giới, bệnh kèm). Logistic cho kết cục nhị phân, tuyến tính cho biến liên tục, Cox cho thời gian đến biến cố.","","Chỉ hiệu chỉnh được biến đã đo; số biến đưa vào bị giới hạn bởi số biến cố."],
+["hq","Missing data","multiple imputation|imputation|missing values|imputed","Dữ liệu thiếu","Dữ liệu không thu được. Cách xử lý: phân tích ca đầy đủ, điền khuyết đa trị (multiple imputation), phân tích độ nhạy.","","Thiếu không ngẫu nhiên (người bệnh nặng bỏ khám) gây sai lệch."],
+["hq","Win ratio","win ratio|hierarchical composite|win ratios","Tỷ số thắng","So từng cặp BN (can thiệp – chứng) theo thứ bậc kết cục ưu tiên (tử vong trước, rồi nhập viện…); win ratio = số cặp thắng / số cặp thua.","Ngày càng dùng trong thử nghiệm suy tim và bệnh cơ tim.","Phụ thuộc thứ tự ưu tiên tác giả chọn; không cho ra ARR hay NNT."],
+["hq","Restricted mean survival time","RMST","Thời gian sống trung bình giới hạn","Diện tích dưới đường Kaplan–Meier đến một mốc thời gian, tức thời gian sống không biến cố trung bình trong khoảng đó. Không cần giả định nguy cơ tỷ lệ.","Ví dụ giả định: nhóm can thiệp sống không biến cố thêm trung bình 1,2 tháng trong 3 năm.",""],
+["hq","Fragility index","fragility","Chỉ số mong manh","Số BN tối thiểu ở nhóm can thiệp phải đổi từ “không biến cố” thành “có biến cố” để kết quả mất ý nghĩa thống kê.","","Chỉ số nhỏ (vd nhỏ hơn số BN mất dấu) cho thấy kết luận dễ đảo ngược."],
+["hq","Incidence","incidence rate|event rate|event rates|cumulative incidence|incidence rates","Tỷ suất mới mắc","Số ca mới trong một khoảng thời gian chia cho số người có nguy cơ (hoặc số người-năm).","",""],
+["hq","Prevalence","prevalent","Tỷ lệ hiện mắc","Tỷ lệ người đang có bệnh tại một thời điểm. Ảnh hưởng trực tiếp đến giá trị tiên đoán của xét nghiệm.","",""],
+["hq","Person-years","patient-years|person years|patient years|person-time|per 100 patient-years","Người-năm","Tổng thời gian theo dõi của tất cả người tham gia; tỷ suất tính “trên 100 người-năm” để so được khi thời gian theo dõi khác nhau.","",""],
+["sl","Selection bias","selection biases","Sai lệch chọn","Cách chọn hoặc giữ người tham gia làm các nhóm khác nhau một cách hệ thống, hoặc làm mẫu không đại diện cho quần thể đích.","Chỉ phân tích BN sống sót đến lúc xuất viện.",""],
+["sl","Information bias","measurement bias|misclassification|detection bias|ascertainment bias","Sai lệch thông tin / đo lường","Đo phơi nhiễm hoặc kết cục sai, hoặc đo khác nhau giữa các nhóm. Detection bias: một nhóm được theo dõi kỹ hơn nên phát hiện nhiều biến cố hơn.","Nhóm dùng thuốc mới được tái khám dày hơn nên ghi nhận thêm rung nhĩ.",""],
+["sl","Recall bias","recall","Sai lệch nhớ lại","Người có bệnh nhớ và kể về phơi nhiễm trong quá khứ khác với người không bệnh. Đặc trưng của nghiên cứu bệnh–chứng.","",""],
+["sl","Performance bias","performance biases","Sai lệch thực hiện","Hai nhóm được chăm sóc khác nhau ngoài can thiệp đang nghiên cứu (vd được tối ưu thuốc nhiều hơn), thường do không làm mù.","",""],
+["sl","Attrition bias","attrition","Sai lệch do mất dấu","Người rời nghiên cứu khác biệt có hệ thống giữa các nhóm, làm lệch kết quả.","",""],
+["sl","Confounding","confounder|confounders|confounding factor|confounding factors|confounded","Yếu tố gây nhiễu","Yếu tố liên quan tới cả phơi nhiễm lẫn kết cục, tạo ra (hoặc che giấu) một mối liên quan giả.","Người uống nhiều cà phê hút thuốc nhiều hơn; liên quan cà phê – nhồi máu có thể là do thuốc lá.","Ngẫu nhiên hoá là cách duy nhất cân bằng cả yếu tố nhiễu chưa đo."],
+["sl","Confounding by indication","indication bias","Gây nhiễu theo chỉ định","BN được chỉ định điều trị vì họ nặng hơn (hoặc nhẹ hơn), nên kết cục khác nhau là do bệnh chứ không do thuốc.","Ví dụ giả định: BN dùng lợi tiểu liều cao tử vong nhiều hơn vì họ suy tim nặng hơn, không phải do thuốc.","Kiểu nhiễu nguy hiểm nhất trong nghiên cứu quan sát về điều trị."],
+["sl","Residual confounding","unmeasured confounding|unmeasured confounders|residual confounders","Nhiễu tồn dư","Nhiễu còn lại sau hiệu chỉnh, do biến chưa đo hoặc đo không chính xác.","",""],
+["sl","Healthy user bias","healthy adherer|healthy user effect|healthy adherer effect","Sai lệch người khỏe / người tuân thủ","Người tự giác dùng thuốc phòng ngừa thường có lối sống lành mạnh hơn, nên thuốc trông như có lợi.","Nghiên cứu quan sát gợi ý liệu pháp hormone thay thế bảo vệ tim; thử nghiệm WHI không xác nhận lợi ích tim mạch.",""],
+["sl","Reverse causation","reverse causality","Nhân quả ngược","Kết cục (hoặc bệnh ở giai đoạn sớm) gây ra phơi nhiễm, chứ không phải ngược lại.","Cholesterol thấp liên quan tử vong cao ở suy tim nặng, vì suy kiệt làm cholesterol giảm.",""],
+["sl","Immortal time bias","immortal time","Sai lệch thời gian bất tử","Một khoảng theo dõi mà nhóm “điều trị” theo định nghĩa không thể có biến cố (vì phải sống đến lúc nhận thuốc), làm thuốc trông có lợi giả tạo.","Ví dụ giả định: xếp BN vào nhóm “dùng statin” nếu có mua thuốc trong 6 tháng sau xuất viện; người chết sớm chưa kịp mua bị xếp vào nhóm không dùng.","Kiểm tra thời điểm 0 có giống nhau giữa hai nhóm không."],
+["sl","Lead-time bias","lead time bias|lead time","Sai lệch thời gian dẫn","Tầm soát phát hiện bệnh sớm hơn làm thời gian sống tính từ lúc chẩn đoán dài ra, dù thời điểm tử vong không đổi.","",""],
+["sl","Publication bias","small-study effect|small-study effects|funnel plot|funnel plots","Sai lệch xuất bản","Nghiên cứu dương tính dễ được đăng hơn nghiên cứu âm tính, làm tổng quan phóng đại hiệu quả. Phát hiện bằng biểu đồ phễu (funnel plot) bất đối xứng.","","Biểu đồ phễu khó đọc khi có dưới khoảng 10 nghiên cứu."],
+["sl","Spin","reporting bias|selective reporting|outcome switching|selective outcome reporting","Diễn giải lệch / báo cáo chọn lọc","Cách viết làm kết quả trông tốt hơn thực tế: nhấn mạnh kết cục phụ hay phân nhóm khi kết cục chính âm tính, đổi kết cục so với đăng ký.","","Đọc kết cục chính trong Results trước, rồi mới đọc Abstract và Conclusion."],
+["sl","Propensity score","propensity score matching|propensity-score|propensity scores|PSM|inverse probability weighting|IPTW|IPW|propensity-matched","Điểm xu hướng","Xác suất một BN nhận điều trị dựa trên đặc điểm đã đo; dùng để ghép cặp, phân tầng hoặc gán trọng số, giúp hai nhóm quan sát giống nhau hơn.","","Chỉ cân bằng biến đã đo, không thay thế được ngẫu nhiên hoá."],
+["sl","Regression to the mean","regression toward the mean","Hồi quy về trung bình","Giá trị đo bất thường lần đầu có xu hướng tự gần trung bình hơn ở lần đo sau, dễ bị tưởng là hiệu quả điều trị.","BN được chọn vì HA rất cao ở lần khám đầu thường có HA thấp hơn ở lần sau dù chưa can thiệp.","Đây là lý do cần nhóm chứng."],
+["sl","Risk of bias","RoB|RoB 2|ROBINS-I|risk-of-bias|Newcastle-Ottawa|Newcastle–Ottawa","Nguy cơ sai lệch","Đánh giá có hệ thống khả năng kết quả bị sai lệch. Công cụ: RoB 2 cho RCT, ROBINS-I cho nghiên cứu can thiệp không ngẫu nhiên, Newcastle–Ottawa cho đoàn hệ và bệnh–chứng.","",""],
+["sc","Kaplan–Meier curve","Kaplan-Meier|Kaplan Meier|KM curve|KM curves|Kaplan–Meier|cumulative incidence curve","Đường cong Kaplan–Meier","Đồ thị tỷ lệ không biến cố (hoặc tỷ lệ biến cố cộng dồn) theo thời gian, có tính BN bị kiểm duyệt. Bảng “number at risk” bên dưới cho biết còn bao nhiêu BN.","","Phần đuôi đường cong ít BN nên kém tin cậy. Hai đường bắt chéo gợi ý vi phạm giả định nguy cơ tỷ lệ."],
+["sc","Cox proportional hazards model","Cox model|Cox regression|proportional hazards|Cox proportional-hazards|proportional-hazards","Mô hình Cox","Mô hình hồi quy cho dữ liệu thời gian đến biến cố, cho ra HR và hiệu chỉnh được nhiều biến.","","Giả định HR không đổi theo thời gian."],
+["sc","Censoring","censored","Kiểm duyệt (dữ liệu bị cắt)","BN chưa có biến cố khi hết theo dõi hoặc khi mất dấu được “kiểm duyệt”: chỉ biết họ không có biến cố đến thời điểm đó.","","Giả định việc kiểm duyệt không liên quan kết cục; bị vi phạm khi người bệnh nặng bỏ theo dõi."],
+["sc","Competing risk","competing risks|Fine-Gray|Fine and Gray|subdistribution hazard","Nguy cơ cạnh tranh","Một biến cố khác (vd tử vong không do tim) ngăn biến cố quan tâm xảy ra. Khi nguy cơ cạnh tranh lớn, Kaplan–Meier thông thường ước lượng quá cao nguy cơ.","BN rất cao tuổi: tử vong do mọi nguyên nhân cạnh tranh với tái nhập viện vì suy tim.",""],
+["sc","Log-rank test","log rank|log-rank","Kiểm định log-rank","So sánh hai đường Kaplan–Meier trên toàn bộ thời gian theo dõi.","",""],
+["sc","Time-to-event","time to first event|time-to-first-event|time to event|time-to-event analysis","Thời gian đến biến cố","Kết cục tính cả việc có biến cố hay không lẫn thời điểm xảy ra.","","Phân tích “biến cố đầu tiên” bỏ qua biến cố tái phát (vd nhập viện suy tim lần 2)."],
+["sc","Landmark analysis","landmark","Phân tích mốc","Chỉ phân tích BN còn sống, không biến cố tại một mốc thời gian, rồi theo dõi tiếp từ mốc đó; dùng để tách hiệu quả sớm và muộn.","Ví dụ giả định: so huyết khối stent trong 30 ngày đầu và sau 30 ngày.",""],
+["cd","Sensitivity","sensitivities","Độ nhạy","Tỷ lệ người có bệnh mà xét nghiệm dương tính. Độ nhạy cao, nếu âm tính thì giúp loại trừ bệnh (SnNout).","Troponin độ nhạy cao âm tính ở 0 và 1 giờ giúp loại trừ nhồi máu cơ tim.","Đừng nhầm với sensitivity analysis (phân tích độ nhạy)."],
+["cd","Specificity","specificities","Độ đặc hiệu","Tỷ lệ người không bệnh mà xét nghiệm âm tính. Độ đặc hiệu cao, nếu dương tính thì giúp khẳng định bệnh (SpPin).","",""],
+["cd","Positive predictive value","PPV","Giá trị tiên đoán dương","Xác suất thật sự có bệnh khi xét nghiệm dương tính. Phụ thuộc mạnh vào tỷ lệ hiện mắc.","Cùng một nghiệm pháp gắng sức: PPV cao ở BN đau ngực điển hình, thấp ở phụ nữ trẻ không triệu chứng.","Không mang PPV từ quần thể này sang quần thể khác."],
+["cd","Negative predictive value","NPV","Giá trị tiên đoán âm","Xác suất thật sự không bệnh khi xét nghiệm âm tính.","",""],
+["cd","Likelihood ratio","LR+|LR−|positive likelihood ratio|negative likelihood ratio|likelihood ratios","Tỷ số khả dĩ","LR+ = độ nhạy / (1 − độ đặc hiệu); LR− = (1 − độ nhạy) / độ đặc hiệu. Cho biết xét nghiệm làm thay đổi xác suất bệnh bao nhiêu, không phụ thuộc tỷ lệ hiện mắc.","LR+ > 10 hoặc LR− < 0,1 làm thay đổi lớn xác suất sau xét nghiệm.",""],
+["cd","Pretest probability","pre-test probability|post-test probability|posttest probability|pretest","Xác suất trước / sau xét nghiệm","Xác suất có bệnh trước khi làm xét nghiệm (từ lâm sàng, dịch tễ); kết hợp với LR cho ra xác suất sau xét nghiệm.","Mô hình xác suất bệnh mạch vành trước test dựa trên tuổi, giới, kiểu đau ngực.",""],
+["cd","ROC curve","receiver operating characteristic|ROC|ROC curves","Đường cong ROC","Đồ thị độ nhạy theo (1 − độ đặc hiệu) ở mọi ngưỡng cắt của một xét nghiệm hay thang điểm.","",""],
+["cd","AUC (C-statistic)","AUC|C-statistic|c statistic|C-index|area under the curve|AUROC|c-statistic","Diện tích dưới đường cong","Đo khả năng phân biệt: xác suất mô hình xếp người có biến cố nguy cơ cao hơn người không biến cố. 0,5 như tung đồng xu, 1,0 hoàn hảo; >0,7 chấp nhận được, >0,8 tốt.","","AUC cao không có nghĩa mô hình dự báo đúng mức nguy cơ; cần xem thêm calibration."],
+["cd","Reference standard","gold standard|reference test","Tiêu chuẩn tham chiếu","Phương pháp tốt nhất hiện có để xác định có bệnh hay không, dùng để đánh giá xét nghiệm mới.","Chụp mạch vành xâm lấn (± FFR) làm tham chiếu cho CT mạch vành.",""],
+["cd","Verification bias","partial verification|workup bias|work-up bias","Sai lệch kiểm chứng","Chỉ người có xét nghiệm dương tính mới được làm tiêu chuẩn tham chiếu, làm độ nhạy cao giả tạo.","Chỉ BN có nghiệm pháp gắng sức dương tính mới được chụp mạch vành.",""],
+["cd","Spectrum bias","spectrum effect","Sai lệch phổ bệnh","Đánh giá xét nghiệm trên BN bệnh quá rõ và người quá khỏe làm độ nhạy, độ đặc hiệu cao hơn thực tế.","","Hỏi: BN trong nghiên cứu có giống BN mình hay gặp không?"],
+["cd","Calibration","calibration plot|calibrated|calibration slope|Hosmer-Lemeshow|Hosmer–Lemeshow","Hiệu chuẩn","Mức độ khớp giữa nguy cơ mô hình dự báo và tỷ lệ biến cố thực tế.","Mô hình dự báo 10% nhưng thực tế 20% là hiệu chuẩn kém.","Mô hình phát triển ở nước khác thường hiệu chuẩn kém ở BN Việt Nam."],
+["cd","Discrimination","discriminative ability|discriminatory ability|discrimination","Khả năng phân biệt","Khả năng tách người sẽ có biến cố với người không; đo bằng AUC/C-statistic.","",""],
+["cd","External validation","internal validation|derivation cohort|validation cohort|externally validated|derivation","Kiểm định ngoài","Thử mô hình trên dữ liệu độc lập (bệnh viện, quốc gia, thời kỳ khác) với dữ liệu tạo ra nó. Kiểm định trong dùng bootstrap hoặc chia mẫu.","Thang điểm GRACE đã được kiểm định ngoài ở nhiều quần thể hội chứng vành cấp.","Mô hình chỉ có kiểm định trong thường kém hơn khi áp dụng thực tế."],
+["cd","Overfitting","overfit|overfitted|events per variable|EPV","Quá khớp","Mô hình bám quá sát dữ liệu phát triển (nhiều biến, ít biến cố) nên dự báo kém ở dữ liệu mới.","","Quy tắc thô: dưới 10–20 biến cố cho mỗi biến dự báo là nguy cơ quá khớp."],
+["cd","Net reclassification improvement","NRI|net reclassification index|reclassification","Cải thiện phân loại lại","Tỷ lệ BN được xếp lại đúng nhóm nguy cơ hơn khi thêm một dấu ấn mới vào mô hình.","","Phụ thuộc ngưỡng phân nhóm; nên đọc cùng AUC và calibration."],
+["cd","Risk score","risk prediction model|prediction model|clinical prediction rule|risk model|risk scores|prediction models","Thang điểm nguy cơ / mô hình dự báo","Công cụ kết hợp nhiều yếu tố để ước tính xác suất biến cố cho từng BN.","GRACE, CHA₂DS₂-VASc, HAS-BLED.",""],
+["tq","Systematic review","systematic reviews|systematic literature review","Tổng quan hệ thống","Tổng hợp mọi nghiên cứu trả lời một câu hỏi rõ ràng theo đề cương định trước: tìm kiếm toàn diện, chọn lọc và đánh giá có hệ thống.","","Khác tổng quan tường thuật (narrative review), loại chọn bài theo ý tác giả."],
+["tq","Meta-analysis","meta-analyses|meta analysis|meta-analytic","Phân tích gộp","Kỹ thuật thống kê gộp kết quả nhiều nghiên cứu thành một ước lượng chung chính xác hơn.","","Gộp nhiều nghiên cứu sai lệch cho ra một kết quả chính xác nhưng sai."],
+["tq","Forest plot","forest plots","Biểu đồ rừng","Mỗi dòng là một nghiên cứu (ô vuông là ước lượng, kích thước là trọng số, đường ngang là CI); hình thoi cuối là ước lượng gộp. Đường dọc là mốc không khác biệt.","","Cũng dùng để trình bày phân tích phân nhóm của một RCT."],
+["tq","Heterogeneity","I2|I²|I-squared|Cochran Q|Cochran's Q|heterogeneous|statistical heterogeneity","Tính không đồng nhất","Mức độ kết quả các nghiên cứu khác nhau nhiều hơn mức do ngẫu nhiên. I² theo gợi ý của Cochrane: 0–40% có thể không quan trọng, 30–60% trung bình, 50–90% đáng kể, 75–100% rất lớn.","","I² cao: tìm lý do (dân số, liều, định nghĩa kết cục khác nhau) trước khi tin ước lượng gộp."],
+["tq","Random-effects model","random-effects|random effects|fixed-effect|fixed effect|fixed-effects|random-effects model","Mô hình ảnh hưởng ngẫu nhiên / cố định","Fixed-effect giả định mọi nghiên cứu ước lượng cùng một hiệu quả thật; random-effects cho phép hiệu quả thật thay đổi giữa các nghiên cứu, CI thường rộng hơn.","","Random-effects cho nghiên cứu nhỏ trọng số tương đối lớn hơn, nên nhạy với small-study effects."],
+["tq","Network meta-analysis","NMA|network meta-analyses|indirect comparison|indirect comparisons","Phân tích gộp mạng lưới","So nhiều can thiệp cùng lúc, kết hợp so sánh trực tiếp và gián tiếp (A vs C và B vs C để suy ra A vs B).","So các thuốc chống đông đường uống mới với nhau qua warfarin làm cầu nối.","Cần giả định tính bắc cầu (transitivity): các thử nghiệm đủ giống nhau về dân số."],
+["tq","PRISMA","PRISMA flow diagram|PRISMA 2020","PRISMA","Hướng dẫn báo cáo tổng quan hệ thống và phân tích gộp, kèm sơ đồ chọn bài.","",""],
+["tq","PROSPERO","PROSPERO registration","Đăng ký đề cương tổng quan","Cơ sở dữ liệu quốc tế để đăng ký đề cương tổng quan hệ thống trước khi thực hiện.","",""],
+["tq","Sensitivity analysis","sensitivity analyses","Phân tích độ nhạy","Lặp lại phân tích với giả định khác (bỏ nghiên cứu nguy cơ sai lệch cao, cách xử lý dữ liệu thiếu khác) để xem kết luận có vững không.","","Khác hoàn toàn với độ nhạy (sensitivity) của xét nghiệm."],
+["tq","Individual patient data","IPD|individual participant data|patient-level data|individual-patient data","Dữ liệu từng bệnh nhân","Phân tích gộp dùng dữ liệu gốc của từng BN thay vì số liệu tổng hợp đã công bố; mạnh hơn, nhất là khi phân tích phân nhóm.","",""],
+["tq","AMSTAR 2","AMSTAR|AMSTAR-2","AMSTAR 2","Công cụ đánh giá chất lượng tổng quan hệ thống, gồm 16 mục, trong đó có các mục then chốt.","",""],
+["kc","GRADE","certainty of evidence|quality of evidence|GRADE approach|certainty of the evidence","GRADE","Hệ thống xếp độ tin cậy bằng chứng: cao, trung bình, thấp, rất thấp. RCT bắt đầu ở mức cao, quan sát ở mức thấp; hạ bậc vì nguy cơ sai lệch, không nhất quán, gián tiếp, không chính xác, sai lệch xuất bản; nâng bậc khi hiệu quả rất lớn hoặc có quan hệ liều – đáp ứng.","","GRADE tách độ tin cậy bằng chứng khỏi độ mạnh khuyến cáo (mạnh / có điều kiện)."],
+["kc","Class of recommendation","COR|class IIa|class IIb|class I recommendation|class III recommendation","Mức khuyến cáo","ESC: I (được khuyến cáo), IIa (nên cân nhắc), IIb (có thể cân nhắc), III (không khuyến cáo). ACC/AHA: 1, 2a, 2b, 3 (không lợi ích hoặc có hại).","","Mức khuyến cáo cao không có nghĩa bằng chứng mạnh; luôn đọc kèm mức bằng chứng."],
+["kc","Level of evidence","LOE|level of evidence A|levels of evidence|level of evidence B|level of evidence C","Mức bằng chứng","ESC: A (nhiều RCT hoặc phân tích gộp), B (một RCT hoặc nghiên cứu không ngẫu nhiên lớn), C (ý kiến chuyên gia, nghiên cứu nhỏ, hồi cứu, sổ bộ). ACC/AHA chia thêm B-R, B-NR, C-LD, C-EO.","","Phần lớn khuyến cáo tim mạch ở mức B hoặc C."],
+["kc","Evidence hierarchy","evidence pyramid|hierarchy of evidence","Tháp bằng chứng","Xếp thiết kế theo độ tin cậy: tổng quan hệ thống các RCT → RCT → đoàn hệ → bệnh–chứng → loạt ca → ý kiến chuyên gia.","","Một RCT kém chất lượng có thể kém tin cậy hơn một nghiên cứu đoàn hệ thiết kế tốt."],
+["kc","PICO","PICOT|PICOS","Khung PICO","Patient/Population – Intervention – Comparison – Outcome (thêm T: thời gian). Dùng để đặt câu hỏi và kiểm tra bài báo có trả lời đúng câu hỏi của mình không.","P: BN NSTEMI trên 75 tuổi; I: chiến lược xâm lấn sớm; C: bảo tồn; O: tử vong, nhồi máu sau 1 năm.",""],
+["kc","Internal validity","internally valid","Giá trị nội tại","Mức độ kết quả phản ánh đúng sự thật trong chính quần thể nghiên cứu, không bị sai lệch hay nhiễu.","",""],
+["kc","External validity","generalizability|generalisability|applicability|generalizable","Tính khái quát hoá","Mức độ kết quả áp dụng được cho BN ngoài nghiên cứu, tức BN của mình.","Thử nghiệm loại BN suy thận nặng thì khó áp dụng cho BN lọc máu.",""],
+["kc","Conflict of interest","conflicts of interest|competing interests|COI|funded by|disclosures","Xung đột lợi ích","Quan hệ tài chính hay nghề nghiệp có thể ảnh hưởng đến thiết kế, phân tích hoặc diễn giải.","","Tài trợ của hãng không làm bài sai, nhưng nên đọc kỹ cách chọn đối chứng, kết cục và cách viết kết luận."],
+["kt","Cost-effectiveness analysis","cost-effectiveness|cost effectiveness|CEA|cost-utility analysis|cost-utility","Phân tích chi phí – hiệu quả","So chi phí và hiệu quả sức khỏe của hai hay nhiều lựa chọn; phân tích chi phí – thỏa dụng (cost-utility) đo hiệu quả bằng QALY.","","Kết quả phụ thuộc giá thuốc và quốc gia; khó chuyển nguyên từ nước giàu sang Việt Nam."],
+["kt","QALY","quality-adjusted life year|quality-adjusted life years|QALYs","Năm sống điều chỉnh theo chất lượng","Số năm sống nhân với hệ số chất lượng cuộc sống (0 = tử vong, 1 = hoàn toàn khỏe mạnh).","2 năm sống ở chất lượng 0,5 = 1 QALY.",""],
+["kt","ICER","incremental cost-effectiveness ratio|ICERs","Tỷ số chi phí – hiệu quả gia tăng","Chi phí thêm cho mỗi đơn vị hiệu quả thêm: ICER = (chi phí A − chi phí B) / (QALY A − QALY B).","Ví dụ giả định: thêm 300 triệu đồng và 0,5 QALY → ICER 600 triệu đồng/QALY.","So với ngưỡng sẵn sàng chi trả của từng quốc gia."],
+["kt","Willingness-to-pay threshold","WTP|willingness to pay|willingness-to-pay|cost-effectiveness threshold","Ngưỡng sẵn sàng chi trả","Mức chi tối đa xã hội chấp nhận cho 1 QALY; can thiệp có ICER dưới ngưỡng được coi là đáng tiền.","","Ngưỡng khác nhau giữa các nước; cách lấy bội số GDP bình quân đầu người còn đang bị tranh luận."],
+["kt","Discounting","discount rate|discounted","Chiết khấu","Quy đổi chi phí và lợi ích trong tương lai về giá trị hiện tại, thường 3–5% mỗi năm.","",""],
+["kt","Budget impact analysis","budget impact","Phân tích tác động ngân sách","Ước tính tổng chi phí cho quỹ BHYT hoặc bệnh viện khi đưa can thiệp vào sử dụng.","","Một can thiệp có thể chi phí – hiệu quả nhưng vẫn vượt ngân sách."],
+["kt","Analytic perspective","societal perspective|payer perspective|healthcare perspective|health care payer perspective","Góc nhìn phân tích","Chi phí được tính theo góc nhìn của ai: người trả tiền (BHYT), hệ thống y tế hay toàn xã hội (gồm cả mất thu nhập).","",""]
+];
+/* Bộ câu hỏi: g = A đáng tin? / B kết quả? / C áp dụng? / D bổ sung */
+const CL=[
+{id:"rct",name:"Thử nghiệm ngẫu nhiên (RCT)",when:"Câu hỏi về hiệu quả điều trị, can thiệp, chiến lược. Câu r1–r6 là bộ 6 câu cốt lõi; r7–r10 dùng khi cần soi kỹ.",src:"Gộp từ JAMA Users’ Guides to the Medical Literature (Guyatt và cs.), CASP Randomised Controlled Trial Checklist và Cochrane RoB 2.",rep:"CONSORT",rob:"RoB 2",qs:[
+["A","r1","Phân bổ có thật sự ngẫu nhiên và được che giấu không?","Methods → Randomization; Supplement","Chia theo ngày, theo số hồ sơ; phong bì không đánh số, không kín; bài không nói gì về che giấu phân bổ."],
+["A","r2","Hai nhóm có tương đồng về yếu tố tiên lượng lúc bắt đầu không?","Bảng 1 (Baseline characteristics)","Chênh lệch rõ ở tuổi, EF, đái tháo đường, bệnh thận, thuốc nền; đáng lo nhất ở thử nghiệm nhỏ."],
+["A","r3","BN, người điều trị và người đánh giá kết cục có được làm mù không (hoặc kết cục đủ khách quan)?","Methods; mục Outcomes / Adjudication","Nhãn mở với kết cục chủ quan (triệu chứng, nhập viện, tái thông mạch) mà không có thẩm định mù; điều trị đi kèm khác nhau giữa hai nhóm."],
+["A","r4","Theo dõi có đầy đủ và phân tích theo nhóm được phân bổ (ITT) không?","Sơ đồ CONSORT; Statistical analysis","Mất dấu >20% hoặc chênh giữa hai nhóm; chỉ báo per-protocol trong thử nghiệm vượt trội; nhiều BN chuyển nhóm."],
+["B","r5","Hiệu quả có đủ lớn và ước lượng có đủ chính xác không?","Results; bảng kết cục; Kaplan–Meier","Chỉ báo RRR mà không có ARR; CI rộng hoặc cận gần mốc 1; lợi ích dồn vào thành phần “mềm” của kết cục gộp."],
+["C","r6","Kết quả có áp dụng được cho BN của tôi, và lợi ích có đáng so với tác hại, chi phí không?","Tiêu chuẩn chọn/loại; bảng an toàn; Discussion","Loại BN cao tuổi, suy thận, bệnh nặng; dùng kết cục thay thế; tác hại (chảy máu) gần bằng lợi ích; giá thuốc ngoài tầm."],
+["D","r7","Kết cục chính có giống bản đăng ký thử nghiệm không?","Số đăng ký (NCT) ở Abstract hoặc Methods","Đổi kết cục chính; kết cục “chính” trong bài là kết cục phụ trong bản đăng ký."],
+["D","r8","Thử nghiệm có chạy đến hết thay vì dừng sớm vì lợi ích không?","Methods → Interim analysis; Results","Dừng sớm khi ít biến cố và hiệu quả lớn bất thường."],
+["D","r9","Kết luận về phân nhóm (nếu có) có được định trước và có p tương tác thấp không?","Forest plot phân nhóm; Supplement","Nhiều phân nhóm, chọn ra một nhóm “có ý nghĩa” để nhấn mạnh khi kết cục chính âm tính."],
+["D","r10","Nếu là thử nghiệm không kém hơn: ngưỡng có hợp lý và kết quả có nhất quán giữa ITT và per-protocol không?","Methods → Sample size; Results","Ngưỡng rộng hơn lợi ích mà thuốc chuẩn mang lại so với placebo; chỉ báo ITT."]]},
+{id:"cohort",name:"Đoàn hệ",when:"Yếu tố nguy cơ, tiên lượng, tác dụng phụ hiếm, hiệu quả điều trị khi không có RCT.",src:"Dựa trên CASP Cohort Study Checklist, Newcastle–Ottawa Scale và ROBINS-I.",rep:"STROBE",rob:"ROBINS-I, Newcastle–Ottawa",qs:[
+["A","c1","Nhóm phơi nhiễm và không phơi nhiễm có được chọn từ cùng quần thể, với cùng thời điểm bắt đầu không?","Methods → Study population; định nghĩa thời điểm 0","Thời điểm 0 khác nhau giữa hai nhóm (nguy cơ immortal time bias); nhóm so sánh lấy từ nơi khác."],
+["A","c2","Phơi nhiễm và kết cục có được đo chính xác, cùng một cách cho hai nhóm không?","Methods → Exposure, Outcomes","Kết cục lấy từ mã ICD chưa thẩm định; một nhóm được theo dõi kỹ hơn."],
+["A","c3","Các yếu tố gây nhiễu quan trọng đã được xác định và hiệu chỉnh đầy đủ chưa?","Statistical analysis; mô hình hiệu chỉnh hoặc propensity score","Thiếu biến tiên lượng quan trọng (độ nặng bệnh, chức năng thận, EF); chỉ có kết quả chưa hiệu chỉnh; nguy cơ gây nhiễu theo chỉ định."],
+["A","c4","Theo dõi có đủ dài và đủ đầy để kết cục kịp xảy ra không?","Results → follow-up, mất dấu","Theo dõi ngắn so với diễn tiến bệnh; mất dấu nhiều mà không mô tả."],
+["B","c5","Mối liên quan mạnh cỡ nào, có chính xác và có quan hệ liều – đáp ứng không?","Bảng kết quả (HR/RR hiệu chỉnh, CI)","Hiệu quả nhỏ (HR gần 1) dễ do nhiễu tồn dư; CI rộng; kết quả chỉ có ý nghĩa ở một mô hình."],
+["B","c6","Kết quả có vững qua phân tích độ nhạy và nhất quán với bằng chứng khác (nhất là RCT) không?","Sensitivity analyses; Discussion","Mâu thuẫn với RCT mà không giải thích; không có phân tích độ nhạy."],
+["C","c7","Dân số có giống BN của tôi và kết quả có đủ mạnh để thay đổi thực hành không?","Bảng 1; Discussion → Limitations","Dữ liệu từ hệ thống y tế rất khác; kết luận nhân quả từ dữ liệu quan sát."]]},
+{id:"case_control",name:"Bệnh–chứng",when:"Bệnh hiếm, tìm yếu tố nguy cơ, tác dụng phụ hiếm của thuốc.",src:"Dựa trên CASP Case Control Study Checklist và Newcastle–Ottawa Scale.",rep:"STROBE",rob:"Newcastle–Ottawa",qs:[
+["A","k1","Ca bệnh có được định nghĩa rõ ràng, khách quan không?","Methods → Case definition","Tiêu chuẩn chẩn đoán mơ hồ; trộn ca mới và ca cũ."],
+["A","k2","Nhóm chứng có đến từ cùng quần thể sinh ra ca bệnh không?","Methods → Control selection","Chứng là BN nằm viện vì bệnh khác có liên quan đến phơi nhiễm; ghép cặp quá mức."],
+["A","k3","Phơi nhiễm có được đo khách quan và như nhau ở ca và chứng không?","Methods → Exposure assessment","Dựa vào phỏng vấn nhớ lại (recall bias); người phỏng vấn biết ai là ca."],
+["A","k4","Đã kiểm soát các yếu tố gây nhiễu chính chưa?","Statistical analysis (hồi quy logistic có điều kiện…)","Chỉ báo OR thô."],
+["B","k5","OR lớn cỡ nào và có chính xác không?","Bảng kết quả","OR gần 1 với CI rộng; biến cố phổ biến mà đọc OR như RR."],
+["C","k6","Kết quả có áp dụng được và nhất quán với bằng chứng khác không?","Discussion","Dùng kết quả bệnh–chứng để khẳng định hiệu quả điều trị."]]},
+{id:"cross_sectional",name:"Cắt ngang",when:"Ước tính tỷ lệ hiện mắc, mô tả thực trạng, khảo sát.",src:"Dựa trên STROBE và JBI Checklist for Analytical Cross Sectional Studies.",rep:"STROBE",rob:"JBI checklist",qs:[
+["A","x1","Mẫu có đại diện cho quần thể đích không (cách chọn mẫu, tỷ lệ tham gia)?","Methods → Sampling; Results → Response rate","Mẫu thuận tiện ở một bệnh viện; tỷ lệ đáp ứng thấp."],
+["A","x2","Biến số có được đo bằng công cụ chuẩn hoá, đã kiểm định không?","Methods → Measurements","Bộ câu hỏi tự soạn chưa kiểm định; đo HA một lần."],
+["B","x3","Tỷ lệ ước tính có kèm khoảng tin cậy và cỡ mẫu có đủ không?","Results","Chỉ có %, không có CI."],
+["C","x4","Tác giả có tránh suy luận nhân quả không?","Discussion, Conclusion","Kết luận “X gây ra Y” từ số liệu đo cùng thời điểm."]]},
+{id:"sr_ma",name:"Tổng quan hệ thống / phân tích gộp",when:"Tổng hợp bằng chứng từ nhiều nghiên cứu cho một câu hỏi.",src:"Dựa trên AMSTAR 2, PRISMA 2020 và JAMA Users’ Guides.",rep:"PRISMA",rob:"AMSTAR 2, ROBIS",qs:[
+["A","s1","Câu hỏi (PICO) có rõ và đề cương có đăng ký trước (vd PROSPERO) không?","Methods; số đăng ký","Không có đề cương; đổi tiêu chí sau khi đã xem dữ liệu."],
+["A","s2","Tìm kiếm có toàn diện không (≥2 cơ sở dữ liệu, tài liệu xám, không giới hạn ngôn ngữ)?","Methods → Search strategy; Supplement","Chỉ tìm PubMed; chỉ lấy bài tiếng Anh."],
+["A","s3","Việc chọn bài và trích xuất dữ liệu có do hai người thực hiện độc lập không?","Methods → Study selection","Một người làm, không đối chiếu."],
+["A","s4","Nguy cơ sai lệch của từng nghiên cứu có được đánh giá và tính đến khi kết luận không?","Bảng hoặc hình risk of bias","Gộp chung RCT và nghiên cứu quan sát; không có phân tích độ nhạy bỏ nghiên cứu nguy cơ cao."],
+["B","s5","Việc gộp có hợp lý không (heterogeneity, I², lựa chọn mô hình)?","Forest plot; Statistical analysis","I² cao mà vẫn gộp, không giải thích; gộp can thiệp hoặc kết cục quá khác nhau."],
+["B","s6","Đã đánh giá sai lệch xuất bản chưa và ước lượng gộp có chính xác không?","Funnel plot; ước lượng gộp và CI; bảng GRADE","Kết quả dựa vào vài nghiên cứu nhỏ dương tính; không có GRADE."],
+["C","s7","Kết quả có áp dụng cho BN của tôi và đã xét đủ kết cục quan trọng (cả lợi lẫn hại) chưa?","Discussion; bảng Summary of findings","Chỉ báo kết cục thay thế; không báo tác hại."]]},
+{id:"diagnostic",name:"Xét nghiệm chẩn đoán",when:"Đánh giá độ chính xác của một xét nghiệm, chẩn đoán hình ảnh, dấu ấn sinh học.",src:"Dựa trên QUADAS-2, CASP Diagnostic Checklist và JAMA Users’ Guides.",rep:"STARD",rob:"QUADAS-2",qs:[
+["A","d1","BN trong nghiên cứu có phổ bệnh giống BN tôi gặp (có nghi ngờ lâm sàng thật) không?","Methods → Participants; Bảng 1","So người bệnh rõ với người khỏe (spectrum bias); thiết kế kiểu bệnh–chứng."],
+["A","d2","Tất cả BN có được làm cùng một tiêu chuẩn tham chiếu phù hợp không?","Methods → Reference standard; sơ đồ STARD","Chỉ người test dương mới được chụp mạch (verification bias); tham chiếu khác nhau tùy kết quả test."],
+["A","d3","Xét nghiệm và tiêu chuẩn tham chiếu có được đọc độc lập, mù với nhau không?","Methods","Người đọc chụp mạch biết kết quả CT."],
+["A","d4","Xét nghiệm và ngưỡng cắt có được mô tả đủ để lặp lại, và ngưỡng có được định trước không?","Methods → Index test","Ngưỡng cắt chọn sau khi xem dữ liệu để kết quả đẹp nhất."],
+["B","d5","Độ nhạy, độ đặc hiệu, LR là bao nhiêu và có CI không?","Bảng 2×2; Results","Chỉ có độ chính xác (accuracy) tổng; CI rộng."],
+["C","d6","Kết quả có làm thay đổi xử trí và có lợi cho BN không?","Discussion","Xét nghiệm chính xác hơn nhưng không chứng minh cải thiện kết cục."]]},
+{id:"prognostic",name:"Mô hình tiên lượng / dự báo",when:"Thang điểm nguy cơ, mô hình dự báo, công cụ AI dự báo biến cố.",src:"Dựa trên PROBAST và TRIPOD.",rep:"TRIPOD",rob:"PROBAST",qs:[
+["A","p1","Dữ liệu nguồn có phù hợp (đoàn hệ tiến cứu hoặc sổ bộ, dân số rõ) không?","Methods → Source of data","Dữ liệu hồi cứu thiếu nhiều; dân số chọn lọc."],
+["A","p2","Biến dự báo và kết cục có được định nghĩa trước, đo độc lập với nhau không?","Methods → Predictors, Outcome","Biến dự báo đo sau khi đã biết kết cục."],
+["A","p3","Số biến cố có đủ so với số biến dự báo và dữ liệu thiếu có được xử lý hợp lý không?","Methods → Sample size; Missing data","Ít biến cố trên mỗi biến; chọn biến theo p đơn biến; loại bỏ BN thiếu dữ liệu."],
+["B","p4","Có báo cáo cả khả năng phân biệt (AUC) lẫn hiệu chuẩn (calibration) không?","Results; calibration plot","Chỉ báo AUC."],
+["B","p5","Mô hình đã được kiểm định ngoài chưa?","Results → External validation","Chỉ kiểm định trong trên cùng dữ liệu."],
+["C","p6","Mô hình có dùng được cho BN của tôi (biến có sẵn, dân số tương tự) và giúp ra quyết định không?","Discussion; công cụ tính","Cần biến mà bệnh viện mình không có; chưa kiểm định ở người châu Á."]]},
+{id:"guideline",name:"Khuyến cáo (guideline)",when:"Đọc và đánh giá một khuyến cáo thực hành lâm sàng.",src:"Dựa trên AGREE II và hệ thống GRADE.",rep:"RIGHT",rob:"AGREE II",qs:[
+["A","g1","Nhóm soạn có đa ngành, có đại diện BN và quản lý xung đột lợi ích minh bạch không?","Phần Authors, Declarations, Supplement về COI","Nhiều tác giả có xung đột lợi ích mà không bị loại khỏi biểu quyết."],
+["A","g2","Bằng chứng có được tìm và tổng hợp có hệ thống không?","Phần Methods của guideline","Không mô tả cách tìm bằng chứng."],
+["B","g3","Mỗi khuyến cáo có ghi rõ mức khuyến cáo và mức bằng chứng (hoặc GRADE), gắn với bằng chứng cụ thể không?","Bảng khuyến cáo; phần Evidence","Khuyến cáo mạnh dựa trên bằng chứng mức C."],
+["B","g4","Có cân nhắc lợi ích, tác hại, giá trị và lựa chọn của BN không?","Phần Rationale","Chỉ nêu lợi ích."],
+["C","g5","Khuyến cáo có còn mới và áp dụng được với nguồn lực, chi phí ở Việt Nam không?","Năm xuất bản; phần Implementation","Đã cũ hơn bằng chứng mới; đòi hỏi thuốc hay kỹ thuật chưa có hoặc chưa được BHYT chi trả."]]},
+{id:"economic",name:"Phân tích kinh tế y tế",when:"Chi phí – hiệu quả, chi phí – thỏa dụng, tác động ngân sách.",src:"Dựa trên bảng 10 câu hỏi của Drummond và CHEERS 2022.",rep:"CHEERS",rob:"Drummond checklist",qs:[
+["A","e1","Câu hỏi, góc nhìn phân tích và các lựa chọn so sánh có rõ và phù hợp không?","Methods","So với lựa chọn không còn dùng; không nêu góc nhìn."],
+["A","e2","Hiệu quả lâm sàng đưa vào mô hình có từ nguồn tin cậy (RCT, phân tích gộp) không?","Methods → Model inputs","Lấy hiệu quả từ một nghiên cứu quan sát nhỏ."],
+["A","e3","Chi phí và kết cục có được đo đầy đủ, định giá hợp lý và có chiết khấu không?","Bảng tham số","Bỏ sót chi phí theo dõi, tác dụng phụ; không chiết khấu."],
+["B","e4","ICER là bao nhiêu so với ngưỡng sẵn sàng chi trả?","Results","Chỉ báo chi phí, không báo phần gia tăng."],
+["B","e5","Kết quả có vững qua phân tích độ nhạy (một chiều, xác suất) không?","Tornado diagram; đường cong chấp nhận chi phí – hiệu quả","Kết luận đảo ngược khi giá thuốc thay đổi nhỏ."],
+["C","e6","Kết quả có chuyển được sang bối cảnh Việt Nam (giá, BHYT, ngưỡng chi trả) không?","Discussion","Mô hình làm ở nước thu nhập cao."]]}
+];
+const GROUPS={A:"Kết quả có đáng tin không?",B:"Kết quả là gì?",C:"Có áp dụng cho BN của tôi không?",D:"Câu hỏi bổ sung"};
+const REPORT=[["Thử nghiệm ngẫu nhiên","CONSORT","RoB 2"],["Đề cương thử nghiệm","SPIRIT","—"],["Đoàn hệ, bệnh–chứng, cắt ngang","STROBE","ROBINS-I, Newcastle–Ottawa"],["Tổng quan hệ thống","PRISMA","AMSTAR 2, ROBIS"],["Xét nghiệm chẩn đoán","STARD","QUADAS-2"],["Mô hình dự báo","TRIPOD","PROBAST"],["Khuyến cáo","RIGHT","AGREE II"],["Kinh tế y tế","CHEERS","Drummond checklist"],["Báo cáo ca lâm sàng","CARE","—"]];
+
+</script>
+<script>
+document.getElementById('rep').innerHTML=REPORT.map(r=>'<tr><td>'+r[0]+'</td><td><b>'+r[1]+'</b></td><td>'+r[2]+'</td></tr>').join('');
+{
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const CATN=Object.fromEntries(CATS);
+const DICT=TERMS.map((t,i)=>({k:'d'+i,cat:t[0],en:t[1],al:t[2]?t[2].split('|'):[],vi:t[3],def:t[4],ex:t[5],pit:t[6]}));
+const CLN=Object.fromEntries(CL.map(c=>[c.id,c]));
+const fmt=(x,d=1)=>Number(x).toFixed(d).replace('.',',');
+let userTerms=[],papers=[],cur=null,store=null,busy=false,ctrl=null,mode='link',files=[],saving=Promise.resolve();
+
+/* ---------- bộ so khớp thuật ngữ ---------- */
+const key=s=>s.toLowerCase().replace(/[\s\-–‑]+/g,'');
+const isAbbr=s=>s.length<=6&&/[A-Z]/.test(s)&&s===s.toUpperCase();
+const pat=s=>s.split(/[\s\-–‑]+/).filter(Boolean).map(p=>p.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('[\\s\\-–‑]?');
+let M={map:new Map(),byK:new Map(),ci:null,cs:null};
+function pendingTerms(){
+  const nt=cur&&cur.analysis&&cur.analysis.new_terms||[];
+  return nt.map((t,i)=>t.status==='pending'?{k:'p'+i,i,cat:t.cat,en:t.en,al:t.match&&t.match!==t.en?[t.match]:[],vi:t.vi,def:t.def,ex:t.ex,pending:true}:null).filter(Boolean);
+}
+function buildMatcher(){
+  const map=new Map(),byK=new Map(),ci=[],cs=[];
+  const add=(s,t)=>{s=String(s||'').trim();if(s.length<2)return;const k=key(s);if(!map.has(k))map.set(k,t);(isAbbr(s)?cs:ci).push(s);};
+  for(const t of [...DICT,...userTerms,...pendingTerms()]){byK.set(t.k,t);add(t.en,t);for(const a of t.al||[])add(a,t);}
+  const mk=(arr,fl,ab)=>{if(!arr.length)return null;const u=[...new Set(arr)].sort((a,b)=>b.length-a.length).map(s=>pat(s)+(/[A-Za-z]$/.test(s)?(ab?'s?':'(?:e?s)?'):''));return new RegExp('(?<![\\p{L}\\p{N}])(?:'+u.join('|')+')(?![\\p{L}\\p{N}])',fl);};
+  M={map,byK,ci:mk(ci,'giu',false),cs:mk(cs,'gu',true)};
+}
+function lookup(s){const k=key(s),m=M.map;return m.get(k)||(k.endsWith('es')&&m.get(k.slice(0,-2)))||(k.endsWith('s')&&m.get(k.slice(0,-1)))||null;}
+function findMatches(text){
+  const out=[];
+  for(const re of [M.cs,M.ci]){if(!re)continue;re.lastIndex=0;let m;while((m=re.exec(text))){if(!m[0]){re.lastIndex++;continue;}const t=lookup(m[0]);if(t)out.push({s:m.index,e:m.index+m[0].length,t});}}
+  out.sort((a,b)=>a.s-b.s||(b.e-b.s)-(a.e-a.s));
+  const res=[];let end=-1;for(const x of out)if(x.s>=end){res.push(x);end=x.e;}
+  return res;
+}
+function hl(text){
+  text=String(text??'');let h='',p=0;
+  for(const x of findMatches(text)){h+=esc(text.slice(p,x.s))+`<mark class="t${x.t.pending?' nw':''}" data-k="${x.t.k}">${esc(text.slice(x.s,x.e))}</mark>`;p=x.e;}
+  return h+esc(text.slice(p));
+}
+const HEAD=/^(abstract|background|introduction|methods?|results?|discussion|conclusions?|limitations?|study design|statistical analysis|table \d+|figure \d+)\b/i;
+function renderDoc(text){
+  return text.split(/\n{2,}/).map(par=>{const p=par.trim();if(!p)return'';
+    if(p.length<90&&!/[.;,]$/.test(p)&&(HEAD.test(p)||(p===p.toUpperCase()&&/[A-Z]/.test(p))))return`<h4>${hl(p)}</h4>`;
+    if(p.includes('\t'))return`<div class="tbl">${hl(p).replace(/\n/g,'<br>').replace(/\t/g,' <span class="sep">│</span> ')}</div>`;
+    return`<p>${hl(p).replace(/\n/g,'<br>')}</p>`;}).join('');
+}
+
+/* ---------- khung chọn thuật ngữ ---------- */
+const pop=$('#pop');
+function termHTML(t){
+  return `<div class="ph"><b>${esc(t.en)}</b>${t.vi?`<span>${esc(t.vi)}</span>`:''}</div><div class="pc">${esc(CATN[t.cat]||'Thuật ngữ')}${t.user?' · anh đã thêm':''}${t.pending?' · mới, chưa có trong từ điển':''}</div><p>${esc(t.def)}</p>${t.ex?`<p class="pe"><b>Ví dụ:</b> ${esc(t.ex)}</p>`:''}${t.pit?`<p class="pp"><b>Dễ nhầm:</b> ${esc(t.pit)}</p>`:''}`;
+}
+function openPop(t,el){
+  let h=termHTML(t)+'<div class="pa">';
+  h+=t.pending?`<button class="pri sm" data-act="ok" data-i="${t.i}">Thêm vào từ điển</button><button class="sec sm" data-act="no" data-i="${t.i}">Bỏ qua</button>`:`<button class="sec sm" data-act="goto" data-k="${t.k}">Mở trong từ điển</button>`;
+  h+='<button class="x" data-act="close" aria-label="Đóng">×</button></div>';
+  pop.innerHTML=h;pop.hidden=false;
+  const nar=innerWidth<700;pop.classList.toggle('sheet',nar);pop.style.cssText='';
+  if(!nar){const r=el.getBoundingClientRect(),w=Math.min(400,innerWidth-24);pop.style.width=w+'px';pop.style.left=Math.max(12,Math.min(r.left,innerWidth-w-12))+'px';pop.style.top='0px';const ph=pop.offsetHeight;let top=r.bottom+8;if(top+ph>innerHeight-8)top=Math.max(8,r.top-ph-8);pop.style.top=top+'px';}
+}
+const closePop=()=>{pop.hidden=true;};
+
+/* ---------- lưu trữ ---------- */
+const toTerm=(id,d)=>({k:'u'+id,id,cat:CATN[d.cat]?d.cat:'tk',en:d.en,al:d.al||[],vi:d.vi||'',def:d.def||'',ex:d.ex||'',pit:'',user:true,src:d.src||''});
+function libNote(s){$('#libNote').textContent=s;}
+async function initStore(){
+  const C=window.claude;
+  if(!C||!C.use){libNote('Mở trang này trên claude.ai để lưu thư viện; hiện chỉ lưu tạm trong lần mở này.');return;}
+  const [db,user]=await Promise.all([C.use('db'),C.use('user')]);
+  const uid=db&&user?await user.id().catch(()=>null):null;
+  if(!uid){libNote('Chưa lưu được thư viện ở chế độ xem này; bài phân tích chỉ giữ tạm đến khi đóng trang.');return;}
+  const base=db.doc('data/users/'+uid+'/lib');
+  store={papers:base.collection('papers'),terms:base.collection('terms')};
+  libNote('Đang tải thư viện…');
+  let timer;
+  try{
+    const [ps,ts]=await Promise.race([Promise.all([store.papers.get(),store.terms.get()]),new Promise((_,rej)=>{timer=setTimeout(()=>rej({code:'timeout'}),10000);})]);
+    clearTimeout(timer);
+    papers=ps.docs.map(d=>({id:d.id,...d.data()}));
+    userTerms=ts.docs.map(d=>toTerm(d.id,d.data()));
+    libNote('');buildMatcher();renderLib();renderGloss();if(cur)renderResult();
+  }catch(e){clearTimeout(timer);libNote(e.code==='timeout'?'Thư viện chưa phản hồi; bài mới vẫn được lưu khi kết nối lại.':'Không tải được thư viện ('+(e.code||e.message)+').');}
+}
+const clean=o=>JSON.parse(JSON.stringify(o));
+function savePaper(){
+  const run=async()=>{
+    if(!cur)return'none';
+    const body=clean({title:cur.meta.title||'Bài báo chưa có tiêu đề',citation:cur.meta.citation||'',design:cur.analysis&&cur.analysis.design||'',meta:cur.meta,text:cur.text.slice(0,120000),analysis:cur.analysis||null,created:cur.created||new Date().toISOString(),updated:new Date().toISOString()});
+    cur.created=body.created;
+    const up=id=>{cur.id=id;const i=papers.findIndex(p=>p.id===id);const rec={id,...body};if(i>=0)papers[i]=rec;else papers.unshift(rec);renderLib();};
+    if(!store){up(cur.id||'tam'+Date.now());return'local';}
+    const ref=cur.id&&!cur.id.startsWith('tam')?store.papers.doc(cur.id):store.papers.doc();
+    try{await ref.set(body);}catch(e){if(e.code==='invalid_argument'){body.text=body.text.slice(0,40000);body.cut=true;await ref.set(body);}else throw e;}
+    up(ref.id);return'ok';
+  };
+  const p=saving.then(run,run);saving=p.catch(()=>{});return p;
+}
+async function addTerm(rec){
+  let id='tam'+Date.now();
+  if(store){const ref=store.terms.doc();await ref.set(clean(rec));id=ref.id;}
+  userTerms.push(toTerm(id,rec));
+}
+async function delTerm(id){if(store&&!id.startsWith('tam'))await store.terms.doc(id).delete();userTerms=userTerms.filter(t=>t.id!==id);}
+
+/* ---------- PubMed qua connector ---------- */
+function unwrap(r){
+  if(r&&typeof r==='object'&&'payload' in r)r=r.payload;
+  if(r&&Array.isArray(r.content))r=r.content.map(c=>c.text||'').join('');
+  if(Array.isArray(r)&&r[0]&&r[0].text!==undefined)r=r.map(c=>c.text).join('');
+  if(typeof r==='string'){try{r=JSON.parse(r);}catch(e){}}
+  return r;
+}
+async function pm(tool,input){
+  const C=window.claude,m=C&&C.use?await C.use('mcp'):null;
+  if(!m)throw new Error('Trang chưa dùng được connector PubMed ở chế độ xem này. Hãy dán văn bản, tải PDF hoặc chụp ảnh bài báo.');
+  if(typeof m.callTool==='function')return unwrap(await m.callTool('PubMed',tool,input));
+  const s=await m.server('PubMed');return unwrap(await s[tool](input));
+}
+async function resolveLink(raw){
+  const s=raw.trim();if(!s)throw new Error('Hãy dán link, PMID, PMCID hoặc DOI.');
+  let pmid=null,pmcid=null,doi=null,m;
+  if((m=s.match(/PMC\d{4,}/i)))pmcid=m[0].toUpperCase();
+  if((m=s.match(/pubmed\.ncbi\.nlm\.nih\.gov\/(\d{5,9})/i)||s.match(/^\s*(?:PMID:?\s*)?(\d{5,9})\s*$/i)))pmid=m[1];
+  if((m=s.match(/10\.\d{4,9}\/[^\s"<>#?]+/))){try{doi=decodeURIComponent(m[0]);}catch(e){doi=m[0];}doi=doi.replace(/[).,;]+$/,'').replace(/\/(full|abstract|pdf|epdf|fulltext)$/i,'');}
+  if(!pmid&&!pmcid&&!doi)throw new Error('Không thấy PMID, PMCID hay DOI trong link này. Dán DOI hoặc PMID (thường ở đầu bài), hoặc chuyển sang dán văn bản / ảnh / PDF.');
+  status('Đang tìm bài trên PubMed…');
+  if(!pmid&&pmcid){const r=await pm('convert_article_ids',{ids:[pmcid],id_type:'pmcid'});pmid=r&&r.records&&r.records[0]&&r.records[0].pmid||null;}
+  if(!pmid&&doi){let r=await pm('search_articles',{query:doi,max_results:3});pmid=r&&r.pmids&&r.pmids[0];if(!pmid){r=await pm('search_articles',{query:doi+'[doi]',max_results:3});pmid=r&&r.pmids&&r.pmids[0];}}
+  const meta={kind:'abstract',doi};let abs='';
+  if(pmid){
+    const r=await pm('get_article_metadata',{pmids:[String(pmid)]}),a=r&&r.articles&&r.articles[0];
+    if(a){const id=a.identifiers||{};meta.title=String(a.title||'').replace(/\.$/,'');meta.doi=a.doi||id.doi||doi;meta.pmid=String(pmid);
+      const j=a.journal&&(a.journal.iso_abbreviation||a.journal.title)||'',y=a.publication_date&&a.publication_date.year||'',au=a.authors&&a.authors[0]&&a.authors[0].last_name;
+      meta.citation=[au?au+(a.authors.length>1?' và cs.':''):'',j,y].filter(Boolean).join(' · ');meta.types=a.article_types||[];abs=a.abstract||'';
+      if(!pmcid)pmcid=id.pmc||id.pmcid||null;}
+  }
+  if(pmid&&!pmcid){try{const r=await pm('convert_article_ids',{ids:[String(pmid)],id_type:'pmid'});pmcid=r&&r.records&&r.records[0]&&r.records[0].pmcid||null;}catch(e){}}
+  let full='';
+  if(pmcid){status('Đang lấy toàn văn từ PubMed Central…');try{const r=await pm('get_full_text_article',{pmc_ids:[pmcid]}),a=r&&r.articles&&r.articles[0];if(a){full=a.full_text||'';meta.title=meta.title||String(a.title||'').replace(/\.$/,'');meta.doi=meta.doi||a.doi||(a.identifiers||{}).doi;abs=abs||a.abstract||'';}}catch(e){}}
+  if(!full&&!abs)throw new Error('PubMed không trả về nội dung cho bài này. Hãy dán văn bản, tải PDF hoặc chụp ảnh.');
+  meta.pmcid=pmcid;meta.kind=full?'pmc':'abstract';
+  return{meta,text:full?(abs?'ABSTRACT\n\n'+abs+'\n\n':'')+full:'ABSTRACT\n\n'+abs};
+}
+
+/* ---------- PDF và ảnh ---------- */
+const loadScript=src=>new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=()=>rej(new Error('Không tải được bộ đọc PDF.'));document.head.appendChild(s);});
+async function pdfText(file){
+  const B='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
+  if(!window.pdfjsLib){await loadScript(B+'pdf.worker.min.js');await loadScript(B+'pdf.min.js');}
+  const L=window.pdfjsLib;L.GlobalWorkerOptions.workerSrc=B+'pdf.worker.min.js';
+  const doc=await L.getDocument({data:await file.arrayBuffer(),isEvalSupported:false}).promise;const pages=[];
+  for(let i=1;i<=doc.numPages;i++){
+    status(`Đang đọc PDF: trang ${i}/${doc.numPages}…`);
+    const tc=await(await doc.getPage(i)).getTextContent();const lines=[];let line='',y=null;
+    for(const it of tc.items){if(y!==null&&Math.abs(it.transform[5]-y)>2){lines.push(line);line='';}line+=it.str;y=it.transform[5];}
+    lines.push(line);
+    let t='';for(const l of lines.map(x=>x.trim()).filter(Boolean)){t+=l.endsWith('-')?l.slice(0,-1):l+(/[.?!:]$/.test(l)?'\n\n':' ');}
+    pages.push(t.trim());
+  }
+  return pages.join('\n\n');
+}
+async function shrink(f){
+  const b=await createImageBitmap(f),s=Math.min(1,1800/Math.max(b.width,b.height)),c=document.createElement('canvas');
+  c.width=Math.round(b.width*s);c.height=Math.round(b.height*s);c.getContext('2d').drawImage(b,0,0,c.width,c.height);
+  return new Promise(r=>c.toBlob(r,'image/jpeg',0.86));
+}
+async function need(name){const C=window.claude,x=C&&C.use?await C.use(name):null;if(!x)throw new Error('Trang chưa gọi được Claude ở chế độ xem này. Hãy mở trang trên claude.ai.');return x;}
+async function ask(prompt,opts){
+  const sample=await need('sample');ctrl=new AbortController();
+  const r=await sample(prompt,{...opts,signal:ctrl.signal,onText:({text})=>status(`Claude đang viết… ${text.length.toLocaleString('vi-VN')} ký tự`)});
+  return r;
+}
+const OCR='Chép lại nguyên văn toàn bộ chữ trong các ảnh trang bài báo khoa học này, theo thứ tự ảnh và thứ tự đọc (hết cột trái mới sang cột phải). Tiêu đề mục để trên dòng riêng; các đoạn cách nhau một dòng trống. Bảng: mỗi hàng một dòng, các ô cách nhau bằng ký tự tab. Bỏ header, footer lặp lại và số trang. Chỉ trả về văn bản đã chép, không thêm bình luận.';
+
+/* ---------- lấy nguồn ---------- */
+async function getSource(){
+  if(mode==='link')return resolveLink($('#inLink').value);
+  if(mode==='text'){const t=$('#inText').value.trim();if(t.length<80)throw new Error('Văn bản quá ngắn; hãy dán ít nhất phần abstract.');return{meta:{kind:'paste'},text:t};}
+  if(!files.length)throw new Error('Hãy chọn ảnh chụp các trang hoặc một file PDF.');
+  const pdf=files.find(f=>f.type==='application/pdf'||/\.pdf$/i.test(f.name));
+  if(pdf){const t=await pdfText(pdf);if(t.replace(/\s/g,'').length<300)throw new Error('PDF này là ảnh scan, không có lớp chữ. Hãy chụp ảnh từng trang rồi tải lên.');return{meta:{kind:'pdf',file:pdf.name},text:t};}
+  const imgs=files.filter(f=>f.type.startsWith('image/')).slice(0,8);
+  status('Đang chuẩn bị ảnh…');const blobs=[];for(const f of imgs)blobs.push(await shrink(f));
+  status('Claude đang đọc chữ trong ảnh…');
+  const r=await ask(OCR,{images:blobs,modelTier:'default'});
+  const t=String(r.text||'').trim();if(t.length<80)throw new Error('Không đọc được chữ trong ảnh. Hãy chụp rõ, thẳng trang hơn.');
+  return{meta:{kind:'image',pages:imgs.length},text:t};
+}
+
+/* ---------- phân tích ---------- */
+const SCHEMA=`{"title":"tiêu đề bài (giữ tiếng Anh)","citation":"tác giả đầu · tạp chí · năm (nếu có)","design":"mã thiết kế","design_label":"mô tả thiết kế bằng tiếng Việt, vd: RCT mù đôi, đa trung tâm, so với placebo","summary":"2–3 câu: bài hỏi gì, làm gì, thấy gì","pico":{"P":"","I":"","C":"","O":"","T":""},"primary":{"outcome":"","treat_label":"","control_label":"","treat_pct":null,"control_pct":null,"effect":"vd HR 0.74 (95% CI 0.65–0.85); P<0.001","follow_up":""},"other_results":[{"label":"","value":"","note":""}],"checklist":[{"id":"r1","answer":"yes|no|unclear","evidence":""}],"pros":[""],"cons":[""],"bias_risk":"thấp|trung bình|cao|không rõ","bias_reason":"","applicability":"","bottom_line":"","new_terms":[{"en":"","match":"","vi":"","cat":"","def":"","ex":""}]}`;
+function buildPrompt(text,meta){
+  const cut=text.length>60000,t=text.slice(0,60000);
+  const cl=CL.map(c=>c.id+' ('+c.name+'):\n'+c.qs.map(q=>'  '+q[1]+': '+q[2]).join('\n')).join('\n');
+  const known=[...DICT,...userTerms].map(x=>x.en).join('; ');
+  return `Bạn là chuyên gia dịch tễ học lâm sàng, giúp một bác sĩ tim mạch can thiệp người Việt Nam thẩm định một bài báo khoa học.
+Quy tắc:
+- Chỉ dựa trên văn bản bên dưới. Điều gì văn bản không nói thì trả lời "unclear" hoặc ghi "bài không nêu". Tuyệt đối không bịa số liệu, tên thử nghiệm hay trích dẫn.
+- Viết tiếng Việt ngắn gọn, giữ thuật ngữ chuyên môn tiếng Anh (vd hazard ratio, ITT) khi cần.
+- Chỉ trả về MỘT object JSON hợp lệ theo schema, không markdown, không lời nào ngoài JSON.
+
+Schema:
+${SCHEMA}
+
+Hướng dẫn:
+- design: một trong rct, cohort, case_control, cross_sectional, sr_ma, diagnostic, prognostic, guideline, economic, other.
+- checklist: trả lời MỌI câu của bộ câu hỏi ứng với design (other thì dùng bộ gần nhất). answer "yes" = đạt, "no" = không đạt, "unclear" = bài không đủ thông tin. evidence 1–2 câu, nêu dẫn chứng và vị trí trong bài (Methods, Bảng 1…).
+- primary: treat_pct và control_pct là số (không kèm %), chỉ điền khi bài nêu trực tiếp tỷ lệ biến cố của kết cục chính ở từng nhóm; nếu không thì null; không tự tính. Nghiên cứu không có hai nhóm so sánh thì primary = null.
+- pros, cons: mỗi bên 3–6 ý, cụ thể cho bài này.
+- bottom_line: 1–2 câu, bác sĩ lâm sàng nên hiểu và dùng kết quả này thế nào.
+- new_terms: tối đa 10 thuật ngữ phương pháp, thống kê hoặc lâm sàng chuyên sâu có trong bài mà KHÔNG nằm trong danh sách "Đã có". match phải là chuỗi xuất hiện y nguyên trong văn bản. def 1–2 câu tiếng Việt; ex là ví dụ tim mạch ngắn hoặc chuỗi rỗng. cat chọn một: ${CATS.map(c=>c[0]+' = '+c[1]).join('; ')}.
+
+Bộ câu hỏi theo thiết kế:
+${cl}
+
+Đã có: ${known}
+
+${meta.title?'Tiêu đề: '+meta.title+'\n':''}${meta.citation?'Nguồn: '+meta.citation+'\n':''}${meta.types&&meta.types.length?'Loại bài (PubMed): '+meta.types.join(', ')+'\n':''}${meta.kind==='abstract'?'Lưu ý: chỉ có abstract.\n':''}Văn bản bài báo${cut?' (đã cắt bớt phần cuối)':''}:
+"""
+${t}
+"""`;
+}
+function parseJSON(s){s=String(s||'');const a=s.indexOf('{'),b=s.lastIndexOf('}');if(a<0||b<a)throw new Error('Claude không trả về kết quả đúng định dạng. Thử lại.');return JSON.parse(s.slice(a,b+1));}
+async function analyze(){
+  const r=await ask(buildPrompt(cur.text,cur.meta),{modelTier:'complex'});
+  let a;try{a=parseJSON(r.text);}catch(e){throw new Error(r.truncated?'Kết quả bị cắt giữa chừng. Thử lại với văn bản ngắn hơn (vd bỏ phần References).':'Không đọc được kết quả của Claude. Bấm Phân tích lần nữa.');}
+  a.checklist=Array.isArray(a.checklist)?a.checklist:[];a.pros=Array.isArray(a.pros)?a.pros:[];a.cons=Array.isArray(a.cons)?a.cons:[];a.other_results=Array.isArray(a.other_results)?a.other_results:[];
+  const low=cur.text.toLowerCase();
+  a.new_terms=(Array.isArray(a.new_terms)?a.new_terms:[]).filter(t=>t&&t.en&&t.def&&!lookup(t.en)&&(!t.match||low.includes(String(t.match).toLowerCase()))).slice(0,10).map(t=>({...t,cat:CATN[t.cat]?t.cat:'tk',status:'pending'}));
+  return a;
+}
+
+/* ---------- chạy ---------- */
+function status(s,err){const el=$('#stat');el.textContent=s||'';el.classList.toggle('err',!!err);}
+function setBusy(b){busy=b;$('#bGo').disabled=b;$('#bHl').disabled=b;$('#bStop').hidden=!b;$$('[data-act=analyze]').forEach(x=>x.disabled=b);}
+const errMsg=e=>{if(ctrl&&ctrl.signal.aborted)return'Đã dừng.';const c=e&&e.code;if(c==='not_granted')return'Anh chưa cho phép trang gọi Claude hoặc PubMed. Mở lại và chấp nhận khi được hỏi.';if(c==='rate_limited')return'Claude đang giới hạn lượt dùng; đợi một lúc rồi thử lại.';return(e&&e.message)||'Có lỗi, thử lại.';};
+async function run(doAnalyze){
+  if(busy)return;setBusy(true);closePop();
+  try{
+    const src=await getSource();
+    cur={id:null,meta:src.meta,text:src.text,analysis:null,created:null};
+    buildMatcher();renderResult(doAnalyze?'t':'t');
+    if(doAnalyze)await doAnalysis();else status('Đã highlight. Bấm “Phân tích bài này” khi cần thẩm định.');
+  }catch(e){status(errMsg(e),true);}
+  finally{setBusy(false);}
+}
+async function doAnalysis(){
+  status('Claude đang thẩm định bài…');
+  cur.analysis=await analyze();
+  if(!cur.meta.title&&cur.analysis.title)cur.meta.title=cur.analysis.title;
+  if(!cur.meta.citation&&cur.analysis.citation)cur.meta.citation=cur.analysis.citation;
+  buildMatcher();renderResult('a');
+  try{const r=await savePaper();renderResult();status(r==='ok'?'Xong. Đã lưu vào thư viện.':'Xong. Bài được giữ tạm trong lần mở này.');}catch(e){status('Phân tích xong nhưng chưa lưu được: '+(e.code==='quota_exceeded'?'thư viện đã đầy, hãy xoá bớt bài cũ.':(e.code||e.message)),true);}
+}
+async function analyzeCurrent(){
+  if(busy||!cur)return;setBusy(true);
+  try{await doAnalysis();}catch(e){status(errMsg(e),true);}finally{setBusy(false);}
+}
+
+/* ---------- hiển thị kết quả ---------- */
+const KIND={pmc:'Toàn văn · PubMed Central',abstract:'Chỉ có abstract · PubMed',paste:'Văn bản dán',image:'Ảnh chụp',pdf:'PDF'};
+const ANS={yes:['Đạt','yes'],no:['Chưa đạt','no'],unclear:['Không rõ','unk']};
+const RISK={'thấp':'ok','trung bình':'unk','cao':'no'};
+let pane='t';
+function calc(tp,cp){tp=Number(tp);cp=Number(cp);if(!isFinite(tp)||!isFinite(cp)||cp<=0||tp<0||tp>100||cp>100)return null;const arr=cp-tp;return{arr,rrr:(1-tp/cp)*100,rr:tp/cp,nnt:arr>0?Math.ceil(100/arr):null,nnh:arr<0?Math.ceil(100/-arr):null};}
+function resultsCard(a){
+  const p=a.primary;let h='<section class="card"><h3>Kết quả chính</h3>';
+  if(p&&(p.outcome||p.effect)){
+    h+=`<p class="lbl">${hl(p.outcome||'Kết cục chính')}</p>${p.effect?`<p class="eff">${hl(p.effect)}</p>`:''}`;
+    const c=calc(p.treat_pct,p.control_pct);
+    if(c){h+=`<div class="tiles"><div><span>ARR</span><b>${fmt(c.arr)}%</b></div><div><span>RRR</span><b>${fmt(c.rrr,0)}%</b></div><div><span>${c.nnt?'NNT':'NNH'}</span><b>${c.nnt||c.nnh||'–'}</b></div></div><p class="mini">Trang tự tính từ tỷ lệ bài nêu: ${esc(p.treat_label||'can thiệp')} ${fmt(p.treat_pct)}% so với ${esc(p.control_label||'chứng')} ${fmt(p.control_pct)}%${p.follow_up?', theo dõi '+esc(p.follow_up):''}.</p>`;}
+    else if(p.follow_up)h+=`<p class="mini">Theo dõi: ${esc(p.follow_up)}</p>`;
+  }
+  if(a.other_results.length)h+='<ul class="or">'+a.other_results.map(r=>`<li><b>${hl(r.label)}</b> ${hl(r.value)}${r.note?`<span> — ${hl(r.note)}</span>`:''}</li>`).join('')+'</ul>';
+  return h+'</section>';
+}
+function analysisHTML(a){
+  const c=CLN[a.design]||null,qs=c?c.qs:[];const qm=Object.fromEntries(qs.map(q=>[q[1],q]));
+  const pico=['P','I','C','O','T'].filter(k=>a.pico&&a.pico[k]).map(k=>`<tr><th>${k}</th><td>${hl(a.pico[k])}</td></tr>`).join('');
+  const rows=a.checklist.map(x=>{const q=qm[x.id],an=ANS[x.answer]||ANS.unclear;return`<li><span class="ans ${an[1]}">${an[0]}</span><div><b>${esc(q?q[2]:x.id)}</b><p>${hl(x.evidence)}</p></div></li>`;}).join('');
+  const cnt=k=>a.checklist.filter(x=>x.answer===k).length;
+  return `<div class="ag">
+<section class="card wide"><h3>Tóm tắt</h3><p>${hl(a.summary)}</p>${pico?`<table class="pico">${pico}</table>`:''}</section>
+${resultsCard(a)}
+<section class="card"><h3>Nguy cơ sai lệch</h3><p>${hl(a.bias_reason||'Bài không đủ thông tin để đánh giá.')}</p><h3>Áp dụng cho BN của tôi</h3><p>${hl(a.applicability||'—')}</p></section>
+
+<section class="card procon"><div><h3 class="okh">Điểm mạnh</h3><ul>${a.pros.map(x=>`<li>${hl(x)}</li>`).join('')}</ul></div><div><h3 class="noh">Hạn chế</h3><ul>${a.cons.map(x=>`<li>${hl(x)}</li>`).join('')}</ul></div></section>
+<section class="card wide"><div class="clh"><h3>${c?esc(c.name)+': bảng câu hỏi':'Bảng câu hỏi'}</h3><span class="mini">${cnt('yes')} đạt · ${cnt('no')} chưa đạt · ${cnt('unclear')} không rõ</span></div><ol class="cla">${rows}</ol>${c?`<a class="lnk" href="#cau-hoi" data-cl="${c.id}">Xem bộ câu hỏi đầy đủ, chỗ cần tìm và cờ đỏ</a>`:''}</section>
+</div><p class="disc">Phần thẩm định do Claude viết từ văn bản bài báo. Đối chiếu con số với bản gốc trước khi dùng cho quyết định lâm sàng.</p>`;
+}
+function newTermsHTML(a){
+  const nt=a&&a.new_terms||[];
+  if(!a)return'<p class="empty">Thuật ngữ mới chỉ có sau khi phân tích bài bằng Claude.</p>';
+  if(!nt.length)return'<p class="empty">Bài này không có thuật ngữ nào ngoài từ điển.</p>';
+  return '<p class="mini">Các thuật ngữ trong bài chưa có trong từ điển. Duyệt cái nào thì cái đó được thêm vào từ điển của anh.</p><div class="ntl">'+nt.map((t,i)=>`<article class="nt"><div class="ph"><b>${esc(t.en)}</b>${t.vi?`<span>${esc(t.vi)}</span>`:''}</div><div class="pc">${esc(CATN[t.cat]||'')}</div><p>${esc(t.def)}</p>${t.ex?`<p class="pe"><b>Ví dụ:</b> ${esc(t.ex)}</p>`:''}<div class="pa">${t.status==='pending'?`<button class="pri sm" data-act="ok" data-i="${i}">Thêm vào từ điển</button><button class="sec sm" data-act="no" data-i="${i}">Bỏ qua</button>`:`<span class="done">${t.status==='ok'?'Đã thêm vào từ điển':'Đã bỏ qua'}</span>`}</div></article>`).join('')+'</div>';
+}
+function renderResult(p){
+  if(p)pane=p;const R=$('#result');if(!cur){R.hidden=true;return;}
+  const a=cur.analysis,m=cur.meta,risk=a&&a.bias_risk;
+  const pend=a&&a.new_terms?a.new_terms.filter(t=>t.status==='pending').length:0;
+  const doi=m.doi&&/^10\./.test(m.doi)?`<a href="https://doi.org/${esc(encodeURI(m.doi))}" target="_blank" rel="noopener">DOI ${esc(m.doi)}</a>`:'';
+  const pmSrc=m.kind==='pmc'||m.kind==='abstract'?'<span>Nguồn: PubMed</span>':'';
+  R.innerHTML=`<div class="rhead"><div class="chips">${a?`<span class="badge">${esc(a.design_label||(CLN[a.design]||{}).name||'Thiết kế chưa rõ')}</span>`:''}${risk?`<span class="pill ${RISK[risk]||'unk'}">Nguy cơ sai lệch: ${esc(risk)}</span>`:''}<span class="pill src">${esc(KIND[m.kind]||'')}</span></div>
+<h2>${esc(m.title||(a&&a.title)||'Bài báo chưa có tiêu đề')}</h2>
+<p class="cite">${[m.citation?esc(m.citation):'',doi,pmSrc].filter(Boolean).join(' · ')}</p>
+${a&&a.bottom_line?`<p class="bl">${hl(a.bottom_line)}</p>`:''}
+${m.kind==='abstract'?'<p class="warn">Chỉ lấy được abstract vì bài không có bản miễn phí trên PubMed Central. Muốn thẩm định đầy đủ, tải PDF hoặc chụp ảnh bài.</p>':''}
+<div class="racts">${!a?'<button class="pri" data-act="analyze">Phân tích bài này</button>':''}<button class="sec" data-act="save" ${cur.id&&!String(cur.id).startsWith('tam')?'disabled':''}>${cur.id?'Đã lưu':'Lưu vào thư viện'}</button>${a?'<button class="sec" data-act="copy">Chép tóm tắt</button>':''}</div></div>
+<div class="subtabs" role="tablist"><button data-p="a" aria-selected="${pane==='a'}">Thẩm định</button><button data-p="t" aria-selected="${pane==='t'}">Bài báo có highlight</button><button data-p="n" aria-selected="${pane==='n'}">Thuật ngữ mới${pend?` <i>${pend}</i>`:''}</button></div>
+<div class="pane" ${pane==='a'?'':'hidden'}>${a?analysisHTML(a):'<div class="card"><p>Bài đã được highlight thuật ngữ. Bấm <b>Phân tích bài này</b> để Claude chấm theo bảng câu hỏi, tìm điểm mạnh, hạn chế và thuật ngữ mới.</p><button class="pri" data-act="analyze">Phân tích bài này</button></div>'}</div>
+<div class="pane" ${pane==='t'?'':'hidden'}><p class="mini">Chạm vào chữ được tô để xem định nghĩa. <mark class="t">Vàng</mark>: có trong từ điển. <mark class="t nw">Hồng</mark>: thuật ngữ mới chờ duyệt.</p><div class="doc">${renderDoc(cur.text)}</div></div>
+<div class="pane" ${pane==='n'?'':'hidden'}>${newTermsHTML(a)}</div>`;
+  R.hidden=false;
+}
+async function decide(i,ok){
+  const t=cur&&cur.analysis&&cur.analysis.new_terms[i];if(!t||t.status!=='pending')return;
+  try{
+    if(ok)await addTerm({en:t.en,vi:t.vi||'',cat:t.cat,def:t.def||'',ex:t.ex||'',al:t.match&&t.match!==t.en?[t.match]:[],src:cur.meta.title||'',at:new Date().toISOString()});
+    t.status=ok?'ok':'no';closePop();buildMatcher();renderResult();renderGloss();
+    if(cur.id)savePaper().catch(()=>{});
+  }catch(e){status('Chưa lưu được thuật ngữ: '+(e.code||e.message),true);}
+}
+function copySummary(){
+  const a=cur.analysis,m=cur.meta;if(!a)return;
+  const lines=[m.title||a.title,m.citation,m.doi?'https://doi.org/'+m.doi:'','',a.design_label,'Nguy cơ sai lệch: '+(a.bias_risk||''),'',a.summary,'','Kết luận: '+(a.bottom_line||''),'','Điểm mạnh:',...a.pros.map(x=>'+ '+x),'','Hạn chế:',...a.cons.map(x=>'– '+x)];
+  navigator.clipboard.writeText(lines.filter(x=>x!==undefined).join('\n')).then(()=>status('Đã chép tóm tắt.'),()=>status('Trình duyệt không cho chép; hãy bôi đen để chép.',true));
+}
+
+/* ---------- từ điển ---------- */
+let gCat='all';
+function renderGloss(){
+  const q=$('#gq').value.trim().toLowerCase();
+  const all=[...DICT,...userTerms];
+  const chips=[['all','Tất cả',all.length],...CATS.map(c=>[c[0],c[1],all.filter(t=>t.cat===c[0]).length]),['user','Anh đã thêm',userTerms.length]];
+  $('#gchips').innerHTML=chips.map(c=>`<button class="chip" aria-pressed="${gCat===c[0]}" data-g="${c[0]}">${esc(c[1])} <i>${c[2]}</i></button>`).join('');
+  const list=all.filter(t=>(gCat==='all'||(gCat==='user'?t.user:t.cat===gCat))&&(!q||[t.en,t.vi,t.def,...(t.al||[])].join(' ').toLowerCase().includes(q)));
+  $('#gcount').textContent=list.length+' thuật ngữ';
+  const by=CATS.map(c=>[c,list.filter(t=>t.cat===c[0])]).filter(x=>x[1].length);
+  $('#glist').innerHTML=by.length?by.map(([c,ts])=>`<h3 class="gh">${esc(c[1])}</h3><div class="gg">${ts.map(t=>`<article class="term" id="term-${t.k}"><h4>${esc(t.en)}${t.vi?`<span>${esc(t.vi)}</span>`:''}</h4>${t.al.length?`<div class="al">${esc(t.al.slice(0,6).join(' · '))}</div>`:''}<p>${esc(t.def)}</p>${t.ex?`<p class="pe"><b>Ví dụ:</b> ${esc(t.ex)}</p>`:''}${t.pit?`<p class="pp"><b>Dễ nhầm:</b> ${esc(t.pit)}</p>`:''}${t.user?`<div class="ut">Anh đã thêm${t.src?' · từ bài: '+esc(t.src):''} <button class="lnkb" data-act="delterm" data-id="${esc(t.id)}">Xoá</button></div>`:''}</article>`).join('')}</div>`).join(''):'<p class="empty">Không có thuật ngữ nào khớp.</p>';
+}
+
+/* ---------- bảng câu hỏi ---------- */
+let clSel='rct';
+function renderCL(){
+  $('#clchips').innerHTML=CL.map(c=>`<button class="chip" aria-pressed="${clSel===c.id}" data-c="${c.id}">${esc(c.name)}</button>`).join('');
+  const c=CLN[clSel];
+  const groups=['A','B','C','D'].map(g=>[g,c.qs.filter(q=>q[0]===g)]).filter(x=>x[1].length);
+  $('#clbody').innerHTML=`<div class="clmeta"><h3>${esc(c.name)}</h3><p>${esc(c.when)}</p><p class="mini">${esc(c.src)} Hướng dẫn báo cáo: <b>${esc(c.rep)}</b>. Công cụ đánh giá sai lệch: <b>${esc(c.rob)}</b>.</p></div>`+groups.map(([g,qs])=>`<h4 class="grp g${g}">${esc(GROUPS[g])}</h4><ol class="qs">${qs.map(q=>`<li><span class="qid">${esc(q[1])}</span><div><b>${hl(q[2])}</b><p><span class="k">Tìm ở đâu:</span> ${hl(q[3])}</p><p><span class="k red">Cờ đỏ:</span> ${hl(q[4])}</p></div></li>`).join('')}</ol>`).join('');
+}
+function calcNNT(){
+  const c=calc($('#cT').value.replace(',','.'),$('#cC').value.replace(',','.'));
+  $('#cOut').innerHTML=c?`<div><span>ARR</span><b>${fmt(c.arr)}%</b></div><div><span>RRR</span><b>${fmt(c.rrr,0)}%</b></div><div><span>RR</span><b>${fmt(c.rr,2)}</b></div><div><span>${c.nnt?'NNT':'NNH'}</span><b>${c.nnt||c.nnh||'∞'}</b></div>`:'<p class="mini">Nhập tỷ lệ biến cố (%) của hai nhóm.</p>';
+}
+
+/* ---------- thư viện ---------- */
+let delArm=null;
+function renderLib(){
+  const ps=[...papers].sort((a,b)=>String(b.created).localeCompare(String(a.created)));
+  $('#libN').textContent=ps.length||'';
+  $('#lib').innerHTML=ps.length?ps.map(p=>{const pend=p.analysis&&p.analysis.new_terms?p.analysis.new_terms.filter(t=>t.status==='pending').length:0;const d=p.created?new Date(p.created).toLocaleDateString('vi-VN'):'';
+    return `<article class="pp-item"><div><h4>${esc(p.title)}</h4><p class="mini">${[p.citation,p.analysis?(p.analysis.design_label||''):'chưa phân tích',d].filter(Boolean).map(esc).join(' · ')}${pend?` · <b>${pend} thuật ngữ chờ duyệt</b>`:''}</p>${p.analysis&&p.analysis.bottom_line?`<p>${esc(p.analysis.bottom_line)}</p>`:''}</div><div class="pa"><button class="pri sm" data-act="open" data-id="${esc(p.id)}">Mở</button><button class="sec sm" data-act="del" data-id="${esc(p.id)}">${delArm===p.id?'Bấm lần nữa để xoá':'Xoá'}</button></div></article>`;}).join(''):'<p class="empty">Chưa có bài nào. Bài anh phân tích sẽ tự lưu vào đây.</p>';
+}
+async function delPaper(id){
+  if(delArm!==id){delArm=id;renderLib();return;}
+  delArm=null;
+  try{if(store&&!id.startsWith('tam'))await store.papers.doc(id).delete();papers=papers.filter(p=>p.id!==id);if(cur&&cur.id===id)cur.id=null;renderLib();}catch(e){libNote('Chưa xoá được: '+(e.code||e.message));}
+}
+function openPaper(id){
+  const p=papers.find(x=>x.id===id);if(!p)return;
+  cur={id:p.id,meta:p.meta||{title:p.title},text:p.text||'',analysis:p.analysis?JSON.parse(JSON.stringify(p.analysis)):null,created:p.created};
+  buildMatcher();location.hash='#phan-tich';renderResult(cur.analysis?'a':'t');status('');
+  $('#result').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+/* ---------- điều hướng ---------- */
+const VIEWS=['phan-tich','tu-dien','cau-hoi','thu-vien'];
+function route(){
+  const h=location.hash.slice(1),v=VIEWS.includes(h)?h:'phan-tich';
+  VIEWS.forEach(x=>{$('#v-'+x).hidden=x!==v;});
+  $$('#tabs a').forEach(a=>a.setAttribute('aria-current',a.getAttribute('href')==='#'+v?'page':'false'));
+  closePop();
+}
+function setMode(m){
+  mode=m;$$('.seg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===m));
+  $$('.mode').forEach(x=>{x.hidden=x.dataset.m!==m;});
+  $('#bHl').textContent=m==='img'?'Chỉ đọc chữ + highlight':'Chỉ highlight';
+}
+function showFiles(){
+  $('#thumbs').innerHTML=files.length?files.map(f=>`<span>${esc(f.name)}</span>`).join(''):'';
+  $('#dropTxt').textContent=files.length?`Đã chọn ${files.length} file. Chọn lại để thay.`:'Chọn ảnh chụp các trang (tối đa 8) hoặc 1 file PDF';
+}
+
+/* ---------- sự kiện ---------- */
+document.addEventListener('click',e=>{
+  const mk=e.target.closest('mark.t[data-k]');
+  if(mk){const t=M.byK.get(mk.dataset.k);if(t){e.preventDefault();openPop(t,mk);}return;}
+  if(!pop.hidden&&!pop.contains(e.target))closePop();
+  const b=e.target.closest('[data-act],[data-p],[data-g],[data-c],.seg [data-m],[data-cl]');
+  if(!b)return;
+  if(b.dataset.m&&b.closest('.seg'))return setMode(b.dataset.m);
+  if(b.dataset.p){pane=b.dataset.p;renderResult();return;}
+  if(b.dataset.g){gCat=b.dataset.g;renderGloss();return;}
+  if(b.dataset.c){clSel=b.dataset.c;renderCL();return;}
+  if(b.dataset.cl){clSel=b.dataset.cl;renderCL();return;}
+  const act=b.dataset.act;
+  if(act==='close')closePop();
+  else if(act==='ok'||act==='no')decide(Number(b.dataset.i),act==='ok');
+  else if(act==='goto'){const t=M.byK.get(b.dataset.k);closePop();if(!t)return;gCat='all';$('#gq').value=t.en;renderGloss();location.hash='#tu-dien';setTimeout(()=>{const el=document.getElementById('term-'+t.k);if(el)el.scrollIntoView({block:'center'});},50);}
+  else if(act==='analyze')analyzeCurrent();
+  else if(act==='save'){savePaper().then(r=>{renderResult();status(r==='ok'?'Đã lưu vào thư viện.':'Đã giữ tạm trong lần mở này.');},er=>status('Chưa lưu được: '+(er.code||er.message),true));}
+  else if(act==='copy')copySummary();
+  else if(act==='open')openPaper(b.dataset.id);
+  else if(act==='del')delPaper(b.dataset.id);
+  else if(act==='delterm'){delTerm(b.dataset.id).then(()=>{buildMatcher();renderGloss();if(cur)renderResult();},er=>libNote('Chưa xoá được: '+(er.code||er.message)));}
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closePop();});
+document.addEventListener('scroll',()=>{if(!pop.hidden&&!pop.classList.contains('sheet'))closePop();},true);
+$('#bGo').addEventListener('click',()=>run(true));
+$('#bHl').addEventListener('click',()=>run(false));
+$('#bStop').addEventListener('click',()=>{if(ctrl)ctrl.abort();});
+$('#inLink').addEventListener('keydown',e=>{if(e.key==='Enter')run(true);});
+$('#inFile').addEventListener('change',e=>{files=[...e.target.files];showFiles();});
+const dz=$('#drop');
+dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('on');});
+dz.addEventListener('dragleave',()=>dz.classList.remove('on'));
+dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('on');files=[...e.dataTransfer.files];showFiles();});
+$('#gq').addEventListener('input',renderGloss);
+$('#cT').addEventListener('input',calcNNT);$('#cC').addEventListener('input',calcNNT);
+addEventListener('hashchange',route);
+document.addEventListener('paste',e=>{
+  if(mode!=='img'||$('#v-phan-tich').hidden)return;
+  const imgs=[...(e.clipboardData&&e.clipboardData.files||[])].filter(f=>f.type.startsWith('image/'));
+  if(imgs.length){files=[...files,...imgs].slice(0,8);showFiles();}
+});
+
+buildMatcher();setMode('link');route();renderGloss();renderCL();calcNNT();renderLib();
+$('#termCount').textContent=DICT.length;
+initStore().catch(e=>libNote('Không mở được thư viện ('+(e.code||e.message)+').'));
+(async()=>{const C=window.claude;if(!C||!C.use){$('#capNote').textContent='Đang xem ngoài claude.ai: từ điển, bảng câu hỏi và nút “Chỉ highlight” với văn bản dán vẫn dùng được.';return;}
+  const [s,m]=await Promise.all([C.use('sample'),C.use('mcp')]);
+  const msg=[];if(!s)msg.push('chưa gọi được Claude ở chế độ xem này');if(!m)msg.push('chưa dùng được PubMed');
+  $('#capNote').textContent=msg.length?'Lưu ý: '+msg.join(', ')+'. Từ điển và highlight văn bản dán vẫn dùng được.':'';})();
+}
+
+</script>
+</body>
+</html>
