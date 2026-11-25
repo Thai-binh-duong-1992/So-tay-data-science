@@ -154,6 +154,15 @@ mark.t.nw{background:var(--hl2);border-bottom:2px dashed var(--acc)}
 .pp-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;padding:18px 0;border-top:1px solid var(--line)}
 .pp-item h4{font-size:20px;margin-bottom:4px}.pp-item p{margin:4px 0}
 #libNote{color:var(--mute);font-size:14px}
+.tsec{margin:10px 0 0}.tsec h5{margin:0 0 3px;font:600 12.5px/1.3 "Be Vietnam Pro",sans-serif;color:var(--mute)}
+.tsec p{margin:0!important;white-space:pre-line;font-size:15px}
+.tsec.th{background:var(--panel);border-radius:8px;padding:8px 10px}.tsec.te{border-left:3px solid #e8c040;padding-left:10px}.tsec.tp h5{color:var(--no)}
+#selBtn{position:fixed;z-index:60;box-shadow:0 8px 24px -8px rgba(0,0,0,.4);max-width:calc(100vw - 16px)}
+#gstat{font-size:14px;color:var(--mute);margin:0 0 8px}#gstat.err{color:var(--no)}
+.askc{background:var(--panel);border:1px dashed var(--line);border-radius:12px;padding:16px 18px;margin:0 0 18px}.askc p{margin:0 0 10px}
+.askc.off{border-style:solid;border-color:var(--crim);margin-bottom:20px}
+.lnkbtn{display:inline-flex;align-items:center;text-decoration:none}
+.term.flash{outline:3px solid #e8c040;outline-offset:2px}
 @media(max-width:900px){.ingrid,.clwrap{grid-template-columns:minmax(0,1fr)}.side{position:static}.tabs,.tabw{position:static}}
 @media(max-width:640px){.ag,.procon{grid-template-columns:minmax(0,1fr)}.cla li{grid-template-columns:minmax(0,1fr);gap:6px}.ans{justify-self:start}.pp-item{grid-template-columns:minmax(0,1fr)}.mi svg{width:46px;height:46px}.in{padding:16px}}
 @media(prefers-reduced-motion:no-preference){#pop:not([hidden]){animation:rise .16s ease-out}@keyframes rise{from{opacity:0;transform:translateY(6px)}}}
@@ -170,6 +179,7 @@ mark.t.nw{background:var(--hl2);border-bottom:2px dashed var(--acc)}
 <main>
 <section id="v-phan-tich">
 <div class="band">
+<div id="offBanner" hidden></div>
 <div class="ingrid">
 <div class="card in">
 <div class="seg" role="group" aria-label="Cách đưa bài báo vào"><button data-m="link" aria-pressed="true">Link · PMID · DOI</button><button data-m="text" aria-pressed="false">Dán văn bản</button><button data-m="img" aria-pressed="false">Ảnh chụp · PDF</button></div>
@@ -180,7 +190,7 @@ mark.t.nw{background:var(--hl2);border-bottom:2px dashed var(--acc)}
 </div>
 <aside class="how">
 <h3>Cách dùng</h3>
-<ol><li><b>Phân tích</b>: Claude chấm bài theo bảng câu hỏi đúng thiết kế, nêu điểm mạnh, hạn chế, tính ARR/NNT và tìm thuật ngữ mới. Bài tự lưu vào Thư viện.</li><li><b>Chỉ highlight</b>: tô thuật ngữ có trong từ điển, không tốn lượt Claude (trừ khi đọc chữ từ ảnh).</li><li>Chạm vào chữ được tô để xem định nghĩa, ví dụ tim mạch và chỗ dễ nhầm.</li></ol>
+<ol><li><b>Phân tích</b>: Claude chấm bài theo bảng câu hỏi đúng thiết kế, nêu điểm mạnh, hạn chế, tính ARR/NNT và tìm thuật ngữ mới. Bài tự lưu vào Thư viện.</li><li><b>Chỉ highlight</b>: tô thuật ngữ có trong từ điển, không tốn lượt Claude (trừ khi đọc chữ từ ảnh).</li><li>Chạm vào chữ được tô để xem định nghĩa, ví dụ và chỗ dễ nhầm.</li><li>Gặp cụm từ lạ chưa được tô: bôi đen nó rồi bấm nút hiện ra, Claude soạn định nghĩa và tự thêm vào từ điển.</li></ol>
 <div class="legend"><mark class="t">thuật ngữ có trong từ điển</mark><mark class="t nw">thuật ngữ mới, chờ anh duyệt</mark></div>
 <p class="note">Từ điển hiện có <b id="termCount"></b> thuật ngữ gốc cùng các thuật ngữ anh duyệt thêm.</p>
 <p class="note" id="capNote"></p>
@@ -192,8 +202,9 @@ mark.t.nw{background:var(--hl2);border-bottom:2px dashed var(--acc)}
 
 <section id="v-tu-dien" hidden><div class="band">
 <h2 class="vh">Từ điển thuật ngữ</h2>
-<p class="vsub">Định nghĩa tiếng Việt, ví dụ tim mạch và chỗ hay hiểu sai. Số liệu ghi “ví dụ giả định” là minh hoạ; các số có tên thử nghiệm lấy từ bài gốc.</p>
-<div class="toolbar"><input type="search" id="gq" placeholder="Tìm: hazard ratio, ITT, độ nhạy…" aria-label="Tìm thuật ngữ"><span class="mini" id="gcount"></span></div>
+<p class="vsub">Mỗi mục có 4 phần: hiểu đơn giản, cách đọc hoặc cách tính, ví dụ có con số, chỗ dễ nhầm. Số liệu ghi “ví dụ giả định” là minh hoạ; số có tên thử nghiệm lấy từ bài gốc. Thuật ngữ chưa có: gõ vào ô tìm rồi nhấn Enter, Claude soạn và tự thêm vào từ điển.</p>
+<div class="toolbar"><input type="search" id="gq" enterkeyhint="search" placeholder="Tìm, hoặc gõ thuật ngữ mới rồi Enter" aria-label="Tìm thuật ngữ"><span class="mini" id="gcount"></span></div>
+<p id="gstat" role="status" aria-live="polite"></p><div id="gask"></div>
 <div class="chiprow" id="gchips"></div>
 <div id="glist"></div>
 </div></section>
@@ -218,147 +229,697 @@ mark.t.nw{background:var(--hl2);border-bottom:2px dashed var(--acc)}
 <div id="lib"></div>
 </div></section>
 </main>
+<button id="selBtn" class="pri sm" hidden></button>
 <div id="pop" role="dialog" aria-label="Định nghĩa thuật ngữ" hidden></div>
 <script>
 const CATS=[["tk","Thiết kế nghiên cứu"],["tn","Thử nghiệm lâm sàng"],["hq","Đo lường hiệu quả & thống kê"],["sl","Sai lệch & gây nhiễu"],["sc","Sống còn"],["cd","Chẩn đoán & tiên lượng"],["tq","Tổng quan & phân tích gộp"],["kc","Khuyến cáo & mức bằng chứng"],["kt","Kinh tế y tế"]];
-/* [nhóm, thuật ngữ, biến thể (|), tên Việt, định nghĩa, ví dụ, dễ nhầm] */
+/* [nhóm, thuật ngữ, biến thể (|), tên Việt, hiểu đơn giản, cách đọc/cách tính, ví dụ, dễ nhầm] */
 const TERMS=[
-["tk","Randomized controlled trial","RCT|randomised controlled trial|randomized trial|randomised trial|randomized controlled trials","Thử nghiệm ngẫu nhiên có đối chứng","Người tham gia được chia ngẫu nhiên vào nhóm can thiệp hoặc nhóm chứng rồi theo dõi kết cục. Ngẫu nhiên hoá cân bằng cả yếu tố nhiễu đã biết lẫn chưa biết, nên đây là thiết kế mạnh nhất để kết luận nhân quả.","DAPA-HF chia ngẫu nhiên 4744 BN suy tim EF ≤40% vào dapagliflozin hoặc placebo.","RCT vẫn sai lệch được nếu không che giấu phân bổ, mất dấu nhiều, hoặc dân số quá chọn lọc."],
-["tk","Cohort study","cohort|prospective cohort|retrospective cohort|cohort studies","Nghiên cứu đoàn hệ","Theo dõi một nhóm người theo thời gian, so tỷ lệ biến cố giữa người có và không có phơi nhiễm (thuốc, yếu tố nguy cơ). Có thể tiến cứu hoặc hồi cứu từ hồ sơ.","Theo dõi BN sau PCI có và không dùng statin liều cao, so tỷ lệ MACE sau 1 năm.","Không ngẫu nhiên nên luôn phải nghĩ tới gây nhiễu; kết luận là “có liên quan”, chưa phải nhân quả."],
-["tk","Case-control study","case control|case–control|case-control","Nghiên cứu bệnh–chứng","Bắt đầu từ kết cục: chọn nhóm có bệnh (ca) và nhóm không bệnh (chứng), rồi nhìn ngược lại xem tỷ lệ phơi nhiễm khác nhau ra sao. Hiệu quả với bệnh hiếm; đo bằng OR.","So tỷ lệ từng dùng NSAID ở BN nhồi máu cơ tim với người không nhồi máu cùng tuổi, giới.","Dễ dính recall bias và sai lệch khi chọn nhóm chứng; không tính được tỷ lệ mới mắc."],
-["tk","Cross-sectional study","cross sectional|cross-sectional","Nghiên cứu cắt ngang","Đo phơi nhiễm và kết cục ở cùng một thời điểm, như chụp một tấm ảnh quần thể. Dùng để ước tính tỷ lệ hiện mắc.","Tỷ lệ tăng huyết áp chưa kiểm soát ở BN khám ngoại trú trong một tháng.","Không biết cái nào có trước nên không suy luận nhân quả."],
-["tk","Registry","registries|registry-based","Sổ bộ (registry)","Cơ sở dữ liệu thu thập có hệ thống các BN cùng bệnh hoặc cùng thủ thuật, thường từ nhiều trung tâm, phản ánh thực hành đời thực.","Sổ bộ can thiệp mạch vành dùng để theo dõi tỷ lệ huyết khối stent.","Chất lượng phụ thuộc độ đầy đủ của dữ liệu; vẫn là nghiên cứu quan sát."],
-["tk","Case series","case report|case reports|case series","Báo cáo ca / loạt ca","Mô tả một hoặc vài BN có đặc điểm đáng chú ý, không có nhóm so sánh.","Loạt ca viêm cơ tim xuất hiện sau tiêm một loại vaccine.","Gợi ý giả thuyết, không chứng minh được hiệu quả hay nguyên nhân."],
-["tk","Prospective","prospectively","Tiến cứu","Dữ liệu được thu thập từ lúc bắt đầu nghiên cứu trở về sau, theo kế hoạch định trước.","","“Tiến cứu” không đồng nghĩa với “ngẫu nhiên”."],
-["tk","Retrospective","retrospectively","Hồi cứu","Dùng dữ liệu có sẵn (bệnh án, HIS) để trả lời câu hỏi đặt ra sau khi sự việc đã xảy ra.","Rà HIS 3 năm để so biến chứng mạch máu giữa đường quay và đường đùi.","Điểm yếu chính là dữ liệu thiếu và ghi chép không đồng nhất."],
-["tk","Pragmatic trial","pragmatic|explanatory trial","Thử nghiệm thực dụng","RCT tiến hành trong điều kiện gần thực hành thường quy (tiêu chuẩn chọn rộng, can thiệp linh hoạt) để trả lời “có hiệu quả ngoài đời không”. Đối lập với thử nghiệm giải thích (explanatory) trong điều kiện lý tưởng.","","Kết quả khái quát tốt hơn nhưng hiệu quả thường nhỏ hơn thử nghiệm lý tưởng."],
-["tk","Crossover trial","cross-over|crossover design|crossover","Thử nghiệm bắt chéo","Mỗi người lần lượt nhận cả hai can thiệp theo thứ tự ngẫu nhiên, có giai đoạn rửa thuốc (washout) ở giữa; mỗi người là chứng của chính mình.","So hai thuốc hạ áp trên cùng một BN, mỗi thuốc 4 tuần.","Chỉ hợp với bệnh mạn ổn định và thuốc hết tác dụng nhanh; không dùng cho kết cục tử vong."],
-["tk","Cluster randomized trial","cluster-randomized|cluster randomised|cluster-randomised|cluster trial","Thử nghiệm ngẫu nhiên theo cụm","Ngẫu nhiên hoá theo đơn vị (bệnh viện, khoa, xã) thay vì từng người.","Chia ngẫu nhiên 40 bệnh viện áp dụng hoặc không áp dụng quy trình tái tưới máu nhanh.","Phân tích phải tính đến tương quan trong cụm, nếu không CI sẽ hẹp giả tạo."],
-["tk","Factorial design","factorial","Thiết kế giai thừa","Thử hai can thiệp cùng lúc: BN được ngẫu nhiên hoá hai lần (A hay không A, B hay không B), tạo thành 4 nhóm.","Ví dụ giả định: thuốc A so với placebo, kèm mục tiêu huyết áp chặt so với chuẩn, trong cùng một thử nghiệm.","Giả định hai can thiệp không tương tác; nếu có tương tác thì khó diễn giải."],
-["tk","Non-inferiority trial","noninferiority|non-inferiority|non-inferiority margin|noninferior|non-inferior","Thử nghiệm không kém hơn","Chứng minh can thiệp mới không kém can thiệp chuẩn quá một ngưỡng định trước (non-inferiority margin), thường vì nó rẻ, an toàn hay tiện hơn. Kết luận dựa vào cận trên của CI so với ngưỡng.","Ví dụ giả định: DAPT 1 tháng so với 12 tháng, ngưỡng là chênh tuyệt đối 2% MACE.","Ngưỡng quá rộng làm “không kém hơn” vô nghĩa. ITT có thể làm hai nhóm giống nhau giả tạo, nên cần xem cả per-protocol."],
-["tk","Superiority trial","superiority","Thử nghiệm vượt trội","Mục tiêu chứng minh can thiệp tốt hơn đối chứng.","","“Không chứng minh được khác biệt” không có nghĩa là “chứng minh không khác biệt”."],
-["tk","Equivalence trial","equivalence","Thử nghiệm tương đương","Chứng minh hai can thiệp khác nhau không quá một ngưỡng định trước ở cả hai chiều.","So thuốc generic với thuốc gốc.",""],
-["tk","Trial phase","phase 3|phase III|phase 2|phase II|phase 4|phase IV","Pha thử nghiệm","Pha I: an toàn, liều, trên ít người. Pha II: tín hiệu hiệu quả, chọn liều. Pha III: RCT lớn trên kết cục lâm sàng để được cấp phép. Pha IV: theo dõi sau khi lưu hành.","DAPA-HF là thử nghiệm pha 3.","Kết quả pha II (thường dùng kết cục thay thế) hay bị pha III bác bỏ."],
-["tk","Target trial emulation","target trial|trial emulation","Mô phỏng thử nghiệm đích","Phân tích dữ liệu quan sát theo khung của một RCT tưởng tượng (tiêu chuẩn chọn, thời điểm 0, chiến lược điều trị) để tránh các sai lệch kinh điển như immortal time bias.","","Vẫn không xử lý được yếu tố nhiễu chưa đo."],
-["tk","Real-world evidence","RWE|real-world data|real world evidence|real-world","Bằng chứng đời thực","Bằng chứng từ dữ liệu ngoài thử nghiệm: hồ sơ điện tử, sổ bộ, dữ liệu bảo hiểm. Bổ sung cho RCT về dân số rộng và an toàn dài hạn.","","“Đời thực” không tự động đáng tin hơn; chất lượng phụ thuộc thiết kế phân tích."],
-["tn","Randomization","randomisation|randomized|randomised|randomly assigned|random assignment|randomly allocated|randomisation","Phân bổ ngẫu nhiên","Chia nhóm bằng cơ chế ngẫu nhiên (máy tính) để mỗi người có cùng xác suất vào mỗi nhóm, nhờ đó các yếu tố tiên lượng cân bằng giữa các nhóm.","","Chia theo ngày chẵn lẻ hay số hồ sơ là “giả ngẫu nhiên”, dễ bị thao túng."],
-["tn","Allocation concealment","concealed allocation|concealment of allocation|allocation was concealed","Che giấu phân bổ","Người tuyển BN không biết trước BN tiếp theo sẽ vào nhóm nào, thường nhờ hệ thống ngẫu nhiên trung tâm qua web hoặc điện thoại. Khác với làm mù.","Phân bổ qua hệ thống ngẫu nhiên tương tác trên web (IWRS).","Thiếu che giấu phân bổ làm phóng đại hiệu quả. Luôn làm được, kể cả khi không làm mù được."],
-["tn","Blinding","blinded|double-blind|double blind|single-blind|masked|masking|triple-blind","Làm mù","Giữ kín việc ai nhận can thiệp nào với BN, người điều trị, người đánh giá kết cục và/hoặc người phân tích.","ORBITA so PCI với thủ thuật giả (sham) để làm mù BN khi đánh giá đau thắt ngực.","“Mù đôi” không nói rõ ai bị làm mù; đọc Methods để biết."],
-["tn","Open-label","open label|unblinded","Nhãn mở","Không làm mù: BN và bác sĩ đều biết nhóm điều trị. Hay gặp khi so thủ thuật với thuốc.","So can thiệp mạch vành với điều trị nội khoa thường là nhãn mở.","Chấp nhận được nếu kết cục khách quan (tử vong) hoặc được thẩm định mù; đáng lo với kết cục chủ quan."],
-["tn","PROBE design","PROBE","Thiết kế PROBE","Prospective Randomized Open Blinded End-point: ngẫu nhiên, nhãn mở, nhưng kết cục do hội đồng đánh giá mù. Phổ biến trong thử nghiệm tim mạch.","","Làm mù người đánh giá không ngăn được việc bác sĩ quyết định nhập viện khác nhau giữa hai nhóm."],
-["tn","Stratified randomization","stratified|stratification|block randomization|permuted blocks|stratified randomisation","Ngẫu nhiên phân tầng / theo khối","Phân tầng: ngẫu nhiên riêng trong từng tầng (vd có/không đái tháo đường) để cân bằng yếu tố quan trọng. Theo khối: giữ số BN hai nhóm cân bằng sau mỗi khối.","Phân tầng theo đái tháo đường để hai nhóm có tỷ lệ ĐTĐ tương đương.",""],
-["tn","Intention-to-treat","ITT|intention to treat|intention-to-treat analysis|intent-to-treat|intent to treat","Phân tích theo ý định điều trị","Phân tích mọi BN theo nhóm được phân bổ ban đầu, bất kể có dùng thuốc, bỏ thuốc hay chuyển nhóm. Giữ nguyên lợi ích của ngẫu nhiên hoá.","BN nhóm nội khoa sau đó được PCI vẫn được tính vào nhóm nội khoa.","Là phân tích chính cho thử nghiệm vượt trội; thử nghiệm không kém hơn cần xem thêm per-protocol."],
-["tn","Per-protocol analysis","per-protocol|per protocol|as-treated|as treated","Phân tích theo đề cương","Chỉ phân tích BN tuân thủ đúng can thiệp được phân bổ (per-protocol), hoặc theo can thiệp thực nhận (as-treated).","","Phá vỡ ngẫu nhiên hoá nên dễ sai lệch; dùng để kiểm tra độ vững."],
-["tn","Modified intention-to-treat","mITT|modified ITT|modified intention to treat","ITT hiệu chỉnh","Biến thể của ITT, loại một số BN (vd chưa nhận liều nào).","","Đọc kỹ ai bị loại; nếu loại sau khi biết nhóm thì có thể sai lệch."],
-["tn","Placebo","placebo-controlled|sham|sham procedure|sham-controlled","Giả dược / thủ thuật giả","Chất không có hoạt tính hoặc thủ thuật giả, giúp làm mù và tách hiệu quả thật khỏi hiệu ứng mong đợi.","","So với placebo khác với so với thuốc chuẩn đang dùng (active comparator); hỏi đối chứng có phù hợp không."],
-["tn","Primary endpoint","primary outcome|primary end point|primary efficacy outcome|primary end-point|primary outcomes","Kết cục chính","Kết cục định trước, dùng để tính cỡ mẫu và trả lời câu hỏi chính. Kết luận của thử nghiệm dựa trên kết cục này.","DAPA-HF: gộp suy tim nặng lên hoặc tử vong tim mạch.","Nếu kết cục chính âm tính, các kết cục phụ “dương tính” chỉ là gợi ý."],
-["tn","Secondary endpoint","secondary outcome|secondary outcomes|secondary end point|secondary endpoints","Kết cục phụ","Kết cục định trước nhưng không dùng để tính cỡ mẫu; lực thống kê thường thấp hơn.","","Kiểm định nhiều kết cục phụ làm tăng nguy cơ dương tính giả."],
-["tn","Composite endpoint","composite outcome|composite","Kết cục gộp","Gộp nhiều biến cố (tử vong, nhồi máu, đột quỵ…) thành một kết cục để tăng số biến cố và giảm cỡ mẫu.","MACE là kết cục gộp kinh điển.","Xem lợi ích đến từ thành phần nào; nếu chủ yếu từ thành phần “mềm” (tái thông mạch) thì kém thuyết phục."],
-["tn","MACE","major adverse cardiovascular events|major adverse cardiac events|MACCE","Biến cố tim mạch nặng","Kết cục gộp hay dùng trong tim mạch, thường gồm tử vong tim mạch, nhồi máu cơ tim, đột quỵ; có nghiên cứu thêm tái thông mạch hoặc nhập viện.","","Định nghĩa MACE khác nhau giữa các bài; không so trực tiếp con số MACE giữa các thử nghiệm."],
-["tn","Hard endpoint","hard outcome|hard outcomes|soft endpoint|hard endpoints","Kết cục cứng","Kết cục khách quan, quan trọng với BN, ít bị đánh giá chủ quan: tử vong, nhồi máu, đột quỵ. Kết cục “mềm”: nhập viện, đau ngực, tái thông mạch do bác sĩ quyết định.","",""],
-["tn","Surrogate endpoint","surrogate outcome|surrogate marker|surrogate","Kết cục thay thế","Chỉ số trung gian (LDL-C, huyết áp, FFR, ngoại tâm thu) dùng thay cho kết cục lâm sàng thật.","CAST: encainide và flecainide giảm ngoại tâm thu thất sau nhồi máu nhưng lại làm tăng tử vong.","Cải thiện chỉ số không bảo đảm cải thiện sống còn."],
-["tn","Subgroup analysis","subgroup|subgroups|subgroup analyses","Phân tích phân nhóm","So hiệu quả điều trị trong các nhóm nhỏ (tuổi, giới, ĐTĐ…), thường trình bày bằng forest plot.","","Chỉ tin khi được định trước, số lượng ít, p tương tác thấp, hợp lý sinh học và lặp lại được. Phần lớn là ngẫu nhiên."],
-["tn","P for interaction","interaction p|P for heterogeneity|test for interaction|p-interaction|P interaction","Giá trị p tương tác","Kiểm định xem hiệu quả có thật sự khác giữa các phân nhóm không. Đọc phân nhóm bằng p tương tác, không so p riêng của từng nhóm.","Nam p=0,01, nữ p=0,20 nhưng p tương tác 0,6: không có bằng chứng hiệu quả khác theo giới.",""],
-["tn","Loss to follow-up","lost to follow-up|loss to follow up|dropout|drop-out|withdrew consent","Mất dấu","BN không còn được theo dõi đến hết nghiên cứu.","","Quy tắc thô: >20%, hoặc chênh giữa hai nhóm, là đáng lo. Nếu số mất dấu lớn hơn chênh lệch số biến cố thì kết luận có thể đảo ngược."],
-["tn","Interim analysis","interim analyses|stopped early|early stopping|early termination|DSMB|data monitoring committee|data and safety monitoring board","Phân tích giữa kỳ / dừng sớm","Hội đồng giám sát độc lập (DSMB) xem dữ liệu giữa chừng, có thể dừng thử nghiệm sớm vì lợi ích, nguy hại hoặc vô ích.","","Dừng sớm vì lợi ích, nhất là khi ít biến cố, thường phóng đại hiệu quả."],
-["tn","Sample size","sample size calculation|power calculation|statistical power|underpowered|adequately powered","Cỡ mẫu và lực thống kê","Cỡ mẫu tính trước dựa trên tỷ lệ biến cố dự kiến, hiệu quả kỳ vọng, alpha (thường 0,05) và lực (thường 80–90%). Lực là xác suất phát hiện được hiệu quả nếu nó thật sự tồn tại.","","Nghiên cứu thiếu lực mà “không có ý nghĩa” không chứng minh được là không có hiệu quả."],
-["tn","CONSORT","CONSORT diagram|CONSORT statement|CONSORT flow diagram","CONSORT","Hướng dẫn báo cáo RCT, kèm sơ đồ luồng BN từ sàng lọc, phân bổ, theo dõi đến phân tích.","","Sơ đồ CONSORT là chỗ nhanh nhất để kiểm tra mất dấu và chuyển nhóm."],
-["tn","Trial registration","ClinicalTrials.gov|NCT number|preregistration|pre-registration|prospectively registered","Đăng ký thử nghiệm","Đăng ký đề cương (kết cục chính, cỡ mẫu) trước khi tuyển BN, vd trên ClinicalTrials.gov (mã NCT).","","So kết cục chính trong bài với bản đăng ký để phát hiện đổi kết cục (outcome switching)."],
-["tn","Run-in period","run-in|run in period|lead-in period","Giai đoạn dẫn nhập","Giai đoạn trước ngẫu nhiên hoá cho BN dùng thử thuốc để loại người không tuân thủ hoặc không dung nạp.","","Làm hiệu quả và độ dung nạp trong bài tốt hơn ngoài đời."],
-["tn","Adjudication","adjudicated|clinical events committee|endpoint committee|event adjudication","Thẩm định biến cố","Hội đồng chuyên gia, thường được làm mù, xác định từng biến cố có đúng định nghĩa kết cục không.","",""],
-["hq","Absolute risk reduction","ARR|absolute risk difference|risk difference|absolute reduction|absolute difference","Giảm nguy cơ tuyệt đối","Hiệu số tỷ lệ biến cố giữa nhóm chứng và nhóm can thiệp: ARR = CER − EER.","DAPA-HF: 21,2% − 16,3% = 4,9% sau trung vị 18,2 tháng.","Luôn đi kèm thời gian theo dõi; ARR 5% sau 1 năm khác với 5% sau 5 năm."],
-["hq","Relative risk reduction","RRR","Giảm nguy cơ tương đối","Phần trăm nguy cơ giảm so với nhóm chứng: RRR = ARR / CER = 1 − RR.","DAPA-HF: 4,9 / 21,2 ≈ 23%.","RRR nghe ấn tượng hơn ARR. Cùng RRR 25% nhưng ARR rất khác ở BN nguy cơ thấp và nguy cơ cao."],
-["hq","Relative risk","risk ratio|RR|risk ratios|relative risks","Nguy cơ tương đối","Tỷ số tỷ lệ biến cố nhóm can thiệp so với nhóm chứng: RR = EER / CER. RR < 1: giảm nguy cơ; RR = 1: không khác.","16,3 / 21,2 ≈ 0,77.",""],
-["hq","Number needed to treat","NNT","Số cần điều trị","Số BN cần điều trị trong khoảng thời gian nghiên cứu để tránh được 1 biến cố: NNT = 1 / ARR.","DAPA-HF: 1 / 0,049 ≈ 21 BN trong khoảng 18 tháng để tránh 1 biến cố kết cục chính.","NNT vô nghĩa nếu không nêu thời gian và kết cục; luôn làm tròn lên."],
-["hq","Number needed to harm","NNH","Số cần để gây hại","Số BN cần điều trị để xảy ra thêm 1 biến cố có hại: NNH = 1 / hiệu số tỷ lệ tác dụng phụ.","Ví dụ giả định: chảy máu nặng 3% so với 2% → NNH = 100.","Đặt NNT cạnh NNH để cân lợi – hại."],
-["hq","Odds ratio","OR|odds ratios|adjusted odds ratio","Tỷ số chênh","Tỷ số giữa odds (xác suất có / xác suất không) của hai nhóm. Dùng trong nghiên cứu bệnh–chứng và hồi quy logistic.","","Khi biến cố phổ biến (>10%), OR phóng đại so với RR; đừng đọc OR như RR."],
-["hq","Hazard ratio","HR|hazard ratios|adjusted hazard ratio","Tỷ số nguy cơ tức thời","Tỷ số tốc độ xảy ra biến cố tại mỗi thời điểm giữa hai nhóm, ước lượng từ mô hình Cox; có tính đến thời gian xảy ra biến cố.","DAPA-HF: HR 0,74 (95% CI 0,65–0,85): tốc độ biến cố ở nhóm dapagliflozin thấp hơn khoảng 26%.","HR giả định tỷ lệ nguy cơ không đổi theo thời gian; hai đường KM bắt chéo là dấu hiệu vi phạm."],
-["hq","Confidence interval","CI|95% CI|confidence intervals|95% confidence interval","Khoảng tin cậy","Khoảng giá trị hợp lý của hiệu quả thật. 95% CI: nếu lặp lại nghiên cứu nhiều lần, 95% số khoảng tính được sẽ chứa giá trị thật.","HR 0,74 (0,65–0,85): khoảng không chứa 1 nên có ý nghĩa thống kê; cận gần 1 nhất (0,85) vẫn là lợi ích đáng kể.","Với tỷ số (HR, RR, OR) mốc là 1; với hiệu số (ARR, MD) mốc là 0. CI rộng nghĩa là ước lượng kém chính xác."],
-["hq","P value","p-value|p value|P-value|P values|p-values","Giá trị p","Xác suất thấy kết quả ít nhất cực đoan như vậy nếu thật sự không có khác biệt (giả thuyết H0 đúng).","P<0,001 trong DAPA-HF: rất khó có kết quả như vậy nếu thuốc không có tác dụng.","p không cho biết độ lớn hiệu quả hay xác suất giả thuyết đúng; p=0,06 không phải “gần có ý nghĩa”."],
-["hq","Statistical significance","statistically significant|clinically significant|clinical significance|clinically meaningful|clinically relevant","Ý nghĩa thống kê và ý nghĩa lâm sàng","Có ý nghĩa thống kê: khó xảy ra do ngẫu nhiên. Có ý nghĩa lâm sàng: hiệu quả đủ lớn để thay đổi quyết định cho BN.","Ví dụ giả định: hạ HA tâm thu 1 mmHg với p<0,001 ở 50.000 người có ý nghĩa thống kê nhưng ít ý nghĩa lâm sàng.",""],
-["hq","Type I error","type 1 error|false-positive finding","Sai lầm loại I","Kết luận có khác biệt trong khi thật ra không có (dương tính giả). Mức chấp nhận là alpha, thường 5%.","","Càng nhiều kiểm định, sai lầm loại I càng cộng dồn."],
-["hq","Type II error","type 2 error|beta error","Sai lầm loại II","Kết luận không có khác biệt trong khi thật ra có (âm tính giả), thường do thiếu cỡ mẫu. Lực = 1 − beta.","",""],
-["hq","Multiple comparisons","multiplicity|multiple testing|Bonferroni|hierarchical testing|hierarchical testing procedure","Đa so sánh","Kiểm định càng nhiều giả thuyết, càng dễ có ít nhất một kết quả “có ý nghĩa” do ngẫu nhiên. Cách kiểm soát: hiệu chỉnh Bonferroni, kiểm định theo thứ bậc định trước.","Với 20 kiểm định độc lập ở alpha 0,05, kỳ vọng khoảng 1 kết quả dương tính giả.","Kết cục phụ chỉ được kiểm định chính thức khi các bước trước trong thứ bậc dương tính."],
-["hq","Standard deviation","SD|standard deviations|standard error|SE","Độ lệch chuẩn","Mức phân tán của dữ liệu quanh trung bình. Nếu phân phối chuẩn, trung bình ± 2 SD chứa khoảng 95% giá trị. Sai số chuẩn (SE) đo độ chính xác của chính giá trị trung bình.","Tuổi 66 ± 11 năm.","Đừng nhầm SD với SE: SE luôn nhỏ hơn và không mô tả độ phân tán của BN."],
-["hq","Interquartile range","IQR|interquartile ranges","Khoảng tứ phân vị","Khoảng từ bách phân vị 25 đến 75, chứa 50% giá trị ở giữa; đi kèm trung vị khi dữ liệu lệch.","Ví dụ giả định: NT-proBNP trung vị 1400 (IQR 850–2600) pg/mL.",""],
-["hq","Median","medians","Trung vị","Giá trị đứng giữa khi xếp dữ liệu theo thứ tự; ít bị ảnh hưởng bởi giá trị cực đoan.","Thời gian theo dõi trung vị 18,2 tháng (DAPA-HF).",""],
-["hq","Mean difference","MD|standardized mean difference|SMD|mean differences","Hiệu trung bình","Chênh lệch giá trị trung bình giữa hai nhóm với biến liên tục. SMD chuẩn hoá theo SD để gộp các thang đo khác nhau.","Ví dụ giả định: LVEF tăng thêm 3,5% (95% CI 1,2–5,8) so với nhóm chứng.",""],
-["hq","Multivariable regression","multivariable|multivariate|logistic regression|linear regression|adjusted analysis|regression model|multivariable analysis","Hồi quy đa biến","Mô hình ước lượng liên quan giữa phơi nhiễm và kết cục, đồng thời hiệu chỉnh cho các biến khác (tuổi, giới, bệnh kèm). Logistic cho kết cục nhị phân, tuyến tính cho biến liên tục, Cox cho thời gian đến biến cố.","","Chỉ hiệu chỉnh được biến đã đo; số biến đưa vào bị giới hạn bởi số biến cố."],
-["hq","Missing data","multiple imputation|imputation|missing values|imputed","Dữ liệu thiếu","Dữ liệu không thu được. Cách xử lý: phân tích ca đầy đủ, điền khuyết đa trị (multiple imputation), phân tích độ nhạy.","","Thiếu không ngẫu nhiên (người bệnh nặng bỏ khám) gây sai lệch."],
-["hq","Win ratio","win ratio|hierarchical composite|win ratios","Tỷ số thắng","So từng cặp BN (can thiệp – chứng) theo thứ bậc kết cục ưu tiên (tử vong trước, rồi nhập viện…); win ratio = số cặp thắng / số cặp thua.","Ngày càng dùng trong thử nghiệm suy tim và bệnh cơ tim.","Phụ thuộc thứ tự ưu tiên tác giả chọn; không cho ra ARR hay NNT."],
-["hq","Restricted mean survival time","RMST","Thời gian sống trung bình giới hạn","Diện tích dưới đường Kaplan–Meier đến một mốc thời gian, tức thời gian sống không biến cố trung bình trong khoảng đó. Không cần giả định nguy cơ tỷ lệ.","Ví dụ giả định: nhóm can thiệp sống không biến cố thêm trung bình 1,2 tháng trong 3 năm.",""],
-["hq","Fragility index","fragility","Chỉ số mong manh","Số BN tối thiểu ở nhóm can thiệp phải đổi từ “không biến cố” thành “có biến cố” để kết quả mất ý nghĩa thống kê.","","Chỉ số nhỏ (vd nhỏ hơn số BN mất dấu) cho thấy kết luận dễ đảo ngược."],
-["hq","Incidence","incidence rate|event rate|event rates|cumulative incidence|incidence rates","Tỷ suất mới mắc","Số ca mới trong một khoảng thời gian chia cho số người có nguy cơ (hoặc số người-năm).","",""],
-["hq","Prevalence","prevalent","Tỷ lệ hiện mắc","Tỷ lệ người đang có bệnh tại một thời điểm. Ảnh hưởng trực tiếp đến giá trị tiên đoán của xét nghiệm.","",""],
-["hq","Person-years","patient-years|person years|patient years|person-time|per 100 patient-years","Người-năm","Tổng thời gian theo dõi của tất cả người tham gia; tỷ suất tính “trên 100 người-năm” để so được khi thời gian theo dõi khác nhau.","",""],
-["sl","Selection bias","selection biases","Sai lệch chọn","Cách chọn hoặc giữ người tham gia làm các nhóm khác nhau một cách hệ thống, hoặc làm mẫu không đại diện cho quần thể đích.","Chỉ phân tích BN sống sót đến lúc xuất viện.",""],
-["sl","Information bias","measurement bias|misclassification|detection bias|ascertainment bias","Sai lệch thông tin / đo lường","Đo phơi nhiễm hoặc kết cục sai, hoặc đo khác nhau giữa các nhóm. Detection bias: một nhóm được theo dõi kỹ hơn nên phát hiện nhiều biến cố hơn.","Nhóm dùng thuốc mới được tái khám dày hơn nên ghi nhận thêm rung nhĩ.",""],
-["sl","Recall bias","recall","Sai lệch nhớ lại","Người có bệnh nhớ và kể về phơi nhiễm trong quá khứ khác với người không bệnh. Đặc trưng của nghiên cứu bệnh–chứng.","",""],
-["sl","Performance bias","performance biases","Sai lệch thực hiện","Hai nhóm được chăm sóc khác nhau ngoài can thiệp đang nghiên cứu (vd được tối ưu thuốc nhiều hơn), thường do không làm mù.","",""],
-["sl","Attrition bias","attrition","Sai lệch do mất dấu","Người rời nghiên cứu khác biệt có hệ thống giữa các nhóm, làm lệch kết quả.","",""],
-["sl","Confounding","confounder|confounders|confounding factor|confounding factors|confounded","Yếu tố gây nhiễu","Yếu tố liên quan tới cả phơi nhiễm lẫn kết cục, tạo ra (hoặc che giấu) một mối liên quan giả.","Người uống nhiều cà phê hút thuốc nhiều hơn; liên quan cà phê – nhồi máu có thể là do thuốc lá.","Ngẫu nhiên hoá là cách duy nhất cân bằng cả yếu tố nhiễu chưa đo."],
-["sl","Confounding by indication","indication bias","Gây nhiễu theo chỉ định","BN được chỉ định điều trị vì họ nặng hơn (hoặc nhẹ hơn), nên kết cục khác nhau là do bệnh chứ không do thuốc.","Ví dụ giả định: BN dùng lợi tiểu liều cao tử vong nhiều hơn vì họ suy tim nặng hơn, không phải do thuốc.","Kiểu nhiễu nguy hiểm nhất trong nghiên cứu quan sát về điều trị."],
-["sl","Residual confounding","unmeasured confounding|unmeasured confounders|residual confounders","Nhiễu tồn dư","Nhiễu còn lại sau hiệu chỉnh, do biến chưa đo hoặc đo không chính xác.","",""],
-["sl","Healthy user bias","healthy adherer|healthy user effect|healthy adherer effect","Sai lệch người khỏe / người tuân thủ","Người tự giác dùng thuốc phòng ngừa thường có lối sống lành mạnh hơn, nên thuốc trông như có lợi.","Nghiên cứu quan sát gợi ý liệu pháp hormone thay thế bảo vệ tim; thử nghiệm WHI không xác nhận lợi ích tim mạch.",""],
-["sl","Reverse causation","reverse causality","Nhân quả ngược","Kết cục (hoặc bệnh ở giai đoạn sớm) gây ra phơi nhiễm, chứ không phải ngược lại.","Cholesterol thấp liên quan tử vong cao ở suy tim nặng, vì suy kiệt làm cholesterol giảm.",""],
-["sl","Immortal time bias","immortal time","Sai lệch thời gian bất tử","Một khoảng theo dõi mà nhóm “điều trị” theo định nghĩa không thể có biến cố (vì phải sống đến lúc nhận thuốc), làm thuốc trông có lợi giả tạo.","Ví dụ giả định: xếp BN vào nhóm “dùng statin” nếu có mua thuốc trong 6 tháng sau xuất viện; người chết sớm chưa kịp mua bị xếp vào nhóm không dùng.","Kiểm tra thời điểm 0 có giống nhau giữa hai nhóm không."],
-["sl","Lead-time bias","lead time bias|lead time","Sai lệch thời gian dẫn","Tầm soát phát hiện bệnh sớm hơn làm thời gian sống tính từ lúc chẩn đoán dài ra, dù thời điểm tử vong không đổi.","",""],
-["sl","Publication bias","small-study effect|small-study effects|funnel plot|funnel plots","Sai lệch xuất bản","Nghiên cứu dương tính dễ được đăng hơn nghiên cứu âm tính, làm tổng quan phóng đại hiệu quả. Phát hiện bằng biểu đồ phễu (funnel plot) bất đối xứng.","","Biểu đồ phễu khó đọc khi có dưới khoảng 10 nghiên cứu."],
-["sl","Spin","reporting bias|selective reporting|outcome switching|selective outcome reporting","Diễn giải lệch / báo cáo chọn lọc","Cách viết làm kết quả trông tốt hơn thực tế: nhấn mạnh kết cục phụ hay phân nhóm khi kết cục chính âm tính, đổi kết cục so với đăng ký.","","Đọc kết cục chính trong Results trước, rồi mới đọc Abstract và Conclusion."],
-["sl","Propensity score","propensity score matching|propensity-score|propensity scores|PSM|inverse probability weighting|IPTW|IPW|propensity-matched","Điểm xu hướng","Xác suất một BN nhận điều trị dựa trên đặc điểm đã đo; dùng để ghép cặp, phân tầng hoặc gán trọng số, giúp hai nhóm quan sát giống nhau hơn.","","Chỉ cân bằng biến đã đo, không thay thế được ngẫu nhiên hoá."],
-["sl","Regression to the mean","regression toward the mean","Hồi quy về trung bình","Giá trị đo bất thường lần đầu có xu hướng tự gần trung bình hơn ở lần đo sau, dễ bị tưởng là hiệu quả điều trị.","BN được chọn vì HA rất cao ở lần khám đầu thường có HA thấp hơn ở lần sau dù chưa can thiệp.","Đây là lý do cần nhóm chứng."],
-["sl","Risk of bias","RoB|RoB 2|ROBINS-I|risk-of-bias|Newcastle-Ottawa|Newcastle–Ottawa","Nguy cơ sai lệch","Đánh giá có hệ thống khả năng kết quả bị sai lệch. Công cụ: RoB 2 cho RCT, ROBINS-I cho nghiên cứu can thiệp không ngẫu nhiên, Newcastle–Ottawa cho đoàn hệ và bệnh–chứng.","",""],
-["sc","Kaplan–Meier curve","Kaplan-Meier|Kaplan Meier|KM curve|KM curves|Kaplan–Meier|cumulative incidence curve","Đường cong Kaplan–Meier","Đồ thị tỷ lệ không biến cố (hoặc tỷ lệ biến cố cộng dồn) theo thời gian, có tính BN bị kiểm duyệt. Bảng “number at risk” bên dưới cho biết còn bao nhiêu BN.","","Phần đuôi đường cong ít BN nên kém tin cậy. Hai đường bắt chéo gợi ý vi phạm giả định nguy cơ tỷ lệ."],
-["sc","Cox proportional hazards model","Cox model|Cox regression|proportional hazards|Cox proportional-hazards|proportional-hazards","Mô hình Cox","Mô hình hồi quy cho dữ liệu thời gian đến biến cố, cho ra HR và hiệu chỉnh được nhiều biến.","","Giả định HR không đổi theo thời gian."],
-["sc","Censoring","censored","Kiểm duyệt (dữ liệu bị cắt)","BN chưa có biến cố khi hết theo dõi hoặc khi mất dấu được “kiểm duyệt”: chỉ biết họ không có biến cố đến thời điểm đó.","","Giả định việc kiểm duyệt không liên quan kết cục; bị vi phạm khi người bệnh nặng bỏ theo dõi."],
-["sc","Competing risk","competing risks|Fine-Gray|Fine and Gray|subdistribution hazard","Nguy cơ cạnh tranh","Một biến cố khác (vd tử vong không do tim) ngăn biến cố quan tâm xảy ra. Khi nguy cơ cạnh tranh lớn, Kaplan–Meier thông thường ước lượng quá cao nguy cơ.","BN rất cao tuổi: tử vong do mọi nguyên nhân cạnh tranh với tái nhập viện vì suy tim.",""],
-["sc","Log-rank test","log rank|log-rank","Kiểm định log-rank","So sánh hai đường Kaplan–Meier trên toàn bộ thời gian theo dõi.","",""],
-["sc","Time-to-event","time to first event|time-to-first-event|time to event|time-to-event analysis","Thời gian đến biến cố","Kết cục tính cả việc có biến cố hay không lẫn thời điểm xảy ra.","","Phân tích “biến cố đầu tiên” bỏ qua biến cố tái phát (vd nhập viện suy tim lần 2)."],
-["sc","Landmark analysis","landmark","Phân tích mốc","Chỉ phân tích BN còn sống, không biến cố tại một mốc thời gian, rồi theo dõi tiếp từ mốc đó; dùng để tách hiệu quả sớm và muộn.","Ví dụ giả định: so huyết khối stent trong 30 ngày đầu và sau 30 ngày.",""],
-["cd","Sensitivity","sensitivities","Độ nhạy","Tỷ lệ người có bệnh mà xét nghiệm dương tính. Độ nhạy cao, nếu âm tính thì giúp loại trừ bệnh (SnNout).","Troponin độ nhạy cao âm tính ở 0 và 1 giờ giúp loại trừ nhồi máu cơ tim.","Đừng nhầm với sensitivity analysis (phân tích độ nhạy)."],
-["cd","Specificity","specificities","Độ đặc hiệu","Tỷ lệ người không bệnh mà xét nghiệm âm tính. Độ đặc hiệu cao, nếu dương tính thì giúp khẳng định bệnh (SpPin).","",""],
-["cd","Positive predictive value","PPV","Giá trị tiên đoán dương","Xác suất thật sự có bệnh khi xét nghiệm dương tính. Phụ thuộc mạnh vào tỷ lệ hiện mắc.","Cùng một nghiệm pháp gắng sức: PPV cao ở BN đau ngực điển hình, thấp ở phụ nữ trẻ không triệu chứng.","Không mang PPV từ quần thể này sang quần thể khác."],
-["cd","Negative predictive value","NPV","Giá trị tiên đoán âm","Xác suất thật sự không bệnh khi xét nghiệm âm tính.","",""],
-["cd","Likelihood ratio","LR+|LR−|positive likelihood ratio|negative likelihood ratio|likelihood ratios","Tỷ số khả dĩ","LR+ = độ nhạy / (1 − độ đặc hiệu); LR− = (1 − độ nhạy) / độ đặc hiệu. Cho biết xét nghiệm làm thay đổi xác suất bệnh bao nhiêu, không phụ thuộc tỷ lệ hiện mắc.","LR+ > 10 hoặc LR− < 0,1 làm thay đổi lớn xác suất sau xét nghiệm.",""],
-["cd","Pretest probability","pre-test probability|post-test probability|posttest probability|pretest","Xác suất trước / sau xét nghiệm","Xác suất có bệnh trước khi làm xét nghiệm (từ lâm sàng, dịch tễ); kết hợp với LR cho ra xác suất sau xét nghiệm.","Mô hình xác suất bệnh mạch vành trước test dựa trên tuổi, giới, kiểu đau ngực.",""],
-["cd","ROC curve","receiver operating characteristic|ROC|ROC curves","Đường cong ROC","Đồ thị độ nhạy theo (1 − độ đặc hiệu) ở mọi ngưỡng cắt của một xét nghiệm hay thang điểm.","",""],
-["cd","AUC (C-statistic)","AUC|C-statistic|c statistic|C-index|area under the curve|AUROC|c-statistic","Diện tích dưới đường cong","Đo khả năng phân biệt: xác suất mô hình xếp người có biến cố nguy cơ cao hơn người không biến cố. 0,5 như tung đồng xu, 1,0 hoàn hảo; >0,7 chấp nhận được, >0,8 tốt.","","AUC cao không có nghĩa mô hình dự báo đúng mức nguy cơ; cần xem thêm calibration."],
-["cd","Reference standard","gold standard|reference test","Tiêu chuẩn tham chiếu","Phương pháp tốt nhất hiện có để xác định có bệnh hay không, dùng để đánh giá xét nghiệm mới.","Chụp mạch vành xâm lấn (± FFR) làm tham chiếu cho CT mạch vành.",""],
-["cd","Verification bias","partial verification|workup bias|work-up bias","Sai lệch kiểm chứng","Chỉ người có xét nghiệm dương tính mới được làm tiêu chuẩn tham chiếu, làm độ nhạy cao giả tạo.","Chỉ BN có nghiệm pháp gắng sức dương tính mới được chụp mạch vành.",""],
-["cd","Spectrum bias","spectrum effect","Sai lệch phổ bệnh","Đánh giá xét nghiệm trên BN bệnh quá rõ và người quá khỏe làm độ nhạy, độ đặc hiệu cao hơn thực tế.","","Hỏi: BN trong nghiên cứu có giống BN mình hay gặp không?"],
-["cd","Calibration","calibration plot|calibrated|calibration slope|Hosmer-Lemeshow|Hosmer–Lemeshow","Hiệu chuẩn","Mức độ khớp giữa nguy cơ mô hình dự báo và tỷ lệ biến cố thực tế.","Mô hình dự báo 10% nhưng thực tế 20% là hiệu chuẩn kém.","Mô hình phát triển ở nước khác thường hiệu chuẩn kém ở BN Việt Nam."],
-["cd","Discrimination","discriminative ability|discriminatory ability|discrimination","Khả năng phân biệt","Khả năng tách người sẽ có biến cố với người không; đo bằng AUC/C-statistic.","",""],
-["cd","External validation","internal validation|derivation cohort|validation cohort|externally validated|derivation","Kiểm định ngoài","Thử mô hình trên dữ liệu độc lập (bệnh viện, quốc gia, thời kỳ khác) với dữ liệu tạo ra nó. Kiểm định trong dùng bootstrap hoặc chia mẫu.","Thang điểm GRACE đã được kiểm định ngoài ở nhiều quần thể hội chứng vành cấp.","Mô hình chỉ có kiểm định trong thường kém hơn khi áp dụng thực tế."],
-["cd","Overfitting","overfit|overfitted|events per variable|EPV","Quá khớp","Mô hình bám quá sát dữ liệu phát triển (nhiều biến, ít biến cố) nên dự báo kém ở dữ liệu mới.","","Quy tắc thô: dưới 10–20 biến cố cho mỗi biến dự báo là nguy cơ quá khớp."],
-["cd","Net reclassification improvement","NRI|net reclassification index|reclassification","Cải thiện phân loại lại","Tỷ lệ BN được xếp lại đúng nhóm nguy cơ hơn khi thêm một dấu ấn mới vào mô hình.","","Phụ thuộc ngưỡng phân nhóm; nên đọc cùng AUC và calibration."],
-["cd","Risk score","risk prediction model|prediction model|clinical prediction rule|risk model|risk scores|prediction models","Thang điểm nguy cơ / mô hình dự báo","Công cụ kết hợp nhiều yếu tố để ước tính xác suất biến cố cho từng BN.","GRACE, CHA₂DS₂-VASc, HAS-BLED.",""],
-["tq","Systematic review","systematic reviews|systematic literature review","Tổng quan hệ thống","Tổng hợp mọi nghiên cứu trả lời một câu hỏi rõ ràng theo đề cương định trước: tìm kiếm toàn diện, chọn lọc và đánh giá có hệ thống.","","Khác tổng quan tường thuật (narrative review), loại chọn bài theo ý tác giả."],
-["tq","Meta-analysis","meta-analyses|meta analysis|meta-analytic","Phân tích gộp","Kỹ thuật thống kê gộp kết quả nhiều nghiên cứu thành một ước lượng chung chính xác hơn.","","Gộp nhiều nghiên cứu sai lệch cho ra một kết quả chính xác nhưng sai."],
-["tq","Forest plot","forest plots","Biểu đồ rừng","Mỗi dòng là một nghiên cứu (ô vuông là ước lượng, kích thước là trọng số, đường ngang là CI); hình thoi cuối là ước lượng gộp. Đường dọc là mốc không khác biệt.","","Cũng dùng để trình bày phân tích phân nhóm của một RCT."],
-["tq","Heterogeneity","I2|I²|I-squared|Cochran Q|Cochran's Q|heterogeneous|statistical heterogeneity","Tính không đồng nhất","Mức độ kết quả các nghiên cứu khác nhau nhiều hơn mức do ngẫu nhiên. I² theo gợi ý của Cochrane: 0–40% có thể không quan trọng, 30–60% trung bình, 50–90% đáng kể, 75–100% rất lớn.","","I² cao: tìm lý do (dân số, liều, định nghĩa kết cục khác nhau) trước khi tin ước lượng gộp."],
-["tq","Random-effects model","random-effects|random effects|fixed-effect|fixed effect|fixed-effects|random-effects model","Mô hình ảnh hưởng ngẫu nhiên / cố định","Fixed-effect giả định mọi nghiên cứu ước lượng cùng một hiệu quả thật; random-effects cho phép hiệu quả thật thay đổi giữa các nghiên cứu, CI thường rộng hơn.","","Random-effects cho nghiên cứu nhỏ trọng số tương đối lớn hơn, nên nhạy với small-study effects."],
-["tq","Network meta-analysis","NMA|network meta-analyses|indirect comparison|indirect comparisons","Phân tích gộp mạng lưới","So nhiều can thiệp cùng lúc, kết hợp so sánh trực tiếp và gián tiếp (A vs C và B vs C để suy ra A vs B).","So các thuốc chống đông đường uống mới với nhau qua warfarin làm cầu nối.","Cần giả định tính bắc cầu (transitivity): các thử nghiệm đủ giống nhau về dân số."],
-["tq","PRISMA","PRISMA flow diagram|PRISMA 2020","PRISMA","Hướng dẫn báo cáo tổng quan hệ thống và phân tích gộp, kèm sơ đồ chọn bài.","",""],
-["tq","PROSPERO","PROSPERO registration","Đăng ký đề cương tổng quan","Cơ sở dữ liệu quốc tế để đăng ký đề cương tổng quan hệ thống trước khi thực hiện.","",""],
-["tq","Sensitivity analysis","sensitivity analyses","Phân tích độ nhạy","Lặp lại phân tích với giả định khác (bỏ nghiên cứu nguy cơ sai lệch cao, cách xử lý dữ liệu thiếu khác) để xem kết luận có vững không.","","Khác hoàn toàn với độ nhạy (sensitivity) của xét nghiệm."],
-["tq","Individual patient data","IPD|individual participant data|patient-level data|individual-patient data","Dữ liệu từng bệnh nhân","Phân tích gộp dùng dữ liệu gốc của từng BN thay vì số liệu tổng hợp đã công bố; mạnh hơn, nhất là khi phân tích phân nhóm.","",""],
-["tq","AMSTAR 2","AMSTAR|AMSTAR-2","AMSTAR 2","Công cụ đánh giá chất lượng tổng quan hệ thống, gồm 16 mục, trong đó có các mục then chốt.","",""],
-["kc","GRADE","certainty of evidence|quality of evidence|GRADE approach|certainty of the evidence","GRADE","Hệ thống xếp độ tin cậy bằng chứng: cao, trung bình, thấp, rất thấp. RCT bắt đầu ở mức cao, quan sát ở mức thấp; hạ bậc vì nguy cơ sai lệch, không nhất quán, gián tiếp, không chính xác, sai lệch xuất bản; nâng bậc khi hiệu quả rất lớn hoặc có quan hệ liều – đáp ứng.","","GRADE tách độ tin cậy bằng chứng khỏi độ mạnh khuyến cáo (mạnh / có điều kiện)."],
-["kc","Class of recommendation","COR|class IIa|class IIb|class I recommendation|class III recommendation","Mức khuyến cáo","ESC: I (được khuyến cáo), IIa (nên cân nhắc), IIb (có thể cân nhắc), III (không khuyến cáo). ACC/AHA: 1, 2a, 2b, 3 (không lợi ích hoặc có hại).","","Mức khuyến cáo cao không có nghĩa bằng chứng mạnh; luôn đọc kèm mức bằng chứng."],
-["kc","Level of evidence","LOE|level of evidence A|levels of evidence|level of evidence B|level of evidence C","Mức bằng chứng","ESC: A (nhiều RCT hoặc phân tích gộp), B (một RCT hoặc nghiên cứu không ngẫu nhiên lớn), C (ý kiến chuyên gia, nghiên cứu nhỏ, hồi cứu, sổ bộ). ACC/AHA chia thêm B-R, B-NR, C-LD, C-EO.","","Phần lớn khuyến cáo tim mạch ở mức B hoặc C."],
-["kc","Evidence hierarchy","evidence pyramid|hierarchy of evidence","Tháp bằng chứng","Xếp thiết kế theo độ tin cậy: tổng quan hệ thống các RCT → RCT → đoàn hệ → bệnh–chứng → loạt ca → ý kiến chuyên gia.","","Một RCT kém chất lượng có thể kém tin cậy hơn một nghiên cứu đoàn hệ thiết kế tốt."],
-["kc","PICO","PICOT|PICOS","Khung PICO","Patient/Population – Intervention – Comparison – Outcome (thêm T: thời gian). Dùng để đặt câu hỏi và kiểm tra bài báo có trả lời đúng câu hỏi của mình không.","P: BN NSTEMI trên 75 tuổi; I: chiến lược xâm lấn sớm; C: bảo tồn; O: tử vong, nhồi máu sau 1 năm.",""],
-["kc","Internal validity","internally valid","Giá trị nội tại","Mức độ kết quả phản ánh đúng sự thật trong chính quần thể nghiên cứu, không bị sai lệch hay nhiễu.","",""],
-["kc","External validity","generalizability|generalisability|applicability|generalizable","Tính khái quát hoá","Mức độ kết quả áp dụng được cho BN ngoài nghiên cứu, tức BN của mình.","Thử nghiệm loại BN suy thận nặng thì khó áp dụng cho BN lọc máu.",""],
-["kc","Conflict of interest","conflicts of interest|competing interests|COI|funded by|disclosures","Xung đột lợi ích","Quan hệ tài chính hay nghề nghiệp có thể ảnh hưởng đến thiết kế, phân tích hoặc diễn giải.","","Tài trợ của hãng không làm bài sai, nhưng nên đọc kỹ cách chọn đối chứng, kết cục và cách viết kết luận."],
-["kt","Cost-effectiveness analysis","cost-effectiveness|cost effectiveness|CEA|cost-utility analysis|cost-utility","Phân tích chi phí – hiệu quả","So chi phí và hiệu quả sức khỏe của hai hay nhiều lựa chọn; phân tích chi phí – thỏa dụng (cost-utility) đo hiệu quả bằng QALY.","","Kết quả phụ thuộc giá thuốc và quốc gia; khó chuyển nguyên từ nước giàu sang Việt Nam."],
-["kt","QALY","quality-adjusted life year|quality-adjusted life years|QALYs","Năm sống điều chỉnh theo chất lượng","Số năm sống nhân với hệ số chất lượng cuộc sống (0 = tử vong, 1 = hoàn toàn khỏe mạnh).","2 năm sống ở chất lượng 0,5 = 1 QALY.",""],
-["kt","ICER","incremental cost-effectiveness ratio|ICERs","Tỷ số chi phí – hiệu quả gia tăng","Chi phí thêm cho mỗi đơn vị hiệu quả thêm: ICER = (chi phí A − chi phí B) / (QALY A − QALY B).","Ví dụ giả định: thêm 300 triệu đồng và 0,5 QALY → ICER 600 triệu đồng/QALY.","So với ngưỡng sẵn sàng chi trả của từng quốc gia."],
-["kt","Willingness-to-pay threshold","WTP|willingness to pay|willingness-to-pay|cost-effectiveness threshold","Ngưỡng sẵn sàng chi trả","Mức chi tối đa xã hội chấp nhận cho 1 QALY; can thiệp có ICER dưới ngưỡng được coi là đáng tiền.","","Ngưỡng khác nhau giữa các nước; cách lấy bội số GDP bình quân đầu người còn đang bị tranh luận."],
-["kt","Discounting","discount rate|discounted","Chiết khấu","Quy đổi chi phí và lợi ích trong tương lai về giá trị hiện tại, thường 3–5% mỗi năm.","",""],
-["kt","Budget impact analysis","budget impact","Phân tích tác động ngân sách","Ước tính tổng chi phí cho quỹ BHYT hoặc bệnh viện khi đưa can thiệp vào sử dụng.","","Một can thiệp có thể chi phí – hiệu quả nhưng vẫn vượt ngân sách."],
-["kt","Analytic perspective","societal perspective|payer perspective|healthcare perspective|health care payer perspective","Góc nhìn phân tích","Chi phí được tính theo góc nhìn của ai: người trả tiền (BHYT), hệ thống y tế hay toàn xã hội (gồm cả mất thu nhập).","",""]
+["tk","Randomized controlled trial","RCT|randomised controlled trial|randomized trial|randomised trial|randomized controlled trials","Thử nghiệm ngẫu nhiên có đối chứng",
+"Là nghiên cứu mà người tham gia được chia vào nhóm dùng can thiệp (thuốc, thủ thuật) hoặc nhóm đối chứng (placebo hoặc điều trị chuẩn) bằng một cơ chế ngẫu nhiên, giống như máy tính tung đồng xu cho từng người. Vì bác sĩ và BN không được chọn nhóm, hai nhóm sẽ giống nhau về mọi mặt (tuổi, mức nặng, kể cả những yếu tố chưa ai biết), chỉ khác nhau ở can thiệp. Do đó nếu kết cục khác nhau, ta có thể quy sự khác biệt đó cho can thiệp. Đây là thiết kế mạnh nhất để trả lời câu hỏi “thuốc này có thật sự có tác dụng không”.",
+"Khi đọc một RCT, đi theo 3 câu hỏi:\n1. Kết quả có đáng tin không: ngẫu nhiên và che giấu phân bổ có chuẩn không, hai nhóm ở Bảng 1 có giống nhau không, ai được làm mù, theo dõi có đầy đủ, có phân tích ITT không?\n2. Kết quả là gì: hiệu quả lớn cỡ nào (ARR, NNT), CI rộng hay hẹp?\n3. Có áp dụng cho BN của mình không: BN trong nghiên cứu có giống BN mình không, lợi có đáng hơn hại không?\nBộ câu hỏi chi tiết nằm ở tab Bảng câu hỏi.",
+"DAPA-HF (NEJM 2019): 4744 BN suy tim EF ≤40% được chia ngẫu nhiên vào dapagliflozin 10 mg/ngày hoặc placebo, thêm vào điều trị nền. Sau trung vị 18,2 tháng, kết cục chính (suy tim nặng lên hoặc tử vong tim mạch) xảy ra ở 16,3% nhóm dapagliflozin so với 21,2% nhóm placebo. Vì hai nhóm được chia ngẫu nhiên và giống nhau lúc đầu, mức giảm này được hiểu là do dapagliflozin.",
+"RCT không tự động đáng tin: nếu không che giấu phân bổ, mất dấu nhiều, hoặc phân tích lệch thì vẫn sai lệch. RCT cũng thường chọn BN “sạch” (ít bệnh kèm), nên kết quả có thể khó áp dụng cho BN cao tuổi, suy thận ngoài đời."],
+["tk","Cohort study","cohort|prospective cohort|retrospective cohort|cohort studies","Nghiên cứu đoàn hệ",
+"Nghiên cứu theo dõi một nhóm người (đoàn hệ) theo thời gian để xem ai xuất hiện kết cục. Người tham gia được chia theo việc có hay không có phơi nhiễm (một thuốc, một yếu tố nguy cơ, một đặc điểm). Khác RCT, việc có phơi nhiễm là do thực tế cuộc sống hay quyết định điều trị của bác sĩ, không do nhà nghiên cứu chia ngẫu nhiên. Tiến cứu: bắt đầu theo dõi từ bây giờ trở đi. Hồi cứu: dựng lại đoàn hệ từ hồ sơ cũ (như dữ liệu HIS).",
+"Kết quả thường trình bày bằng tỷ suất biến cố ở mỗi nhóm, kèm HR hoặc RR đã hiệu chỉnh. Câu hỏi then chốt: ngoài phơi nhiễm, hai nhóm còn khác nhau những gì, và tác giả đã hiệu chỉnh đủ chưa? Kết luận đúng là “có liên quan”, chưa phải “gây ra”.",
+"Ví dụ giả định: rà HIS 2020–2024, lấy 1200 BN sau PCI. 800 BN được kê statin cường độ cao, 400 BN dùng liều trung bình. Sau 1 năm, MACE 6% so với 9%, HR hiệu chỉnh 0,70. Nhưng BN được kê liều cao có thể trẻ hơn, ít suy thận hơn, tái khám đều hơn, nên một phần khác biệt có thể do những yếu tố đó chứ không do liều statin.",
+"Hay bị hiểu nhầm thành bằng chứng nhân quả. Đoàn hệ mạnh ở câu hỏi tiên lượng và tác dụng phụ, nhưng yếu ở câu hỏi hiệu quả điều trị vì gây nhiễu theo chỉ định."],
+["tk","Case-control study","case control|case–control|case-control","Nghiên cứu bệnh–chứng",
+"Thiết kế đi ngược so với đoàn hệ: bắt đầu từ kết cục. Nhà nghiên cứu chọn một nhóm người đã có bệnh (ca) và một nhóm không có bệnh (chứng) có đặc điểm tương tự, rồi tra hồ sơ hoặc phỏng vấn xem trước đó mỗi nhóm có phơi nhiễm bao nhiêu. Nếu nhóm ca phơi nhiễm nhiều hơn nhóm chứng, phơi nhiễm đó có liên quan với bệnh. Thiết kế này nhanh, rẻ, đặc biệt hữu ích cho bệnh hiếm hoặc tác dụng phụ hiếm.",
+"Kết quả đo bằng odds ratio (OR). OR > 1: phơi nhiễm liên quan với tăng khả năng mắc bệnh. Vì nhà nghiên cứu tự chọn số ca và số chứng, thiết kế này không tính được tỷ lệ mới mắc hay nguy cơ tuyệt đối.",
+"Ví dụ giả định: chọn 200 BN nhồi máu cơ tim (ca) và 400 người không nhồi máu cùng tuổi, giới (chứng). Trong 2 tuần trước đó, 50/200 ca (25%) và 60/400 chứng (15%) có dùng NSAID.\n• Odds phơi nhiễm ở ca = 50/150 = 0,33.\n• Odds phơi nhiễm ở chứng = 60/340 = 0,18.\n• OR = 0,33 / 0,18 ≈ 1,9.\nNghĩa là dùng NSAID gắn với khả năng nhồi máu cao gần gấp đôi.",
+"Dễ dính recall bias (người bệnh nhớ kỹ hơn những gì mình đã dùng) và sai lệch khi chọn nhóm chứng. Không đọc OR ở đây như RR."],
+["tk","Cross-sectional study","cross sectional|cross-sectional","Nghiên cứu cắt ngang",
+"Đo phơi nhiễm và bệnh cùng một lúc trên một nhóm người, giống chụp một bức ảnh tại một thời điểm. Dùng để biết “hiện có bao nhiêu người mắc” (tỷ lệ hiện mắc) và mô tả thực trạng, ví dụ khảo sát mức kiểm soát huyết áp ở phòng khám.",
+"Kết quả là tỷ lệ phần trăm kèm khoảng tin cậy, đôi khi so sánh giữa các nhóm bằng OR hoặc tỷ số tỷ lệ hiện mắc. Hỏi: mẫu có đại diện cho quần thể mình quan tâm không, công cụ đo có chuẩn không.",
+"Ví dụ giả định: khảo sát 500 BN tăng huyết áp khám ngoại trú trong tháng 10; 210 BN (42%; 95% CI 38–46%) có HA ≥140/90 mmHg dù đang dùng thuốc. Người có HA không kiểm soát hay quên thuốc hơn, nhưng thiết kế này không cho biết quên thuốc dẫn tới HA cao, hay HA cao (đau đầu, mệt) làm họ bỏ thuốc.",
+"Không xác định được cái nào có trước, nên không kết luận nhân quả."],
+["tk","Registry","registries|registry-based","Sổ bộ (registry)",
+"Một cơ sở dữ liệu thu thập theo mẫu thống nhất về tất cả (hoặc phần lớn) BN có cùng một bệnh hay cùng một thủ thuật, thường ở nhiều bệnh viện và trong nhiều năm. Registry phản ánh thực hành ngoài đời: BN già hơn, nhiều bệnh kèm hơn so với BN trong RCT.",
+"Đọc registry như một nghiên cứu quan sát: xem tiêu chuẩn đưa vào, tỷ lệ dữ liệu thiếu, cách định nghĩa biến cố, có kiểm tra chất lượng dữ liệu (đối chiếu hồ sơ gốc) không.",
+"Ví dụ giả định: sổ bộ can thiệp mạch vành của 10 bệnh viện ghi nhận 15.000 ca PCI; tỷ lệ huyết khối stent trong 30 ngày là 0,7%, cao hơn ở BN STEMI và BN ngưng thuốc kháng tiểu cầu sớm.",
+"Registry lớn không có nghĩa là hết gây nhiễu; so sánh hai chiến lược điều trị trong registry vẫn là nghiên cứu quan sát."],
+["tk","Case series","case report|case reports|case series","Báo cáo ca / loạt ca",
+"Mô tả chi tiết một BN (báo cáo ca) hoặc một nhóm BN (loạt ca) có điểm đáng chú ý: bệnh hiếm, biểu hiện lạ, biến chứng mới, kỹ thuật mới. Không có nhóm so sánh.",
+"Giá trị chính là cảnh báo sớm và gợi ý giả thuyết để nghiên cứu tiếp; không dùng để kết luận hiệu quả hay nguyên nhân.",
+"Ví dụ giả định: một bệnh viện báo cáo 12 ca bóc tách động mạch vành tự phát ở phụ nữ sau sinh, mô tả hình ảnh chụp mạch và diễn tiến. Báo cáo này gợi ý cần nghiên cứu vai trò của yếu tố nội tiết.",
+"Thấy nhiều BN cải thiện sau một điều trị trong loạt ca chưa chứng minh được điều trị có hiệu quả, vì không biết nếu không điều trị thì họ có tự cải thiện hay không."],
+["tk","Prospective","prospectively","Tiến cứu",
+"Nghiên cứu được lên kế hoạch trước, rồi mới thu thập dữ liệu khi sự việc diễn ra: định nghĩa biến, cách đo, thời điểm theo dõi đều có sẵn từ đầu. Nhờ vậy dữ liệu thường đầy đủ và đồng nhất hơn nghiên cứu hồi cứu.",
+"Khi bài ghi “prospective”, kiểm tra xem đề cương có được đăng ký trước không và kết cục trong bài có giống trong đề cương không.",
+"Ví dụ giả định: từ tháng 1/2025, mọi BN STEMI vào viện được ghi theo một phiếu chuẩn (thời gian cửa – bóng, Killip, EF), tái khám 30 ngày và 1 năm theo lịch hẹn định trước.",
+"Tiến cứu không đồng nghĩa với ngẫu nhiên. Một đoàn hệ tiến cứu vẫn là nghiên cứu quan sát."],
+["tk","Retrospective","retrospectively","Hồi cứu",
+"Nghiên cứu dùng dữ liệu đã có sẵn (bệnh án, HIS, phim chụp, sổ bộ) để trả lời một câu hỏi được đặt ra sau khi sự việc đã xảy ra. Nhanh, rẻ, phù hợp cho người mới bắt đầu làm nghiên cứu.",
+"Điểm yếu thường gặp: dữ liệu thiếu, mỗi bác sĩ ghi chép một kiểu, không biết những ai đã mất theo dõi. Bài tốt nói rõ cách xử lý dữ liệu thiếu và cách xác định kết cục.",
+"Ví dụ giả định: rà HIS 3 năm, lấy 900 ca chụp và can thiệp mạch vành, so tỷ lệ biến chứng mạch máu giữa đường quay (2%) và đường đùi (5%). Nhưng đường đùi có thể được chọn cho BN nặng hơn, sốc, cần dụng cụ lớn, nên không thể quy hết khác biệt cho đường vào.",
+"Nếu biến chứng nhẹ không được ghi trong bệnh án, tỷ lệ biến cố sẽ thấp giả tạo."],
+["tk","Pragmatic trial","pragmatic|explanatory trial","Thử nghiệm thực dụng",
+"RCT được thiết kế gần với thực hành hằng ngày: tiêu chuẩn chọn rộng (nhận cả BN già, nhiều bệnh), can thiệp áp dụng như ngoài đời, theo dõi bằng dữ liệu thường quy. Nó trả lời câu hỏi “áp dụng ngoài đời có hiệu quả không” (effectiveness). Ngược lại, thử nghiệm giải thích (explanatory) làm trong điều kiện lý tưởng để hỏi “trong điều kiện tốt nhất thuốc có tác dụng không” (efficacy).",
+"Công cụ PRECIS-2 chấm mỗi thử nghiệm nằm ở đâu giữa thực dụng và giải thích theo nhiều mặt (tiêu chuẩn chọn, cách theo dõi, mức kiểm soát tuân thủ…).",
+"Ví dụ giả định: chia ngẫu nhiên BN suy tim xuất viện vào hai chiến lược (điều dưỡng gọi điện hằng tuần so với tái khám thường quy), BN được nhận bất kể tuổi và bệnh kèm, kết cục lấy từ dữ liệu bảo hiểm.",
+"Hiệu quả trong thử nghiệm thực dụng thường nhỏ hơn thử nghiệm lý tưởng vì tuân thủ kém hơn; điều đó không có nghĩa là can thiệp kém."],
+["tk","Crossover trial","cross-over|crossover design|crossover","Thử nghiệm bắt chéo",
+"Mỗi người tham gia lần lượt nhận cả hai điều trị, thứ tự được chia ngẫu nhiên (A rồi B, hoặc B rồi A). Giữa hai giai đoạn có thời gian rửa thuốc (washout) để thuốc trước hết tác dụng. Vì mỗi người được so với chính mình, cần ít người hơn.",
+"Chỉ hợp lý khi bệnh mạn tính ổn định, thuốc tác dụng nhanh và hết nhanh, kết cục đo lặp lại được. Cần kiểm tra hiệu ứng mang sang (carry-over) và hiệu ứng giai đoạn.",
+"Ví dụ giả định: 40 BN tăng huyết áp dùng thuốc A 4 tuần, nghỉ 2 tuần, rồi dùng thuốc B 4 tuần (hoặc ngược lại). HA tâm thu trung bình khi dùng A thấp hơn khi dùng B 5 mmHg.",
+"Không dùng được cho kết cục không đảo ngược (tử vong, nhồi máu) hoặc bệnh tự khỏi."],
+["tk","Cluster randomized trial","cluster-randomized|cluster randomised|cluster-randomised|cluster trial","Thử nghiệm ngẫu nhiên theo cụm",
+"Thay vì chia ngẫu nhiên từng BN, nhà nghiên cứu chia ngẫu nhiên cả một đơn vị (bệnh viện, khoa, phòng khám, xã). Mọi BN trong đơn vị đó nhận cùng một can thiệp. Dùng khi can thiệp tác động lên cả hệ thống (quy trình, đào tạo) hoặc khi BN cùng nơi dễ “lây” can thiệp cho nhau.",
+"BN trong cùng cụm giống nhau hơn BN khác cụm, nên phải phân tích có tính đến cụm (hệ số tương quan nội cụm, ICC). Số cụm quan trọng hơn số BN: 2 bệnh viện với 2000 BN vẫn chỉ là 2 đơn vị được ngẫu nhiên.",
+"Ví dụ giả định: chia ngẫu nhiên 40 bệnh viện huyện; 20 bệnh viện áp dụng quy trình gọi trước cho trung tâm can thiệp, 20 bệnh viện làm như cũ; so thời gian từ lúc vào viện đến khi tái tưới máu.",
+"Nếu bỏ qua cụm khi phân tích, khoảng tin cậy hẹp giả tạo và p nhỏ giả tạo."],
+["tk","Factorial design","factorial","Thiết kế giai thừa",
+"Một thử nghiệm trả lời hai câu hỏi cùng lúc. BN được chia ngẫu nhiên hai lần: lần một vào A hoặc không A, lần hai vào B hoặc không B. Kết quả là 4 nhóm: A+B, chỉ A, chỉ B, không gì. Tiết kiệm vì dùng một cỡ mẫu cho hai câu hỏi.",
+"Hiệu quả của A được tính bằng cách so tất cả người có A với tất cả người không A (bất kể B). Cách này chỉ đúng nếu A và B không tương tác; bài tốt sẽ báo kiểm định tương tác.",
+"ISIS-2 (1988) dùng thiết kế 2×2 trên BN nghi nhồi máu cơ tim cấp: streptokinase so với placebo, và aspirin so với placebo. Cả hai đều giảm tử vong mạch máu, và nhóm dùng cả hai có lợi nhất.",
+"Nếu hai can thiệp tương tác (A làm thay đổi tác dụng của B), phân tích gộp như trên sẽ cho kết quả sai."],
+["tk","Non-inferiority trial","noninferiority|non-inferiority|non-inferiority margin|noninferior|non-inferior","Thử nghiệm không kém hơn",
+"Mục tiêu không phải chứng minh thuốc mới tốt hơn, mà là chứng minh nó không kém thuốc chuẩn quá một mức chấp nhận được, gọi là ngưỡng không kém hơn (non-inferiority margin, ký hiệu Δ). Người ta chấp nhận “có thể kém một chút” vì thuốc mới có ưu điểm khác: rẻ hơn, ít chảy máu hơn, uống tiện hơn, ngắn ngày hơn.",
+"Nhìn cận trên của khoảng tin cậy (CI) của hiệu số giữa thuốc mới và thuốc chuẩn (hiệu số dương = thuốc mới có nhiều biến cố hơn):\n• Cận trên < Δ → không kém hơn.\n• Cận trên > Δ → không chứng minh được không kém hơn.\n• Nếu toàn bộ CI nằm dưới 0 → có thể kiểm định tiếp vượt trội.\nNgưỡng Δ phải được đặt trước và nhỏ hơn lợi ích mà thuốc chuẩn mang lại so với placebo.",
+"Ví dụ giả định: so DAPT 1 tháng với DAPT 12 tháng sau PCI, ngưỡng Δ = 2% (hiệu số tuyệt đối MACE).\n• MACE: 5,0% (1 tháng) so với 4,6% (12 tháng), hiệu số +0,4%.\n• 95% CI của hiệu số: −0,6% đến +1,4%.\n• Cận trên 1,4% < 2% → DAPT ngắn không kém hơn. Nếu chảy máu cũng thấp hơn, DAPT ngắn là lựa chọn hấp dẫn.",
+"Ngưỡng quá rộng (ví dụ 5%) thì gần như thuốc nào cũng “không kém hơn”. Phân tích ITT có thể làm hai nhóm giống nhau giả tạo (vì BN chuyển nhóm), nên thử nghiệm không kém hơn cần nhất quán cả ITT lẫn per-protocol."],
+["tk","Superiority trial","superiority","Thử nghiệm vượt trội",
+"Thiết kế phổ biến nhất: muốn chứng minh can thiệp mới tốt hơn đối chứng (placebo hoặc điều trị chuẩn).",
+"Nếu CI của HR/RR không chứa 1 (hoặc CI của hiệu số không chứa 0) và nằm ở phía có lợi → vượt trội. Nếu CI chứa 1 → chưa chứng minh được vượt trội.",
+"DAPA-HF là thử nghiệm vượt trội so với placebo: HR 0,74 (95% CI 0,65–0,85). CI không chứa 1 nên kết luận dapagliflozin tốt hơn placebo về kết cục chính.",
+"Thử nghiệm vượt trội không có ý nghĩa thống kê không cho phép kết luận hai thuốc “tương đương”; chỉ là chưa đủ bằng chứng để thấy khác biệt."],
+["tk","Equivalence trial","equivalence","Thử nghiệm tương đương",
+"Chứng minh hai can thiệp cho kết quả gần như nhau: khác biệt không vượt quá một ngưỡng ±Δ ở cả hai chiều (không tốt hơn nhiều, cũng không kém hơn nhiều). Hay dùng khi so thuốc generic hoặc biosimilar với thuốc gốc.",
+"Tương đương khi toàn bộ khoảng tin cậy nằm gọn trong khoảng từ −Δ đến +Δ.",
+"Ví dụ giả định: so một thuốc generic với thuốc gốc về mức giảm LDL-C, ngưỡng ±5%. Hiệu số −1,2% (95% CI −3,8% đến +1,4%) nằm gọn trong ±5% → tương đương.",
+"Khác với không kém hơn: không kém hơn chỉ kiểm tra một phía, tương đương kiểm tra cả hai phía."],
+["tk","Trial phase","phase 3|phase III|phase 2|phase II|phase 4|phase IV","Pha thử nghiệm",
+"Một thuốc mới đi qua các pha trước và sau khi được cấp phép:\n• Pha I: vài chục người, chủ yếu xem an toàn và liều dung nạp.\n• Pha II: vài trăm BN, tìm tín hiệu hiệu quả và chọn liều, thường dùng kết cục thay thế (chỉ số xét nghiệm, hình ảnh).\n• Pha III: RCT lớn (hàng nghìn BN) trên kết cục lâm sàng, là cơ sở để cấp phép và đưa vào khuyến cáo.\n• Pha IV: theo dõi sau khi thuốc lưu hành, phát hiện tác dụng phụ hiếm.",
+"Pha của nghiên cứu cho biết kết luận mạnh đến đâu: kết quả pha II “có tín hiệu” chưa đủ để thay đổi thực hành.",
+"DAPA-HF là thử nghiệm pha 3, dùng kết cục lâm sàng, nên đủ mạnh để đưa SGLT2i vào khuyến cáo điều trị suy tim.",
+"Nhiều thuốc thành công ở pha II (cải thiện chỉ số) nhưng thất bại ở pha III (không giảm tử vong, biến cố)."],
+["tk","Target trial emulation","target trial|trial emulation","Mô phỏng thử nghiệm đích",
+"Một cách phân tích dữ liệu quan sát (HIS, registry, bảo hiểm). Trước hết nhà nghiên cứu viết ra đề cương của một RCT “lý tưởng” mình muốn làm: ai được chọn, so hai chiến lược nào, bắt đầu theo dõi từ khi nào, kết cục gì. Sau đó bắt dữ liệu quan sát tuân theo đúng khung đó. Cách này giúp tránh các lỗi kinh điển như immortal time bias.",
+"Khi đọc, kiểm tra: thời điểm 0 có trùng với lúc BN đủ điều kiện và lúc bắt đầu chiến lược điều trị không; tác giả có dùng phương pháp hiệu chỉnh (IPW, clone–censor–weight) không.",
+"Ví dụ giả định: muốn biết bắt đầu ARNI ngay khi nằm viện có tốt hơn đợi sau xuất viện không. Đề cương đích: BN suy tim EF thấp nhập viện, đã ổn định, chia hai chiến lược; thời điểm 0 là ngày ổn định. Sau đó dựng lại hai nhóm từ HIS đúng như vậy.",
+"Mô phỏng tốt đến đâu cũng không xử lý được yếu tố gây nhiễu chưa đo."],
+["tk","Real-world evidence","RWE|real-world data|real world evidence|real-world","Bằng chứng đời thực",
+"Bằng chứng rút ra từ dữ liệu thu thập trong chăm sóc thường quy, ngoài thử nghiệm lâm sàng: hồ sơ bệnh án điện tử, sổ bộ, dữ liệu bảo hiểm, thiết bị đeo. Dùng để biết thuốc hoạt động ra sao trên BN thực tế (già hơn, nhiều bệnh hơn) và để phát hiện tác dụng phụ hiếm hoặc dài hạn.",
+"Chất lượng RWE phụ thuộc vào chất lượng dữ liệu và thiết kế phân tích (target trial emulation, propensity score), không phụ thuộc vào cỡ mẫu lớn hay nhỏ.",
+"Ví dụ giả định: dữ liệu bảo hiểm của 50.000 BN rung nhĩ cho thấy NOAC liên quan với ít xuất huyết nội sọ hơn warfarin, phù hợp với kết quả các RCT.",
+"“Đời thực” không có nghĩa là đúng hơn RCT. Khi RWE mâu thuẫn với RCT về hiệu quả điều trị, thường RCT đáng tin hơn."],
+
+["tn","Randomization","randomisation|randomized|randomised|randomly assigned|random assignment|randomly allocated","Phân bổ ngẫu nhiên",
+"Chia BN vào các nhóm bằng một quy trình ngẫu nhiên (thường do máy tính sinh), để mỗi người có cùng cơ hội vào mỗi nhóm. Nhờ đó các yếu tố ảnh hưởng tới kết cục, kể cả những yếu tố chưa ai biết, phân bố đều giữa hai nhóm. Đây là lý do RCT cho phép kết luận nhân quả.",
+"Trong phần Methods, tìm cách sinh chuỗi ngẫu nhiên (máy tính, bảng số ngẫu nhiên) và có phân tầng hay chia theo khối không. Sau đó xem Bảng 1 để kiểm tra hai nhóm có giống nhau không.",
+"Ví dụ giả định: 600 BN NSTEMI được máy tính chia 1:1 vào chiến lược xâm lấn sớm hoặc trì hoãn. Ở Bảng 1: tuổi trung bình 65 so với 66, đái tháo đường 32% so với 31%, điểm GRACE trung bình 140 so với 142. Hai nhóm cân bằng.",
+"Chia theo ngày chẵn/lẻ, số hồ sơ chẵn/lẻ, ngày trong tuần là giả ngẫu nhiên: người tuyển biết trước nhóm nên có thể chọn BN."],
+["tn","Allocation concealment","concealed allocation|concealment of allocation|allocation was concealed","Che giấu phân bổ",
+"Người tuyển BN không thể biết trước BN tiếp theo sẽ vào nhóm nào cho đến khi BN đã chính thức được đưa vào nghiên cứu. Nếu biết trước, bác sĩ có thể vô tình (hoặc cố ý) đưa BN nhẹ vào nhóm thuốc mới, làm hỏng ngẫu nhiên. Che giấu phân bổ khác với làm mù: làm mù là giữ kín sau khi đã chia nhóm.",
+"Cách đạt chuẩn: hệ thống ngẫu nhiên trung tâm qua web hoặc điện thoại (IWRS), hoặc hộp thuốc giống hệt nhau đánh số liên tiếp. Phong bì niêm phong chỉ chấp nhận được khi được đánh số liên tiếp, kín, không nhìn xuyên được.",
+"Ví dụ giả định: nếu danh sách ngẫu nhiên được dán trên tường phòng thủ thuật, bác sĩ thấy BN tiếp theo sẽ vào nhóm stent mới và có thể chờ để đưa một BN tổn thương đơn giản vào. Nhóm stent mới khi đó trông tốt hơn thực tế.",
+"Che giấu phân bổ luôn làm được, kể cả trong thử nghiệm nhãn mở không làm mù được. Thiếu che giấu phân bổ thường làm phóng đại hiệu quả."],
+["tn","Blinding","blinded|double-blind|double blind|single-blind|masked|masking|triple-blind","Làm mù",
+"Giữ kín thông tin ai đang nhận can thiệp nào, để kỳ vọng không ảnh hưởng đến kết quả. Có thể làm mù BN, bác sĩ điều trị, người đánh giá kết cục và người phân tích số liệu. Làm mù quan trọng nhất khi kết cục mang tính chủ quan (đau ngực, chất lượng cuộc sống, quyết định nhập viện).",
+"Đừng dừng ở chữ “mù đôi”; đọc Methods để biết cụ thể ai được làm mù và bằng cách nào (viên placebo giống hệt, thủ thuật giả).",
+"ORBITA (Lancet 2018): BN đau thắt ngực ổn định, hẹp một nhánh, được chia vào PCI hoặc thủ thuật giả (vẫn chụp mạch nhưng không đặt stent), BN không biết mình thuộc nhóm nào. Khác biệt thời gian gắng sức giữa hai nhóm không có ý nghĩa thống kê, gợi ý một phần cải thiện triệu chứng sau PCI là hiệu ứng mong đợi.",
+"“Mù đôi” không có định nghĩa thống nhất. Khi thuốc có tác dụng dễ nhận ra (nhịp chậm do chẹn beta), việc làm mù có thể bị phá."],
+["tn","Open-label","open label|unblinded","Nhãn mở",
+"BN và bác sĩ đều biết đang dùng điều trị nào. Hay gặp khi so sánh thủ thuật với thuốc, hoặc so hai chiến lược khó giả lập.",
+"Mức đáng lo phụ thuộc kết cục: tử vong do mọi nguyên nhân ít bị ảnh hưởng; nhập viện, tái thông mạch, triệu chứng thì dễ bị ảnh hưởng. Tìm xem kết cục có được hội đồng mù thẩm định không (thiết kế PROBE).",
+"Ví dụ giả định: thử nghiệm nhãn mở so PCI với điều trị nội khoa. Nhóm nội khoa biết mình không được can thiệp nên có xu hướng báo đau ngực nhiều hơn và được bác sĩ cho chụp lại sớm hơn, làm “tái thông mạch không kế hoạch” tăng ở nhóm nội khoa.",
+"Nhãn mở không có nghĩa là kém chất lượng, nhưng phải nhìn kỹ các kết cục mềm."],
+["tn","PROBE design","PROBE","Thiết kế PROBE",
+"Viết tắt của Prospective Randomized Open, Blinded End-point: tiến cứu, ngẫu nhiên, nhãn mở (BN và bác sĩ biết nhóm), nhưng kết cục được một hội đồng độc lập đánh giá mà không biết BN thuộc nhóm nào. Rất hay dùng trong tim mạch khi không thể làm mù hoàn toàn.",
+"Ưu điểm: rẻ, sát thực hành. Hạn chế: quyết định có cho BN nhập viện, có chụp lại hay không vẫn do bác sĩ biết nhóm đưa ra.",
+"Ví dụ giả định: so warfarin với một NOAC. BN và bác sĩ biết thuốc đang dùng, nhưng hồ sơ mỗi ca nghi đột quỵ được gửi cho hội đồng thần kinh không biết nhóm để xác định có phải đột quỵ thật không.",
+"Làm mù người đánh giá không sửa được sai lệch ở bước phát hiện biến cố."],
+["tn","Stratified randomization","stratified|stratification|block randomization|permuted blocks|stratified randomisation","Ngẫu nhiên phân tầng / theo khối",
+"Hai kỹ thuật giúp ngẫu nhiên hoá cân bằng hơn.\n• Phân tầng: chia BN thành các tầng theo yếu tố tiên lượng mạnh (có/không đái tháo đường, theo trung tâm), rồi ngẫu nhiên riêng trong từng tầng, để yếu tố đó chắc chắn cân bằng.\n• Theo khối: sau mỗi khối (vd 4 hoặc 6 BN) số BN hai nhóm bằng nhau, tránh lệch số lượng khi thử nghiệm nhỏ hoặc dừng sớm.",
+"Khi bài nói ngẫu nhiên có phân tầng theo yếu tố X, phân tích chính nên hiệu chỉnh theo X.",
+"Ví dụ giả định: thử nghiệm 300 BN, phân tầng theo đái tháo đường, khối kích thước 4. Trong tầng ĐTĐ, cứ mỗi 4 BN thì 2 vào thuốc, 2 vào placebo, theo thứ tự ngẫu nhiên như A-B-B-A.",
+"Khối kích thước cố định, nhỏ, trong thử nghiệm nhãn mở → người tuyển có thể đoán được BN cuối khối; nên dùng khối kích thước thay đổi."],
+["tn","Intention-to-treat","ITT|intention to treat|intention-to-treat analysis|intent-to-treat|intent to treat","Phân tích theo ý định điều trị",
+"Phân tích mọi BN theo đúng nhóm được chia ngẫu nhiên ban đầu, bất kể sau đó họ có uống thuốc, bỏ thuốc hay chuyển sang nhóm kia. Nguyên tắc: “đã chia vào nhóm nào thì tính vào nhóm đó”. Cách này giữ nguyên lợi ích của ngẫu nhiên hoá và phản ánh hiệu quả khi áp dụng một chiến lược ngoài đời, nơi luôn có người không tuân thủ.",
+"Xem sơ đồ CONSORT: số BN được phân tích có bằng số BN được chia ngẫu nhiên không. ITT là phân tích chính của thử nghiệm vượt trội.",
+"Ví dụ giả định: 500 BN được chia vào PCI, 500 vào điều trị nội khoa. Có 60 BN nhóm nội khoa sau đó vẫn được PCI vì đau ngực. Theo ITT, 60 BN này vẫn được tính vào nhóm nội khoa. Kết quả trả lời câu hỏi: chiến lược “bắt đầu bằng nội khoa” so với “PCI ngay” khác nhau thế nào.",
+"ITT có xu hướng làm hiệu quả nhỏ đi (vì có người không nhận điều trị). Trong thử nghiệm không kém hơn, điều này lại khiến dễ đạt “không kém hơn”, nên cần xem thêm per-protocol."],
+["tn","Per-protocol analysis","per-protocol|per protocol|as-treated|as treated","Phân tích theo đề cương",
+"Per-protocol: chỉ phân tích những BN tuân thủ đúng điều trị được chia. As-treated: phân tích theo điều trị BN thực sự nhận, không theo nhóm được chia. Cả hai trả lời câu hỏi “nếu dùng đúng thì hiệu quả ra sao”.",
+"Vì loại bỏ hoặc chuyển BN dựa trên những gì xảy ra sau ngẫu nhiên hoá, hai nhóm không còn cân bằng nữa. Dùng làm phân tích độ nhạy: nếu ITT và per-protocol cùng chiều, kết luận vững hơn.",
+"Ví dụ giả định: trong 500 BN nhóm thuốc, 80 BN bỏ thuốc vì tác dụng phụ; phân tích per-protocol loại 80 BN này. Nhưng người bỏ thuốc thường là người bệnh nặng hơn, nên nhóm thuốc còn lại khỏe hơn và trông có lợi hơn thực tế.",
+"Kết quả per-protocol đẹp hơn ITT thường không có nghĩa là thuốc tốt hơn, mà là có sai lệch chọn lọc."],
+["tn","Modified intention-to-treat","mITT|modified ITT|modified intention to treat","ITT hiệu chỉnh",
+"Một biến thể của ITT, loại ra một số BN theo quy tắc định trước, thường là BN chưa nhận liều thuốc nào hoặc sau đó phát hiện không đủ tiêu chuẩn.",
+"Đọc kỹ ai bị loại, bao nhiêu người, có cân bằng giữa hai nhóm không, và quyết định loại có được đưa ra khi chưa biết BN thuộc nhóm nào không.",
+"Ví dụ giả định: 1000 BN được chia ngẫu nhiên; 30 BN nhóm thuốc và 10 BN nhóm placebo không nhận liều nào và bị loại khỏi phân tích mITT. Số bị loại chênh nhau là tín hiệu cần chú ý.",
+"Không có định nghĩa thống nhất; mỗi bài mITT có thể loại BN theo cách khác nhau."],
+["tn","Placebo","placebo-controlled|sham|sham procedure|sham-controlled","Giả dược / thủ thuật giả",
+"Placebo là viên thuốc hay dung dịch trông giống hệt thuốc thật nhưng không có hoạt chất. Thủ thuật giả (sham) làm các bước bên ngoài giống thủ thuật thật nhưng không thực hiện phần điều trị. Mục đích: làm mù, và tách tác dụng thật của can thiệp khỏi hiệu ứng mong đợi hay việc được chăm sóc nhiều hơn.",
+"Hỏi: so với placebo có phù hợp không? Nếu đã có điều trị chuẩn hiệu quả, so với placebo có thể không đạo đức và không trả lời câu hỏi lâm sàng cần biết (thuốc mới có hơn thuốc đang dùng không).",
+"Trong DAPA-HF, placebo được thêm vào điều trị nền chuẩn (ACEi/ARB/ARNI, chẹn beta, MRA). Vì vậy câu hỏi là “thêm dapagliflozin có lợi hơn không”, không phải “dapagliflozin thay cho điều trị chuẩn”.",
+"Hiệu ứng placebo có thể rất lớn với kết cục chủ quan như đau, khó thở."],
+["tn","Primary endpoint","primary outcome|primary end point|primary efficacy outcome|primary end-point|primary outcomes","Kết cục chính",
+"Kết cục quan trọng nhất của nghiên cứu, được chọn trước khi bắt đầu và dùng để tính cỡ mẫu. Kết luận chính của thử nghiệm (thành công hay thất bại) dựa vào kết cục này.",
+"Đọc kết cục chính trong phần Results trước khi đọc abstract hay kết luận. Đối chiếu với bản đăng ký (ClinicalTrials.gov) để chắc kết cục không bị đổi.",
+"DAPA-HF: kết cục chính là gộp suy tim nặng lên (nhập viện, hoặc khám cấp cứu phải truyền thuốc tĩnh mạch) hoặc tử vong tim mạch. Kết quả 16,3% so với 21,2%, HR 0,74: thử nghiệm dương tính.",
+"Khi kết cục chính âm tính, những kết cục phụ hay phân nhóm “có ý nghĩa” chỉ là gợi ý, chưa phải bằng chứng."],
+["tn","Secondary endpoint","secondary outcome|secondary outcomes|secondary end point|secondary endpoints","Kết cục phụ",
+"Các kết cục khác được định trước nhưng không dùng để tính cỡ mẫu, ví dụ tử vong do mọi nguyên nhân, chất lượng cuộc sống, các thành phần riêng của kết cục gộp.",
+"Kết cục phụ đáng tin hơn khi được kiểm định theo thứ bậc định trước (chỉ kiểm định khi kết cục đứng trước dương tính) hoặc có hiệu chỉnh đa so sánh.",
+"Ví dụ giả định: kết cục chính dương tính. Kết cục phụ thứ nhất (tử vong tim mạch) HR 0,82 (0,69–0,98) được kiểm định chính thức. Kết cục phụ thứ ba có p = 0,04 nhưng thứ bậc đã dừng ở kết cục thứ hai âm tính, nên kết cục thứ ba chỉ được coi là gợi ý.",
+"Lực thống kê cho kết cục phụ thường thấp, nên âm tính ở kết cục phụ không có nghĩa là không có tác dụng."],
+["tn","Composite endpoint","composite outcome|composite","Kết cục gộp",
+"Gộp nhiều biến cố thành một kết cục; BN được tính có kết cục nếu có bất kỳ biến cố nào trong đó (thường tính biến cố đầu tiên). Mục đích: có nhiều biến cố hơn nên cần ít BN hơn. Ví dụ quen thuộc là MACE.",
+"Ba điều cần xem:\n1. Các thành phần có tầm quan trọng tương đương với BN không?\n2. Mỗi thành phần đóng góp bao nhiêu biến cố?\n3. Hiệu quả có cùng chiều trên từng thành phần không?\nBảng các thành phần thường nằm ngay dưới kết cục chính.",
+"Ví dụ giả định: kết cục gộp “tử vong, nhồi máu, tái thông mạch không kế hoạch” giảm từ 12% xuống 9%. Tách ra:\n• Tử vong: 3% so với 3%.\n• Nhồi máu: 4% so với 4%.\n• Tái thông mạch: 5% so với 2%.\nToàn bộ lợi ích đến từ tái thông mạch, kết cục ít quan trọng nhất và dễ bị ảnh hưởng bởi quyết định của bác sĩ.",
+"Không được nói “thuốc giảm tử vong” khi chỉ có kết cục gộp giảm."],
+["tn","MACE","major adverse cardiovascular events|major adverse cardiac events|MACCE","Biến cố tim mạch nặng",
+"Major Adverse Cardiovascular Events: kết cục gộp được dùng nhiều nhất trong tim mạch. Phiên bản 3 điểm thường gồm tử vong tim mạch, nhồi máu cơ tim không tử vong, đột quỵ không tử vong. Có bài thêm tái thông mạch, nhập viện vì đau thắt ngực không ổn định hoặc suy tim (MACE 4–5 điểm). MACCE thêm các biến cố mạch máu não.",
+"Luôn tìm định nghĩa MACE trong Methods của từng bài và ghi lại các thành phần trước khi so sánh.",
+"Ví dụ giả định: thử nghiệm A báo MACE 8% (có tính tái thông mạch), thử nghiệm B báo MACE 5% (không tính tái thông mạch). Không thể nói BN trong B ít biến cố hơn, vì hai định nghĩa khác nhau.",
+"So sánh con số MACE giữa các thử nghiệm có định nghĩa khác nhau là sai."],
+["tn","Hard endpoint","hard outcome|hard outcomes|soft endpoint|hard endpoints","Kết cục cứng / kết cục mềm",
+"Kết cục cứng là biến cố khách quan, quan trọng trực tiếp với BN và khó bị ảnh hưởng bởi chủ quan: tử vong, nhồi máu cơ tim, đột quỵ. Kết cục mềm phụ thuộc nhiều vào quyết định của bác sĩ hoặc cảm nhận của BN: nhập viện, tái thông mạch, mức đau ngực, thang điểm triệu chứng.",
+"Kết cục mềm không vô giá trị (nhập viện vì suy tim rất quan trọng với BN), nhưng cần làm mù tốt hơn mới tin được.",
+"Ví dụ giả định: trong thử nghiệm nhãn mở, “tái thông mạch không kế hoạch” giảm mạnh ở nhóm PCI vì bác sĩ ít có lý do chụp lại BN đã được đặt stent, trong khi tử vong và nhồi máu không khác giữa hai nhóm.",
+""],
+["tn","Surrogate endpoint","surrogate outcome|surrogate marker|surrogate","Kết cục thay thế",
+"Một chỉ số đo được sớm, dễ, rẻ (LDL-C, HbA1c, huyết áp, EF, số ngoại tâm thu, FFR) được dùng thay cho kết cục lâm sàng thật (tử vong, nhồi máu, nhập viện). Giả định là cải thiện chỉ số sẽ dẫn đến cải thiện kết cục thật, nhưng giả định này đã nhiều lần sai.",
+"Chỉ tin kết cục thay thế khi đã có RCT chứng minh, cho cùng nhóm thuốc, rằng cải thiện chỉ số đó đi kèm giảm biến cố lâm sàng.",
+"CAST (NEJM 1989–1991): BN sau nhồi máu có ngoại tâm thu thất được dùng encainide hoặc flecainide. Thuốc làm giảm ngoại tâm thu (chỉ số thay thế) nhưng tử vong lại tăng so với placebo, và thử nghiệm phải dừng sớm.",
+"Thuốc làm tăng HDL-C (torcetrapib) cũng không giảm biến cố mà còn tăng tử vong."],
+["tn","Subgroup analysis","subgroup|subgroups|subgroup analyses","Phân tích phân nhóm",
+"So sánh hiệu quả điều trị trong từng nhóm nhỏ BN (theo tuổi, giới, đái tháo đường, EF…) để xem thuốc có tác dụng khác nhau giữa các nhóm không. Thường trình bày bằng forest plot phân nhóm.",
+"Chỉ tin kết quả phân nhóm khi:\n• được định trước;\n• số phân nhóm ít;\n• p tương tác thấp;\n• hợp lý về sinh học;\n• được lặp lại ở thử nghiệm khác.\nThiếu những điều này thì phần lớn khác biệt phân nhóm là do ngẫu nhiên.",
+"ISIS-2: khi phân tích theo cung hoàng đạo, aspirin dường như không có lợi ở người sinh cung Song Tử và Thiên Bình, trong khi có lợi rõ ở các cung còn lại. Tác giả cố ý đưa ra phân tích này để minh hoạ rằng một phân nhóm vô nghĩa vẫn có thể trông “có ý nghĩa”.",
+"Không kết luận “thuốc không có tác dụng ở phụ nữ” chỉ vì CI của nhóm nữ chứa 1; phải nhìn p tương tác."],
+["tn","P for interaction","interaction p|P for heterogeneity|test for interaction|p-interaction|P interaction","Giá trị p tương tác",
+"Kiểm định xem hiệu quả điều trị ở các phân nhóm có thật sự khác nhau không. Đây mới là con số đúng để đánh giá phân nhóm, chứ không phải so p của từng phân nhóm với nhau.",
+"• p tương tác nhỏ (thường < 0,05, cần chặt hơn khi có nhiều phân nhóm) → có bằng chứng hiệu quả khác nhau giữa các phân nhóm.\n• p tương tác lớn → hiệu quả ở các nhóm phù hợp với nhau; p riêng của từng nhóm khác nhau chỉ do cỡ mẫu mỗi nhóm khác nhau.",
+"Ví dụ giả định:\n• Nam: HR 0,72 (0,60–0,86), p = 0,001.\n• Nữ: HR 0,80 (0,60–1,07), p = 0,13.\n• p tương tác = 0,52.\nNhóm nữ ít BN hơn nên CI rộng và chứa 1, nhưng HR hai giới gần nhau và p tương tác lớn → không có bằng chứng thuốc kém hiệu quả ở nữ.",
+"Lỗi rất hay gặp: thấy một nhóm có ý nghĩa, nhóm kia không, rồi kết luận thuốc chỉ có tác dụng ở một nhóm."],
+["tn","Loss to follow-up","lost to follow-up|loss to follow up|dropout|drop-out|withdrew consent","Mất dấu",
+"BN rời nghiên cứu trước khi kết thúc theo dõi (rút đồng ý, chuyển nơi ở, không liên lạc được), nên không biết họ có biến cố hay không. Nếu người mất dấu khác người ở lại (thường là bệnh nặng hơn), kết quả có thể bị lệch.",
+"Xem sơ đồ CONSORT. Quy tắc thô: dưới 5% ít đáng lo, trên 20% đáng lo. Phép thử “trường hợp xấu nhất”: giả sử mọi BN mất dấu ở nhóm can thiệp đều có biến cố, kết luận có còn đứng vững không?",
+"Ví dụ giả định: mỗi nhóm 1000 BN; biến cố 100 so với 130 (chênh 30). Mất dấu 40 BN ở nhóm thuốc và 20 BN ở nhóm chứng. Nếu cả 40 BN mất dấu ở nhóm thuốc đều có biến cố, nhóm thuốc thành 140 so với 130 → kết luận đảo ngược. Kết quả này mong manh.",
+"Bài chỉ báo tỷ lệ mất dấu chung mà không chia theo từng nhóm là thiếu sót."],
+["tn","Interim analysis","interim analyses|stopped early|early stopping|early termination|DSMB|data monitoring committee|data and safety monitoring board","Phân tích giữa kỳ / dừng sớm",
+"Trong thử nghiệm lớn, một hội đồng giám sát dữ liệu và an toàn (DSMB) độc lập xem kết quả giữa chừng theo kế hoạch định trước. Họ có thể khuyến nghị dừng sớm nếu lợi ích quá rõ, có hại, hoặc khó có khả năng thấy khác biệt (vô ích).",
+"Ngưỡng dừng vì lợi ích thường rất chặt (ví dụ p < 0,001) để tránh dừng nhầm. Khi thử nghiệm dừng sớm, xem lúc dừng đã có bao nhiêu biến cố.",
+"Ví dụ giả định: thử nghiệm dự kiến 900 biến cố nhưng dừng ở phân tích giữa kỳ khi mới có 120 biến cố, với HR 0,55. Thử nghiệm dừng sớm khi còn ít biến cố có xu hướng phóng đại hiệu quả; HR thật có thể gần 0,75.",
+"Dừng sớm vì có hại hoặc vì vô ích thì đáng tin; dừng sớm vì lợi ích thì cần dè dặt."],
+["tn","Sample size","sample size calculation|power calculation|statistical power|underpowered|adequately powered","Cỡ mẫu và lực thống kê",
+"Cỡ mẫu là số BN cần tuyển, được tính trước để nghiên cứu đủ khả năng phát hiện một hiệu quả nếu nó thật sự tồn tại. Lực thống kê (power) là xác suất phát hiện được hiệu quả đó, thường đặt 80% hoặc 90%. Nghiên cứu thiếu lực (underpowered) dễ cho kết quả “không có ý nghĩa” dù thuốc có tác dụng.",
+"Cỡ mẫu phụ thuộc 4 yếu tố: tỷ lệ biến cố nhóm chứng, hiệu quả mong đợi, alpha (thường 0,05) và lực. Tìm trong Methods câu dạng “we estimated that X patients would provide 90% power to detect…”, rồi so giả định đó với kết quả thật: nếu tỷ lệ biến cố thực tế thấp hơn giả định nhiều, thử nghiệm bị thiếu lực.",
+"Ví dụ giả định: dự kiến nhóm chứng có 15% biến cố, mong giảm 20% tương đối (xuống 12%), alpha 0,05, lực 80% → cần khoảng 2000 BN mỗi nhóm. Nếu thực tế nhóm chứng chỉ có 8% biến cố, số biến cố ít hơn dự kiến nhiều và lực giảm còn khoảng 50%.",
+"“Không có khác biệt có ý nghĩa” trong một nghiên cứu thiếu lực nghĩa là “chưa đủ dữ liệu để kết luận”, không phải “hai điều trị như nhau”."],
+["tn","CONSORT","CONSORT diagram|CONSORT statement|CONSORT flow diagram","CONSORT",
+"Bộ hướng dẫn quốc tế về cách viết báo cáo RCT, gồm danh sách các mục cần báo cáo và một sơ đồ luồng BN: bao nhiêu người được sàng lọc, bị loại vì sao, được chia ngẫu nhiên, nhận can thiệp, mất dấu, được phân tích.",
+"Sơ đồ CONSORT thường là Hình 1. Đọc nó để biết nhanh số mất dấu, số chuyển nhóm và số BN được phân tích ở mỗi nhóm.",
+"Ví dụ giả định: 8000 BN được sàng lọc → 3000 bị loại (eGFR thấp, không đồng ý) → 5000 được chia ngẫu nhiên (2500/2500) → mất dấu 12 và 15 → phân tích ITT 2500/2500.",
+"Báo cáo theo đúng CONSORT nghĩa là báo cáo đầy đủ, không đảm bảo nghiên cứu được thiết kế tốt."],
+["tn","Trial registration","ClinicalTrials.gov|NCT number|preregistration|pre-registration|prospectively registered","Đăng ký thử nghiệm",
+"Đăng ký thông tin thử nghiệm (câu hỏi, kết cục chính, cỡ mẫu, kế hoạch phân tích) lên cơ sở dữ liệu công khai trước khi tuyển BN đầu tiên, ví dụ ClinicalTrials.gov (mã NCT…). Mục đích: ngăn tác giả đổi kết cục sau khi đã thấy kết quả, và giúp phát hiện những thử nghiệm âm tính không được xuất bản.",
+"Lấy mã NCT trong abstract, tra trên ClinicalTrials.gov, so kết cục chính và ngày đăng ký (trước hay sau khi bắt đầu tuyển BN).",
+"Ví dụ giả định: bản đăng ký ghi kết cục chính là tử vong do mọi nguyên nhân sau 2 năm, nhưng bài báo lại trình bày “nhập viện vì suy tim sau 1 năm” là kết cục chính vì kết cục này có ý nghĩa. Đây là đổi kết cục (outcome switching).",
+"Đăng ký sau khi đã tuyển BN (retrospective registration) làm giảm giá trị của việc đăng ký."],
+["tn","Run-in period","run-in|run in period|lead-in period","Giai đoạn dẫn nhập",
+"Giai đoạn trước khi chia ngẫu nhiên, BN dùng thử thuốc (hoặc placebo) vài tuần. Ai không tuân thủ hoặc không dung nạp thì bị loại trước khi vào thử nghiệm chính. Giúp thử nghiệm ít người bỏ thuốc hơn.",
+"Khi có run-in, BN trong thử nghiệm là những người đã chứng tỏ dung nạp tốt, nên tỷ lệ tác dụng phụ và bỏ thuốc trong bài thấp hơn ngoài đời.",
+"Ví dụ giả định: 10.500 BN vào giai đoạn run-in với thuốc mới; 2000 BN bị loại vì tụt huyết áp, tăng kali hoặc suy thận; còn 8500 BN được chia ngẫu nhiên. Ngoài đời, khoảng 1/5 BN có thể không dung nạp thuốc ngay từ đầu.",
+"Đừng áp dụng thẳng tỷ lệ tác dụng phụ của thử nghiệm có run-in cho BN của mình."],
+["tn","Adjudication","adjudicated|clinical events committee|endpoint committee|event adjudication","Thẩm định biến cố",
+"Mỗi biến cố nghi ngờ (nhồi máu, đột quỵ, tử vong tim mạch) được một hội đồng chuyên gia độc lập (Clinical Events Committee) xem hồ sơ gốc và xác định có đúng định nghĩa kết cục không. Hội đồng thường không biết BN ở nhóm nào. Việc này giúp kết cục chính xác và thống nhất giữa các trung tâm.",
+"Tìm trong Methods câu dạng “events were adjudicated by an independent committee unaware of treatment assignment”.",
+"Ví dụ giả định: các trung tâm báo 120 ca “nhồi máu cơ tim”; hội đồng xem troponin, ECG và chỉ xác nhận 95 ca đúng định nghĩa phổ quát về nhồi máu cơ tim.",
+"Thẩm định chỉ xác nhận các biến cố đã được báo lên; nó không sửa được việc một nhóm được theo dõi kỹ hơn nhóm kia."],
+
+["hq","Absolute risk reduction","ARR|absolute risk difference|risk difference|absolute reduction|absolute difference","Giảm nguy cơ tuyệt đối",
+"Mức chênh lệch tuyệt đối về tỷ lệ biến cố giữa nhóm chứng và nhóm can thiệp. Nó trả lời câu hỏi thực tế nhất: cứ 100 BN được điều trị thì bớt được bao nhiêu biến cố. Đây là con số nên dùng khi tư vấn cho BN.",
+"Công thức: ARR = tỷ lệ biến cố nhóm chứng (CER) − tỷ lệ biến cố nhóm can thiệp (EER).\nARR luôn phải đi kèm khoảng thời gian theo dõi.",
+"DAPA-HF: CER = 21,2%, EER = 16,3%.\nARR = 21,2% − 16,3% = 4,9% sau trung vị 18,2 tháng.\nNghĩa là cứ 100 BN dùng dapagliflozin khoảng 1,5 năm, có khoảng 5 BN tránh được suy tim nặng lên hoặc tử vong tim mạch.",
+"Cùng một thuốc, ARR lớn ở BN nguy cơ cao và nhỏ ở BN nguy cơ thấp, vì ARR phụ thuộc nguy cơ nền."],
+["hq","Relative risk reduction","RRR","Giảm nguy cơ tương đối",
+"Phần trăm nguy cơ được giảm so với nhóm chứng. Nó cho biết thuốc cắt bớt bao nhiêu phần của nguy cơ ban đầu, và thường khá ổn định giữa các nhóm BN có nguy cơ khác nhau.",
+"Công thức: RRR = ARR / CER = 1 − RR.\nVới HR, nhiều bài nói “giảm 26%” nghĩa là 1 − 0,74.",
+"DAPA-HF: RRR = 4,9 / 21,2 ≈ 23% (theo tỷ lệ thô); theo HR là 1 − 0,74 = 26%.\nÁp dụng cùng RRR 23% cho hai BN:\n• BN nguy cơ 40% → giảm còn khoảng 31%; ARR ≈ 9%; NNT ≈ 11.\n• BN nguy cơ 8% → giảm còn khoảng 6,2%; ARR ≈ 1,8%; NNT ≈ 55.",
+"Quảng cáo thuốc thích dùng RRR vì nghe lớn (“giảm 50% nguy cơ”), dù ARR có thể chỉ 0,5%."],
+["hq","Relative risk","risk ratio|RR|risk ratios|relative risks","Nguy cơ tương đối",
+"Tỷ số giữa tỷ lệ biến cố ở nhóm can thiệp (hay nhóm phơi nhiễm) và ở nhóm chứng. Cho biết nguy cơ ở nhóm này bằng bao nhiêu lần nhóm kia.",
+"RR = EER / CER.\n• RR = 1: không khác.\n• RR < 1: giảm nguy cơ (RR 0,8 = giảm 20%).\n• RR > 1: tăng nguy cơ (RR 1,5 = tăng 50%).\nNếu CI của RR chứa 1 → không có ý nghĩa thống kê.",
+"DAPA-HF: RR = 16,3 / 21,2 ≈ 0,77, tức nguy cơ ở nhóm dapagliflozin bằng khoảng 77% nhóm placebo.",
+"RR không nói gì về độ lớn tuyệt đối: RR 0,5 có thể chỉ là từ 2% xuống 1%."],
+["hq","Number needed to treat","NNT","Số cần điều trị",
+"Số BN cần điều trị (trong đúng khoảng thời gian của nghiên cứu) để tránh được thêm 1 biến cố so với không điều trị. Đây là cách diễn đạt lợi ích dễ hiểu nhất. NNT càng nhỏ, thuốc càng có lợi.",
+"NNT = 1 / ARR (ARR viết dưới dạng số thập phân), luôn làm tròn lên.\nNếu ARR tính bằng %: NNT = 100 / ARR.",
+"DAPA-HF: ARR = 4,9% → NNT = 100 / 4,9 ≈ 20,4 → làm tròn lên 21.\nCâu tư vấn: “Cứ khoảng 21 người như anh/chị dùng thuốc này trong 18 tháng thì có 1 người tránh được nhập viện vì suy tim hoặc tử vong tim mạch.”",
+"NNT phải nêu kèm kết cục và thời gian. NNT 21 sau 18 tháng không so trực tiếp được với NNT 50 sau 5 năm."],
+["hq","Number needed to harm","NNH","Số cần để gây hại",
+"Số BN cần điều trị để có thêm 1 BN bị tác dụng có hại. NNH càng lớn càng an toàn. Đặt NNH cạnh NNT để cân lợi và hại.",
+"NNH = 1 / (tỷ lệ tác hại nhóm can thiệp − tỷ lệ tác hại nhóm chứng), làm tròn lên.",
+"Ví dụ giả định: thêm thuốc chống đông liều thấp sau hội chứng vành cấp.\n• Biến cố thiếu máu cục bộ: 10% → 8,5%; ARR 1,5%; NNT = 67.\n• Chảy máu nặng: 1% → 2%; NNH = 100.\nCứ 100 BN điều trị: tránh khoảng 1,5 biến cố thiếu máu, thêm 1 ca chảy máu nặng. Quyết định tuỳ BN có nguy cơ chảy máu cao hay không.",
+"So NNT với NNH chỉ có ý nghĩa khi hai loại biến cố có mức nghiêm trọng tương đương."],
+["hq","Odds ratio","OR|odds ratios|adjusted odds ratio","Tỷ số chênh",
+"Odds là tỷ số giữa xác suất có biến cố và xác suất không có biến cố (khác với xác suất). Odds ratio là tỷ số odds của hai nhóm. OR là đơn vị kết quả của nghiên cứu bệnh–chứng và hồi quy logistic.",
+"Odds = p / (1 − p). Từ bảng 2×2: OR = (a × d) / (b × c).\nOR = 1: không liên quan; OR > 1: tăng; OR < 1: giảm.\nKhi biến cố hiếm (< 10%), OR ≈ RR. Khi biến cố phổ biến, OR xa 1 hơn RR.",
+"Ví dụ giả định: tử vong 30% ở nhóm A, 20% ở nhóm B.\n• RR = 0,30 / 0,20 = 1,5.\n• Odds A = 0,3 / 0,7 = 0,43; odds B = 0,2 / 0,8 = 0,25; OR = 0,43 / 0,25 = 1,7.\nNếu đọc OR như RR, sẽ tưởng nguy cơ tăng 70% trong khi thật ra tăng 50%.",
+"Lỗi hay gặp nhất: nói “nguy cơ tăng gấp X lần” từ OR khi biến cố phổ biến."],
+["hq","Hazard ratio","HR|hazard ratios|adjusted hazard ratio","Tỷ số nguy cơ tức thời",
+"Tỷ số giữa tốc độ xảy ra biến cố ở hai nhóm tại mỗi thời điểm theo dõi, ước lượng bằng mô hình Cox. Khác RR, HR tính đến cả việc biến cố xảy ra sớm hay muộn và mỗi BN được theo dõi bao lâu. Đây là thước đo hay gặp nhất trong thử nghiệm tim mạch.",
+"• HR = 1: không khác.\n• HR < 1: biến cố xảy ra chậm hơn hoặc ít hơn ở nhóm can thiệp (HR 0,74 ≈ giảm 26% tốc độ biến cố).\n• HR > 1: tăng.\nĐọc kèm 95% CI: không chứa 1 → có ý nghĩa. HR giả định tỷ lệ nguy cơ không đổi theo thời gian (proportional hazards).",
+"DAPA-HF: HR 0,74 (95% CI 0,65–0,85).\n• Ước lượng tốt nhất: tốc độ biến cố giảm 26%.\n• Mức giảm thật có thể từ 15% (1 − 0,85) đến 35% (1 − 0,65).\n• CI không chứa 1 → có ý nghĩa thống kê.",
+"HR không phải xác suất: HR 0,74 không có nghĩa là “26% BN được cứu”. Muốn biết lợi ích tuyệt đối, xem ARR hoặc đường Kaplan–Meier."],
+["hq","Confidence interval","CI|95% CI|confidence intervals|95% confidence interval","Khoảng tin cậy",
+"Khoảng giá trị mà hiệu quả thật nhiều khả năng nằm trong đó, dựa trên dữ liệu của nghiên cứu. 95% CI có nghĩa: nếu lặp lại nghiên cứu nhiều lần, 95% số khoảng tính ra sẽ chứa giá trị thật. CI cho biết cả độ lớn hiệu quả lẫn độ chính xác, nên hữu ích hơn p.",
+"• Mốc “không khác biệt”: 1 với tỷ số (HR, RR, OR); 0 với hiệu số (ARR, hiệu trung bình).\n• CI không chứa mốc → có ý nghĩa thống kê.\n• CI hẹp → ước lượng chính xác (thường do mẫu lớn).\n• Đọc cả hai đầu: đầu gần mốc nhất cho biết lợi ích tối thiểu còn hợp lý. Nếu đầu đó vẫn đáng kể về lâm sàng, kết luận chắc chắn.",
+"So sánh hai kết quả giả định:\n• A: HR 0,80 (0,75–0,86) → chắc chắn có lợi, ít nhất giảm 14%.\n• B: HR 0,80 (0,55–1,15) → ước lượng giống A, nhưng hiệu quả thật có thể từ giảm 45% đến tăng 15%; chưa kết luận được.\nDAPA-HF: HR 0,74 (0,65–0,85), lợi ích tối thiểu khoảng 15%.",
+"CI chứa 1 không chứng minh “không có hiệu quả”, chỉ là chưa đủ chính xác để kết luận."],
+["hq","P value","p-value|p value|P-value|P values|p-values","Giá trị p",
+"Xác suất quan sát được kết quả ít nhất cực đoan như trong nghiên cứu, nếu thật ra không có khác biệt nào (giả thuyết không, H0). p nhỏ nghĩa là kết quả khó xảy ra chỉ do may rủi nếu thuốc không có tác dụng. Ngưỡng truyền thống là 0,05.",
+"• p < 0,05: thường gọi là có ý nghĩa thống kê.\n• p không cho biết hiệu quả lớn hay nhỏ, cũng không cho biết xác suất thuốc có tác dụng.\n• Luôn đọc p cùng ước lượng hiệu quả và CI.",
+"DAPA-HF: P < 0,001 → nếu dapagliflozin không có tác dụng, xác suất thấy khác biệt lớn như vậy chỉ dưới 1/1000.\nVí dụ giả định: một thử nghiệm 60.000 BN thấy HA giảm thêm 1 mmHg với p < 0,001. Rất chắc là có khác biệt, nhưng khác biệt quá nhỏ để có ý nghĩa lâm sàng.",
+"p = 0,06 không phải “gần có ý nghĩa” hay “có xu hướng”; p = 0,04 và p = 0,06 gần như cùng một mức bằng chứng. p = 0,03 không có nghĩa xác suất kết quả sai là 3%."],
+["hq","Statistical significance","statistically significant|clinically significant|clinical significance|clinically meaningful|clinically relevant","Ý nghĩa thống kê và ý nghĩa lâm sàng",
+"Có ý nghĩa thống kê: kết quả khó xảy ra do ngẫu nhiên (p < 0,05, CI không chứa mốc). Có ý nghĩa lâm sàng: hiệu quả đủ lớn để đáng thay đổi điều trị cho BN, sau khi cân với tác hại, chi phí và sự bất tiện. Hai thứ này độc lập với nhau.",
+"Tự đặt trước một mức khác biệt tối thiểu có ý nghĩa lâm sàng (MCID), rồi so với CI: nếu toàn bộ CI vượt MCID → chắc chắn có ý nghĩa lâm sàng.",
+"Ví dụ giả định:\n• Thuốc A giảm điểm khó thở 0,5 trên thang 0–100 (p < 0,001, n = 20.000): có ý nghĩa thống kê nhưng BN không cảm nhận được.\n• Thuốc B giảm 10 điểm (p = 0,09, n = 80): có thể có ý nghĩa lâm sàng nhưng nghiên cứu quá nhỏ để chắc chắn.",
+"Thấy chữ “significant” trong bài cần hỏi lại: có ý nghĩa thống kê hay ý nghĩa lâm sàng?"],
+["hq","Type I error","type 1 error|false-positive finding","Sai lầm loại I",
+"Kết luận có khác biệt trong khi thật ra không có (dương tính giả), giống chuông báo cháy kêu khi không có cháy. Xác suất chấp nhận sai lầm này là alpha, thường đặt 5%.",
+"Mỗi lần kiểm định với alpha 0,05 có 5% khả năng dương tính giả; làm càng nhiều kiểm định thì khả năng có ít nhất một dương tính giả càng tăng.",
+"Ví dụ giả định: một thuốc thật sự không có tác dụng được thử trong 20 nghiên cứu độc lập; trung bình khoảng 1 nghiên cứu sẽ cho p < 0,05 chỉ do may rủi. Nếu chỉ nghiên cứu đó được xuất bản, y văn sẽ “chứng minh” thuốc có tác dụng.",
+""],
+["hq","Type II error","type 2 error|beta error","Sai lầm loại II",
+"Kết luận không có khác biệt trong khi thật ra có (âm tính giả), giống chuông báo cháy không kêu khi có cháy. Xác suất mắc sai lầm này là beta; lực thống kê = 1 − beta. Nguyên nhân hay gặp: cỡ mẫu nhỏ, ít biến cố.",
+"Khi một nghiên cứu âm tính, nhìn CI: nếu CI rộng và chứa cả mức lợi ích đáng kể, có thể đây là sai lầm loại II.",
+"Ví dụ giả định: thử nghiệm 200 BN cho HR 0,75 (0,48–1,17), p = 0,2. CI chứa cả giảm 52% lẫn tăng 17%; nghiên cứu quá nhỏ, chưa thể nói thuốc không có tác dụng.",
+""],
+["hq","Multiple comparisons","multiplicity|multiple testing|Bonferroni|hierarchical testing|hierarchical testing procedure","Đa so sánh",
+"Càng làm nhiều phép kiểm định (nhiều kết cục, nhiều phân nhóm, nhiều thời điểm), càng dễ có ít nhất một kết quả p < 0,05 chỉ do ngẫu nhiên. Đây là vấn đề đa so sánh.",
+"Xác suất có ít nhất một dương tính giả với k kiểm định độc lập = 1 − 0,95^k.\nCách kiểm soát: hiệu chỉnh Bonferroni (ngưỡng mới = 0,05 / k), kiểm định theo thứ bậc định trước, hoặc coi các kết quả phụ chỉ là gợi ý.",
+"• 1 kiểm định: 5%.\n• 10 kiểm định: 1 − 0,95^10 ≈ 40%.\n• 20 kiểm định: ≈ 64%.\nVí dụ: bài báo kiểm định 20 phân nhóm và báo 1 phân nhóm có p = 0,03. Với Bonferroni, ngưỡng là 0,05/20 = 0,0025, nên p = 0,03 không đạt.",
+"Bài không nói đã kiểm định bao nhiêu thứ thì khó biết một kết quả “có ý nghĩa” là thật hay chỉ là một trong nhiều lần thử."],
+["hq","Standard deviation","SD|standard deviations|standard error|SE","Độ lệch chuẩn và sai số chuẩn",
+"Độ lệch chuẩn (SD) cho biết giá trị của các BN trong mẫu phân tán quanh giá trị trung bình rộng hay hẹp. Sai số chuẩn (SE) cho biết bản thân giá trị trung bình được ước lượng chính xác đến đâu. SE = SD / √n, nên SE luôn nhỏ hơn SD và nhỏ dần khi mẫu lớn lên.",
+"Với phân phối gần chuẩn: trung bình ± 1 SD chứa khoảng 68% BN; ± 2 SD chứa khoảng 95%.\n95% CI của giá trị trung bình ≈ trung bình ± 1,96 × SE.",
+"Ví dụ giả định: 100 BN có tuổi 66 ± 11 (SD).\n• Khoảng 95% BN có tuổi từ 44 đến 88.\n• SE = 11 / √100 = 1,1 → 95% CI của tuổi trung bình ≈ 63,8–68,2.",
+"Bài trình bày “trung bình ± SE” làm dữ liệu trông ít phân tán hơn thực tế; xem chú thích bảng để biết là SD hay SE."],
+["hq","Interquartile range","IQR|interquartile ranges","Khoảng tứ phân vị",
+"Khoảng giữa bách phân vị 25 (Q1) và bách phân vị 75 (Q3), chứa một nửa số BN ở giữa. Dùng kèm trung vị khi dữ liệu bị lệch (có vài giá trị rất cao), như NT-proBNP, troponin, thời gian nằm viện.",
+"Viết dạng “trung vị (IQR Q1–Q3)”. Khoảng càng rộng, dữ liệu càng phân tán.",
+"Ví dụ giả định: NT-proBNP trung vị 1400 (IQR 850–2600) pg/mL: một nửa số BN có giá trị dưới 1400; 25% dưới 850; 25% trên 2600.",
+"Khi dữ liệu trình bày dạng trung vị (IQR), hai nhóm thường được so bằng kiểm định phi tham số (Mann–Whitney), không phải t-test."],
+["hq","Median","medians","Trung vị",
+"Giá trị nằm chính giữa khi xếp tất cả các giá trị từ nhỏ đến lớn: một nửa BN thấp hơn, một nửa cao hơn. Trung vị không bị kéo lệch bởi vài giá trị cực đoan, nên phù hợp với dữ liệu lệch.",
+"Trong thử nghiệm, “trung vị thời gian theo dõi” cho biết thời gian theo dõi điển hình; “trung vị sống còn” là thời điểm còn 50% BN chưa có biến cố.",
+"Ví dụ giả định: thời gian nằm viện của 7 BN: 3, 3, 4, 4, 5, 6, 30 ngày.\n• Trung bình = 55 / 7 ≈ 7,9 ngày (bị kéo lên vì 1 BN nằm 30 ngày).\n• Trung vị = 4 ngày, phản ánh BN điển hình hơn.",
+""],
+["hq","Mean difference","MD|standardized mean difference|SMD|mean differences","Hiệu trung bình",
+"Hiệu trung bình (MD): chênh lệch giá trị trung bình của một biến liên tục giữa hai nhóm (EF, HA, điểm chất lượng cuộc sống), giữ nguyên đơn vị đo. Hiệu trung bình chuẩn hoá (SMD) chia chênh lệch này cho SD, để so sánh hoặc gộp các nghiên cứu dùng thang đo khác nhau.",
+"Với MD, mốc không khác biệt là 0. Với SMD (Cohen’s d): khoảng 0,2 là nhỏ, 0,5 trung bình, 0,8 lớn.",
+"Ví dụ giả định: sau 6 tháng, EF tăng thêm 3,5% (95% CI 1,2–5,8) ở nhóm thuốc so với nhóm chứng. CI không chứa 0 → có ý nghĩa thống kê; lợi ích tối thiểu khoảng 1,2% EF.",
+"SMD khó hình dung về lâm sàng; khi có thể, nên quy về đơn vị đo gốc."],
+["hq","Multivariable regression","multivariable|multivariate|logistic regression|linear regression|adjusted analysis|regression model|multivariable analysis","Hồi quy đa biến",
+"Mô hình thống kê ước lượng mối liên quan giữa một yếu tố (phơi nhiễm) và kết cục, đồng thời “giữ cố định” các yếu tố khác (tuổi, giới, bệnh kèm). Kết quả được gọi là “đã hiệu chỉnh”. Loại mô hình tuỳ kết cục:\n• Logistic: kết cục có/không → OR.\n• Tuyến tính: kết cục liên tục → hệ số β.\n• Cox: thời gian đến biến cố → HR.",
+"So kết quả chưa hiệu chỉnh và đã hiệu chỉnh: nếu thay đổi nhiều, gây nhiễu đáng kể. Xem các biến được đưa vào có hợp lý không. Số biến bị giới hạn bởi số biến cố (khoảng 10 biến cố cho mỗi biến).",
+"Ví dụ giả định: đái tháo đường liên quan tử vong sau PCI với OR thô 2,0. Sau hiệu chỉnh tuổi, suy thận, EF, OR còn 1,4 (1,1–1,8). Phần lớn mối liên quan ban đầu là do BN ĐTĐ già hơn và suy thận nhiều hơn.",
+"Hiệu chỉnh chỉ xử lý được những biến đã đo và đo chính xác. “Multivariate” (nhiều kết cục) thường bị dùng nhầm thay cho “multivariable” (nhiều biến dự báo)."],
+["hq","Missing data","multiple imputation|imputation|missing values|imputed","Dữ liệu thiếu",
+"Giá trị không thu được (BN không làm xét nghiệm, bỏ khám). Nếu dữ liệu thiếu không ngẫu nhiên (người nặng hay bỏ khám), phân tích chỉ trên BN có đủ dữ liệu sẽ bị lệch.",
+"Cách xử lý: phân tích ca đầy đủ (bỏ BN thiếu), điền khuyết đa trị (multiple imputation: ước lượng giá trị thiếu nhiều lần từ các dữ liệu khác), phân tích độ nhạy với giả định xấu nhất. Bài tốt báo % dữ liệu thiếu cho từng biến.",
+"Ví dụ giả định: nghiên cứu từ HIS có 30% BN thiếu EF. Những BN thiếu EF thường là BN tử vong sớm chưa kịp siêu âm; bỏ họ đi làm tỷ lệ tử vong thấp giả tạo.",
+"Nghiên cứu hồi cứu không ghi gì về dữ liệu thiếu là dấu hiệu đáng lo."],
+["hq","Win ratio","win ratio|hierarchical composite|win ratios","Tỷ số thắng",
+"Cách phân tích kết cục gộp theo thứ bậc ưu tiên. Mỗi BN nhóm can thiệp được ghép cặp với mỗi BN nhóm chứng và so lần lượt theo thứ tự quan trọng: trước hết ai sống lâu hơn; nếu hoà, ai ít nhập viện hơn; nếu vẫn hoà, ai có triệu chứng tốt hơn… Cặp nào BN nhóm can thiệp tốt hơn thì tính là “thắng”.",
+"Win ratio = số cặp thắng / số cặp thua. Lớn hơn 1: có lợi cho can thiệp. Đọc kèm CI và thứ tự ưu tiên tác giả đã chọn.",
+"Ví dụ giả định: trong 1000 cặp so sánh có 450 cặp thắng (330 nhờ tử vong, 120 nhờ nhập viện), 300 cặp thua, 250 cặp hoà. Win ratio = 450 / 300 = 1,5.",
+"Win ratio cao có thể chủ yếu đến từ thành phần ít quan trọng (thang điểm triệu chứng); xem đóng góp của từng bậc."],
+["hq","Restricted mean survival time","RMST","Thời gian sống trung bình giới hạn",
+"Thời gian sống (hoặc sống không biến cố) trung bình của BN tính đến một mốc thời gian định trước, bằng diện tích dưới đường Kaplan–Meier đến mốc đó. Hiệu RMST giữa hai nhóm được diễn đạt bằng đơn vị thời gian, dễ giải thích với BN.",
+"Không cần giả định nguy cơ tỷ lệ, nên hữu ích khi hai đường KM bắt chéo nhau.",
+"Ví dụ giả định: theo dõi 36 tháng, RMST nhóm can thiệp 33,1 tháng, nhóm chứng 31,9 tháng → trung bình BN sống không biến cố thêm 1,2 tháng trong 3 năm.",
+""],
+["hq","Fragility index","fragility","Chỉ số mong manh",
+"Số BN tối thiểu ở nhóm có ít biến cố hơn phải đổi từ “không biến cố” thành “có biến cố” thì kết quả mất ý nghĩa thống kê (p ≥ 0,05). Chỉ số càng nhỏ, kết luận càng dễ đổ.",
+"So với số BN mất dấu: nếu số mất dấu lớn hơn chỉ số mong manh, kết luận rất mong manh.",
+"Ví dụ giả định: thử nghiệm 400 BN, biến cố 10 so với 25, p = 0,01. Chỉ cần thêm 3 biến cố ở nhóm can thiệp là p > 0,05 → chỉ số mong manh = 3, trong khi có 8 BN mất dấu.",
+"Chỉ áp dụng cho kết cục có/không trong RCT chia 1:1; không thay thế được CI."],
+["hq","Incidence","incidence rate|event rate|event rates|cumulative incidence|incidence rates","Tỷ suất mới mắc",
+"Số ca mới xuất hiện trong một khoảng thời gian trên số người có nguy cơ mắc. Trả lời câu hỏi: trong một năm có bao nhiêu người mới mắc.",
+"Tỷ lệ mới mắc tích luỹ = số ca mới / số người có nguy cơ lúc đầu (trong khoảng thời gian đó).\nTỷ suất mới mắc = số ca mới / tổng số người-năm theo dõi.",
+"Ví dụ giả định: theo dõi 2000 BN sau thay van 1 năm, 60 BN mới xuất hiện rung nhĩ → tỷ lệ mới mắc 1 năm = 60 / 2000 = 3%.",
+"Đừng nhầm với tỷ lệ hiện mắc (đang có bệnh tại một thời điểm)."],
+["hq","Prevalence","prevalent","Tỷ lệ hiện mắc",
+"Tỷ lệ người đang có bệnh trong một quần thể tại một thời điểm (hoặc một khoảng ngắn), gồm cả ca cũ và ca mới.",
+"Tỷ lệ hiện mắc = số người đang có bệnh / tổng số người được khảo sát. Tỷ lệ này ảnh hưởng mạnh tới giá trị tiên đoán dương và âm của xét nghiệm.",
+"Ví dụ giả định: trong 1000 BN khám tim mạch, 180 BN đang có rung nhĩ → tỷ lệ hiện mắc 18%.",
+""],
+["hq","Person-years","patient-years|person years|patient years|person-time|per 100 patient-years","Người-năm",
+"Tổng thời gian theo dõi của tất cả người tham gia cộng lại. Vì mỗi BN được theo dõi dài ngắn khác nhau, tính biến cố trên người-năm giúp so sánh công bằng.",
+"Tỷ suất = số biến cố / tổng số người-năm (thường nhân 100 để có “trên 100 người-năm”).",
+"Ví dụ giả định: 3 BN được theo dõi 2 năm, 1 năm và 0,5 năm → 3,5 người-năm. Một nghiên cứu có 40 ca đột quỵ trong 2000 người-năm → 2,0 đột quỵ / 100 người-năm, tức khoảng 2% mỗi năm.",
+"Cách tính này giả định nguy cơ đều theo thời gian; nếu biến cố dồn vào năm đầu, con số trung bình che khuất điều đó."],
+
+["sl","Selection bias","selection biases","Sai lệch chọn",
+"Sai lệch do cách chọn người vào nghiên cứu, hoặc cách giữ họ ở lại, làm các nhóm khác nhau một cách có hệ thống, hoặc làm mẫu không đại diện cho BN mình quan tâm. Kết quả vì thế lệch khỏi sự thật.",
+"Hỏi: ai được đưa vào, ai bị loại, ai rời đi, và việc đó có liên quan đến cả phơi nhiễm lẫn kết cục không.",
+"Ví dụ giả định: một nghiên cứu về tử vong sau nhồi máu chỉ lấy BN còn sống đến lúc xuất viện. BN tử vong trong 24 giờ đầu (nặng nhất) bị bỏ qua, nên tỷ lệ tử vong và hiệu quả điều trị đều sai.",
+""],
+["sl","Information bias","measurement bias|misclassification|detection bias|ascertainment bias","Sai lệch thông tin / đo lường",
+"Sai lệch do đo hoặc phân loại sai phơi nhiễm hay kết cục, đặc biệt đáng lo khi sai số khác nhau giữa các nhóm. Detection bias là một dạng: một nhóm được theo dõi, xét nghiệm nhiều hơn nên phát hiện nhiều biến cố hơn.",
+"Kiểm tra: kết cục có được đo cùng cách, cùng tần suất ở hai nhóm không; người đo có biết BN thuộc nhóm nào không.",
+"Ví dụ giả định: BN dùng thuốc mới được đeo Holter mỗi 3 tháng theo một đề cương phụ, nhóm chứng thì không. Rung nhĩ “tăng” ở nhóm thuốc mới chỉ vì được tìm kỹ hơn.",
+""],
+["sl","Recall bias","recall","Sai lệch nhớ lại",
+"Người đã mắc bệnh thường cố nhớ và suy nghĩ nhiều hơn về những gì mình đã tiếp xúc, nên kể về phơi nhiễm khác với người khỏe. Đặc trưng của nghiên cứu bệnh–chứng dùng phỏng vấn.",
+"Giảm bằng cách dùng dữ liệu được ghi nhận từ trước (hồ sơ kê đơn, dữ liệu nhà thuốc) thay vì hỏi lại BN.",
+"Ví dụ giả định: BN nhồi máu cơ tim nhớ rõ “tuần trước có uống thuốc giảm đau”, còn người khỏe mạnh thì quên. NSAID khi đó trông liên quan với nhồi máu mạnh hơn thực tế.",
+""],
+["sl","Performance bias","performance biases","Sai lệch thực hiện",
+"Hai nhóm được chăm sóc khác nhau ngoài can thiệp đang nghiên cứu, ví dụ một nhóm được tái khám dày hơn, được tối ưu thuốc nhiều hơn. Thường xảy ra khi không làm mù.",
+"Xem bảng thuốc dùng kèm trong quá trình theo dõi; chênh lệch lớn giữa hai nhóm là dấu hiệu cảnh báo.",
+"Ví dụ giả định: nhóm can thiệp được điều dưỡng gọi điện hằng tuần để kiểm tra thuốc, nhóm chứng thì không. Tái nhập viện giảm có thể do được chăm sóc sát hơn, không do can thiệp chính.",
+""],
+["sl","Attrition bias","attrition","Sai lệch do mất dấu",
+"Sai lệch xảy ra khi người rời nghiên cứu (mất dấu, rút lui, bỏ thuốc) ở hai nhóm khác nhau về số lượng hoặc đặc điểm.",
+"Xem sơ đồ CONSORT, số người rời đi và lý do ở mỗi nhóm, và cách tác giả xử lý dữ liệu thiếu.",
+"Ví dụ giả định: 15% BN nhóm thuốc mới bỏ cuộc vì tác dụng phụ, so với 5% ở nhóm chứng. Nếu chỉ phân tích người hoàn thành, nhóm thuốc mới chỉ còn những người dung nạp tốt, thường khỏe hơn.",
+""],
+["sl","Confounding","confounder|confounders|confounding factor|confounding factors|confounded","Yếu tố gây nhiễu",
+"Yếu tố gây nhiễu là một yếu tố thứ ba liên quan tới cả phơi nhiễm lẫn kết cục, và không nằm trên con đường nhân quả giữa chúng. Nó tạo ra một mối liên quan giả, hoặc che giấu một mối liên quan thật.",
+"Một yếu tố là gây nhiễu khi đủ ba điều kiện:\n1. Liên quan với phơi nhiễm.\n2. Là yếu tố nguy cơ của kết cục.\n3. Không phải bước trung gian giữa phơi nhiễm và kết cục.\nCách xử lý: ngẫu nhiên hoá (tốt nhất), ghép cặp, phân tầng, hồi quy đa biến, propensity score.",
+"Ví dụ giả định: người uống nhiều cà phê có tỷ lệ nhồi máu cao hơn, nhưng họ cũng hút thuốc nhiều hơn. Khi phân tích riêng nhóm hút thuốc và nhóm không hút, cà phê không còn liên quan với nhồi máu → thuốc lá là yếu tố gây nhiễu.",
+"Hiệu chỉnh một biến trung gian (như huyết áp khi nghiên cứu muối và đột quỵ) là sai, vì làm mất đi chính hiệu quả cần đo."],
+["sl","Confounding by indication","indication bias","Gây nhiễu theo chỉ định",
+"Lý do bác sĩ chỉ định điều trị (vì BN nặng hơn hoặc nhẹ hơn) cũng liên quan đến kết cục. Kết quả là thuốc trông có hại (hoặc có lợi) do loại BN được dùng nó, không do bản thân thuốc. Đây là kiểu gây nhiễu nguy hiểm nhất khi đánh giá điều trị bằng dữ liệu quan sát.",
+"Khó xử lý hoàn toàn vì mức nặng thường không được đo đầy đủ. Target trial emulation và so với một thuốc thay thế (active comparator) giúp giảm bớt.",
+"Ví dụ giả định: dữ liệu HIS cho thấy BN suy tim dùng furosemide liều cao tử vong gấp đôi. Nhưng bác sĩ chỉ cho liều cao khi BN ứ dịch nặng, kháng lợi tiểu; chính mức nặng làm tử vong cao, không phải furosemide.",
+""],
+["sl","Residual confounding","unmeasured confounding|unmeasured confounders|residual confounders","Nhiễu tồn dư",
+"Nhiễu còn sót lại sau khi đã hiệu chỉnh, do có yếu tố chưa được đo (thể trạng, khả năng tự chăm sóc, điều kiện kinh tế) hoặc đo không chính xác.",
+"Dấu hiệu cảnh báo: hiệu quả nhỏ (HR khoảng 0,8–1,25) trong nghiên cứu quan sát rất dễ là do nhiễu tồn dư. Một số bài tính E-value: yếu tố chưa đo phải mạnh đến mức nào mới xoá được kết quả.",
+"Ví dụ giả định: nghiên cứu quan sát thấy dùng vitamin D liên quan với ít biến cố tim mạch hơn (HR 0,85) dù đã hiệu chỉnh nhiều biến. Người tự mua vitamin thường quan tâm sức khỏe hơn, điều này không đo được. RCT sau đó không thấy lợi ích.",
+""],
+["sl","Healthy user bias","healthy adherer|healthy user effect|healthy adherer effect","Sai lệch người khỏe / người tuân thủ",
+"Người chủ động dùng thuốc phòng ngừa và uống thuốc đều đặn thường cũng ăn uống tốt hơn, tập luyện nhiều hơn, đi khám đều hơn. Vì vậy thuốc phòng ngừa trông có lợi trong nghiên cứu quan sát, kể cả khi chính thuốc không có tác dụng.",
+"Dấu hiệu nghi ngờ: thuốc dường như giảm cả những biến cố không liên quan về sinh học (tai nạn, nhiễm trùng).",
+"Nhiều nghiên cứu quan sát từng gợi ý liệu pháp hormone thay thế bảo vệ tim ở phụ nữ mãn kinh; thử nghiệm WHI không xác nhận lợi ích tim mạch này.\nMột hiện tượng kinh điển khác: trong các thử nghiệm, người uống placebo đều đặn cũng có tử vong thấp hơn người uống placebo không đều.",
+""],
+["sl","Reverse causation","reverse causality","Nhân quả ngược",
+"Thay vì phơi nhiễm gây ra kết cục, chính kết cục (hoặc bệnh ở giai đoạn sớm chưa được chẩn đoán) gây ra phơi nhiễm.",
+"Cách giảm: bỏ các biến cố xảy ra trong một khoảng thời gian đầu sau khi đo phơi nhiễm, hoặc dùng nghiên cứu theo dõi dài.",
+"Ở BN suy tim nặng, cholesterol thấp liên quan với tử vong cao. Không phải cholesterol thấp gây tử vong, mà suy tim nặng gây suy kiệt và sung huyết gan, làm cholesterol giảm.",
+""],
+["sl","Immortal time bias","immortal time","Sai lệch thời gian bất tử",
+"Có một khoảng thời gian theo dõi mà BN ở nhóm “được điều trị”, theo cách định nghĩa nhóm, không thể chết hay có biến cố, vì họ phải sống đến lúc nhận điều trị mới được xếp vào nhóm đó. Khoảng thời gian “bất tử” này làm nhóm điều trị trông tốt hơn giả tạo.",
+"Kiểm tra: thời điểm bắt đầu theo dõi (thời điểm 0) có giống nhau cho cả hai nhóm và có trùng lúc bắt đầu điều trị không. Cách sửa: phân tích phơi nhiễm thay đổi theo thời gian, phân tích mốc (landmark), hoặc target trial emulation.",
+"Ví dụ giả định: một nghiên cứu xếp BN vào nhóm “dùng statin” nếu có mua statin trong vòng 6 tháng sau xuất viện, thời điểm 0 là ngày xuất viện.\nBN chết ở tháng thứ 2 trước khi kịp mua thuốc → bị xếp vào nhóm “không dùng”. Nhóm dùng statin chắc chắn sống ít nhất đến lúc mua thuốc → statin trông giảm tử vong mạnh hơn thực tế.",
+""],
+["sl","Lead-time bias","lead time bias|lead time","Sai lệch thời gian dẫn",
+"Khi tầm soát phát hiện bệnh sớm hơn, thời gian sống “tính từ lúc chẩn đoán” dài ra, dù BN mất vào đúng thời điểm như khi không tầm soát. Tầm soát vì vậy trông có lợi giả tạo.",
+"So sánh tử vong tính từ lúc bắt đầu nghiên cứu (hoặc tỷ lệ tử vong trong cả quần thể) thay vì thời gian sống tính từ lúc chẩn đoán.",
+"Ví dụ giả định: không tầm soát, bệnh được phát hiện lúc 70 tuổi, BN mất lúc 75 tuổi → sống 5 năm sau chẩn đoán. Có tầm soát, bệnh được phát hiện lúc 67 tuổi, BN vẫn mất lúc 75 tuổi → sống 8 năm sau chẩn đoán. Tầm soát không kéo dài đời BN dù con số “sống thêm” tăng.",
+""],
+["sl","Publication bias","small-study effect|small-study effects|funnel plot|funnel plots","Sai lệch xuất bản",
+"Nghiên cứu cho kết quả dương tính, ấn tượng dễ được nộp và được đăng hơn nghiên cứu âm tính. Khi tổng hợp y văn, hiệu quả bị phóng đại vì thiếu các nghiên cứu âm tính “nằm trong ngăn kéo”.",
+"Biểu đồ phễu (funnel plot): trục ngang là hiệu quả, trục dọc là độ chính xác. Nếu không có sai lệch, các điểm tạo hình phễu cân đối; thiếu một góc phía dưới (nghiên cứu nhỏ âm tính) gợi ý có sai lệch. Kiểm định Egger hỗ trợ việc đánh giá.",
+"Ví dụ giả định: phân tích gộp 15 nghiên cứu về một thuốc; các nghiên cứu nhỏ đều cho hiệu quả lớn, không có nghiên cứu nhỏ nào âm tính → phễu lệch, nghi ngờ nhiều nghiên cứu nhỏ âm tính chưa được đăng.",
+"Biểu đồ phễu khó đọc khi có ít hơn khoảng 10 nghiên cứu; phễu lệch cũng có thể do nghiên cứu nhỏ có chất lượng kém."],
+["sl","Spin","reporting bias|selective reporting|outcome switching|selective outcome reporting","Diễn giải lệch / báo cáo chọn lọc",
+"Cách trình bày làm kết quả trông tốt hơn thực tế: kết cục chính âm tính nhưng abstract nhấn mạnh kết cục phụ hay phân nhóm có ý nghĩa; đổi kết cục so với bản đăng ký; dùng cụm “có xu hướng có lợi” với p = 0,08; kết luận vượt quá dữ liệu.",
+"Đọc theo thứ tự: kết cục chính trong Results → các bảng → sau cùng mới đọc abstract và kết luận.",
+"Ví dụ giả định: abstract viết “thuốc X cải thiện kết cục ở BN đái tháo đường”, trong khi kết cục chính toàn bộ có HR 0,96 (0,85–1,08), và phân nhóm ĐTĐ chỉ là 1 trong 18 phân nhóm, p tương tác 0,09.",
+""],
+["sl","Propensity score","propensity score matching|propensity-score|propensity scores|PSM|inverse probability weighting|IPTW|IPW|propensity-matched","Điểm xu hướng",
+"Xác suất một BN nhận điều trị, ước tính từ các đặc điểm đã đo (tuổi, bệnh kèm, xét nghiệm…). Những BN có cùng điểm xu hướng nhưng một người được điều trị, một người không, thì giống nhau về các đặc điểm đã đo. Điểm này được dùng để ghép cặp (PSM), gán trọng số (IPTW) hoặc hiệu chỉnh, giúp hai nhóm quan sát giống nhau hơn, gần với một RCT.",
+"Kiểm tra bảng đặc điểm sau ghép cặp: hiệu chuẩn hoá (standardized difference) < 0,1 là cân bằng tốt. Xem bao nhiêu BN bị loại vì không ghép được.",
+"Ví dụ giả định: 3000 BN NSTEMI, 1800 được can thiệp sớm, 1200 không. Trước ghép cặp, nhóm can thiệp trẻ hơn trung bình 8 tuổi. Sau ghép 1:1 theo điểm xu hướng còn 1000 cặp, tuổi, creatinine, Killip tương đương; tử vong 1 năm 7% so với 10%.",
+"Propensity score chỉ cân bằng được các biến đã đo; nó không thay thế được ngẫu nhiên hoá."],
+["sl","Regression to the mean","regression toward the mean","Hồi quy về trung bình",
+"Khi chọn BN vì một chỉ số đo được bất thường (rất cao hoặc rất thấp), lần đo sau thường gần mức trung bình hơn, chỉ do dao động ngẫu nhiên tự nhiên. Điều này dễ bị nhầm là hiệu quả điều trị.",
+"Đây là lý do mọi nghiên cứu về hiệu quả cần nhóm chứng: nhóm chứng cũng “cải thiện” do hồi quy về trung bình.",
+"Ví dụ giả định: chọn 50 BN có HA lần đầu ≥ 170 mmHg, chưa cho thuốc, đo lại sau 2 tuần thì trung bình còn 158 mmHg. Nếu đã cho một thuốc mới, mức giảm 12 mmHg này dễ bị gán nhầm cho thuốc.",
+""],
+["sl","Risk of bias","RoB|RoB 2|ROBINS-I|risk-of-bias|Newcastle-Ottawa|Newcastle–Ottawa","Nguy cơ sai lệch",
+"Đánh giá có hệ thống khả năng kết quả của một nghiên cứu bị lệch khỏi sự thật do thiết kế hay cách thực hiện. Mỗi loại nghiên cứu có công cụ riêng.",
+"• RoB 2 (RCT): 5 lĩnh vực: quá trình ngẫu nhiên, lệch khỏi can thiệp dự định, dữ liệu kết cục thiếu, đo kết cục, chọn lọc kết quả báo cáo. Mỗi lĩnh vực xếp: thấp / có vài lo ngại / cao.\n• ROBINS-I: nghiên cứu can thiệp không ngẫu nhiên.\n• Newcastle–Ottawa: đoàn hệ và bệnh–chứng (chấm sao).\n• QUADAS-2: xét nghiệm chẩn đoán.",
+"Ví dụ giả định: một RCT nhãn mở dùng kết cục “đau thắt ngực” có lĩnh vực “đo kết cục” xếp nguy cơ cao, nên tổng thể xếp nguy cơ sai lệch cao dù quá trình ngẫu nhiên tốt.",
+""],
+
+["sc","Kaplan–Meier curve","Kaplan-Meier|Kaplan Meier|KM curve|KM curves|Kaplan–Meier|cumulative incidence curve","Đường cong Kaplan–Meier",
+"Đồ thị mô tả tỷ lệ BN chưa có biến cố (hoặc tỷ lệ biến cố cộng dồn) theo thời gian ở từng nhóm. Đường thay đổi theo từng bậc mỗi khi có biến cố. BN bị kiểm duyệt (mất dấu, hết thời gian theo dõi) được tính đúng phần thời gian họ được theo dõi.",
+"Cách đọc:\n• Khoảng cách giữa hai đường tại một mốc thời gian = hiệu số tuyệt đối tại mốc đó (ARR).\n• Hai đường tách nhau sớm hay muộn cho biết lợi ích xuất hiện khi nào.\n• Bảng “No. at risk” dưới trục hoành: số BN còn đang theo dõi; phần đuôi ít BN thì kém tin cậy.\n• Hai đường bắt chéo gợi ý HR không hằng định theo thời gian.",
+"Trong DAPA-HF, hai đường tách nhau từ những tháng đầu và giãn dần, cuối thời gian theo dõi cách nhau khoảng 5 điểm phần trăm, tương ứng ARR 4,9%.\nVí dụ giả định: hai đường trùng nhau 6 tháng đầu rồi mới tách → lợi ích đến muộn, BN cần dùng thuốc đủ lâu mới thấy.",
+"Trục tung bị cắt (bắt đầu từ 70% thay vì 0%) làm khác biệt trông lớn hơn thực tế."],
+["sc","Cox proportional hazards model","Cox model|Cox regression|proportional hazards|Cox proportional-hazards|proportional-hazards","Mô hình Cox",
+"Mô hình hồi quy dành cho dữ liệu thời gian đến biến cố. Cho ra HR của một yếu tố sau khi hiệu chỉnh nhiều yếu tố khác, có tính đến BN bị kiểm duyệt.",
+"Giả định chính: HR không đổi theo thời gian (nguy cơ tỷ lệ). Bài tốt báo đã kiểm tra giả định này (phần dư Schoenfeld). Nếu giả định bị vi phạm, nên báo HR theo từng giai đoạn hoặc dùng RMST.",
+"Ví dụ giả định: mô hình Cox trên 2000 BN sau PCI cho thấy suy thận (eGFR < 60) liên quan với tử vong, HR 1,8 (1,4–2,3), sau hiệu chỉnh tuổi, đái tháo đường, EF.",
+""],
+["sc","Censoring","censored","Kiểm duyệt (dữ liệu bị cắt)",
+"Khi theo dõi kết thúc mà BN chưa có biến cố, hoặc BN mất dấu, rút khỏi nghiên cứu, ta chỉ biết họ “không có biến cố cho đến thời điểm X”. Dữ liệu của họ bị kiểm duyệt (bị cắt) tại X: vẫn được dùng đến X chứ không bị bỏ.",
+"Giả định: việc bị kiểm duyệt không liên quan tới nguy cơ biến cố. Giả định này bị vi phạm khi BN nặng lên rồi bỏ theo dõi.",
+"Ví dụ giả định: BN A được theo dõi 14 tháng thì chuyển vào Hà Nội, mất liên lạc, chưa có biến cố. A đóng góp 14 tháng không biến cố cho đường KM, sau đó không còn được tính trong “No. at risk”.",
+""],
+["sc","Competing risk","competing risks|Fine-Gray|Fine and Gray|subdistribution hazard","Nguy cơ cạnh tranh",
+"Một biến cố khác xảy ra làm biến cố đang quan tâm không còn có thể xảy ra. Ví dụ: BN chết do ung thư thì không thể tái nhập viện vì suy tim nữa. Khi nguy cơ cạnh tranh lớn (BN cao tuổi, nhiều bệnh), phương pháp Kaplan–Meier thông thường ước lượng quá cao nguy cơ của biến cố quan tâm.",
+"Bài tốt dùng hàm tỷ lệ mới mắc tích luỹ (cumulative incidence function) hoặc mô hình Fine–Gray.",
+"Ví dụ giả định: BN 85 tuổi sau TAVI, theo dõi 5 năm, 30% tử vong do nguyên nhân ngoài tim mạch. KM thông thường ước tính tái nhập viện vì suy tim 25%, trong khi phân tích có tính nguy cơ cạnh tranh cho 18%.",
+""],
+["sc","Log-rank test","log rank|log-rank","Kiểm định log-rank",
+"Kiểm định thống kê so sánh hai (hoặc nhiều) đường Kaplan–Meier trên toàn bộ thời gian theo dõi, để xem khác biệt có vượt mức ngẫu nhiên không. Cho ra giá trị p.",
+"Mạnh nhất khi khác biệt đều theo thời gian; kém nhạy khi hai đường bắt chéo nhau.",
+"Ví dụ giả định: hai đường KM tách dần, log-rank p = 0,002 → khác biệt sống còn giữa hai nhóm khó do ngẫu nhiên.",
+""],
+["sc","Time-to-event","time to first event|time-to-first-event|time to event|time-to-event analysis","Thời gian đến biến cố",
+"Kết cục gồm hai thông tin: BN có biến cố không và biến cố xảy ra sau bao lâu. Phân tích kiểu này dùng được dữ liệu của các BN được theo dõi dài ngắn khác nhau.",
+"Phương pháp: Kaplan–Meier, log-rank, Cox. Phần lớn bài phân tích “thời gian đến biến cố đầu tiên”, bỏ qua các biến cố lặp lại; một số bài phân tích cả biến cố tái phát.",
+"Ví dụ giả định: BN nhập viện vì suy tim 3 lần trong 2 năm. Phân tích biến cố đầu tiên chỉ tính lần thứ nhất; phân tích tổng biến cố (recurrent events) tính cả 3 lần, phản ánh gánh nặng bệnh tốt hơn.",
+""],
+["sc","Landmark analysis","landmark","Phân tích mốc",
+"Chọn một mốc thời gian (landmark), chỉ đưa vào phân tích những BN còn sống, chưa có biến cố đến mốc đó, rồi theo dõi tiếp từ mốc. Dùng để tách hiệu quả giai đoạn sớm và giai đoạn muộn, hoặc để tránh immortal time bias.",
+"Mốc phải được chọn trước và có lý do lâm sàng.",
+"Ví dụ giả định: so hai loại stent, phân tích riêng giai đoạn 0–30 ngày (huyết khối sớm) và từ ngày 30 đến 1 năm. Stent A có lợi ở giai đoạn sớm nhưng không khác stent B ở giai đoạn muộn.",
+""],
+
+["cd","Sensitivity","sensitivities","Độ nhạy",
+"Trong số những người thật sự có bệnh, xét nghiệm phát hiện đúng (dương tính) được bao nhiêu phần trăm. Xét nghiệm có độ nhạy cao hiếm khi bỏ sót bệnh. Vì vậy, nếu một xét nghiệm độ nhạy cao cho kết quả âm tính, có thể yên tâm loại trừ bệnh (quy tắc SnNout: Sensitive, Negative → rule out).",
+"Độ nhạy = dương tính thật / (dương tính thật + âm tính giả) = a / (a + c) trong bảng 2×2.",
+"Ví dụ giả định: 100 BN thật sự bị nhồi máu; troponin độ nhạy cao dương tính ở 98 BN, âm tính ở 2 BN → độ nhạy 98%. Nhờ vậy, phác đồ troponin 0 giờ/1 giờ âm tính giúp cho BN đau ngực nguy cơ thấp về sớm.",
+"Đừng nhầm với “phân tích độ nhạy” (sensitivity analysis), một khái niệm thống kê khác hẳn."],
+["cd","Specificity","specificities","Độ đặc hiệu",
+"Trong số những người thật sự không có bệnh, xét nghiệm cho kết quả âm tính đúng bao nhiêu phần trăm. Xét nghiệm có độ đặc hiệu cao ít báo động nhầm. Vì vậy, nếu một xét nghiệm độ đặc hiệu cao cho kết quả dương tính, có thể khá chắc chắn khẳng định bệnh (SpPin: Specific, Positive → rule in).",
+"Độ đặc hiệu = âm tính thật / (âm tính thật + dương tính giả) = d / (b + d).",
+"Ví dụ giả định: 200 người không có hẹp mạch vành; nghiệm pháp gắng sức âm tính ở 160 người, dương tính (giả) ở 40 người → độ đặc hiệu 80%.",
+"Độ nhạy và độ đặc hiệu thường đánh đổi nhau khi thay đổi ngưỡng cắt."],
+["cd","Positive predictive value","PPV","Giá trị tiên đoán dương",
+"Khi xét nghiệm của BN dương tính, xác suất BN thật sự có bệnh là bao nhiêu. Đây là câu hỏi bác sĩ thực sự cần trả lời trước một BN cụ thể. PPV phụ thuộc rất mạnh vào tỷ lệ bệnh trong nhóm BN được làm xét nghiệm.",
+"PPV = dương tính thật / tổng số dương tính = a / (a + b).",
+"Cùng một xét nghiệm có độ nhạy 90%, độ đặc hiệu 80%, làm cho 1000 người:\n• Tỷ lệ bệnh 50% (đau ngực điển hình, nhiều yếu tố nguy cơ): dương tính thật 450, dương tính giả 100 → PPV = 450 / 550 ≈ 82%.\n• Tỷ lệ bệnh 5% (phụ nữ trẻ không triệu chứng): dương tính thật 45, dương tính giả 190 → PPV = 45 / 235 ≈ 19%. Phần lớn kết quả dương tính là giả.",
+"Không mang PPV của nghiên cứu (thường làm ở bệnh viện, tỷ lệ bệnh cao) áp dụng cho phòng khám sàng lọc."],
+["cd","Negative predictive value","NPV","Giá trị tiên đoán âm",
+"Khi xét nghiệm âm tính, xác suất BN thật sự không có bệnh là bao nhiêu. NPV cao khi tỷ lệ bệnh thấp và độ nhạy cao.",
+"NPV = âm tính thật / tổng số âm tính = d / (c + d).",
+"Tiếp ví dụ PPV với tỷ lệ bệnh 5% (1000 người, 50 người bệnh): âm tính thật 760, âm tính giả 5 → NPV = 760 / 765 ≈ 99,3%. Kết quả âm tính ở nhóm nguy cơ thấp rất đáng tin.",
+""],
+["cd","Likelihood ratio","LR+|LR−|positive likelihood ratio|negative likelihood ratio|likelihood ratios","Tỷ số khả dĩ",
+"Tỷ số khả dĩ cho biết một kết quả xét nghiệm làm tăng hay giảm khả năng có bệnh bao nhiêu lần. Khác PPV, LR không phụ thuộc tỷ lệ bệnh, nên mang từ nghiên cứu sang BN của mình được.",
+"LR+ = độ nhạy / (1 − độ đặc hiệu); LR− = (1 − độ nhạy) / độ đặc hiệu.\nCách đọc nhanh:\n• LR+ > 10 hoặc LR− < 0,1: thay đổi lớn, thường đủ để quyết định.\n• LR 5–10 hoặc 0,1–0,2: thay đổi vừa.\n• LR 1–2 hoặc 0,5–1: gần như không thay đổi.\nCách kết hợp: odds sau = odds trước × LR.",
+"Xét nghiệm có độ nhạy 90%, độ đặc hiệu 80% → LR+ = 0,9 / 0,2 = 4,5; LR− = 0,1 / 0,8 = 0,125.\nBN có xác suất trước xét nghiệm 30% → odds trước = 0,3 / 0,7 = 0,43.\n• Kết quả dương: odds sau = 0,43 × 4,5 = 1,93 → xác suất sau = 1,93 / 2,93 ≈ 66%.\n• Kết quả âm: odds sau = 0,43 × 0,125 = 0,054 → xác suất sau ≈ 5%.",
+""],
+["cd","Pretest probability","pre-test probability|post-test probability|posttest probability|pretest","Xác suất trước / sau xét nghiệm",
+"Xác suất trước xét nghiệm: khả năng BN có bệnh dựa trên bệnh sử, khám, yếu tố nguy cơ, trước khi có kết quả. Xác suất sau xét nghiệm: khả năng đó sau khi biết kết quả. Xét nghiệm chỉ làm thay đổi xác suất, không cho câu trả lời tuyệt đối.",
+"Xác suất sau được tính từ odds sau (= odds trước × LR), hoặc tra bằng biểu đồ Fagan. Khi xác suất trước rất thấp hoặc rất cao, xét nghiệm thường ít làm thay đổi quyết định.",
+"Ví dụ giả định: nam 65 tuổi đau thắt ngực điển hình có xác suất bệnh mạch vành trước xét nghiệm khoảng 50%; nữ 35 tuổi đau ngực không điển hình khoảng 5%. Cùng một kết quả nghiệm pháp gắng sức dương tính dẫn tới xác suất sau xét nghiệm rất khác nhau ở hai người.",
+""],
+["cd","ROC curve","receiver operating characteristic|ROC|ROC curves","Đường cong ROC",
+"Đồ thị biểu diễn độ nhạy (trục tung) theo 1 − độ đặc hiệu (trục hoành) tại mọi ngưỡng cắt của một xét nghiệm hay thang điểm liên tục. Đường càng cong về góc trên bên trái, xét nghiệm phân biệt càng tốt. Đường chéo tương ứng với phân biệt ngẫu nhiên.",
+"Dùng để chọn ngưỡng cắt (thường là điểm gần góc trên trái nhất, hoặc có chỉ số Youden cao nhất) và để so sánh hai xét nghiệm bằng AUC.",
+"Ví dụ giả định: NT-proBNP để chẩn đoán suy tim cấp: ngưỡng 300 pg/mL cho độ nhạy 98%, độ đặc hiệu 60%; ngưỡng 900 pg/mL cho độ nhạy 85%, độ đặc hiệu 85%. Mỗi ngưỡng là một điểm trên đường ROC.",
+""],
+["cd","AUC (C-statistic)","AUC|C-statistic|c statistic|C-index|area under the curve|AUROC|c-statistic","Diện tích dưới đường cong",
+"Diện tích dưới đường ROC, đo khả năng phân biệt. Nếu chọn ngẫu nhiên một BN có biến cố và một BN không có biến cố, AUC là xác suất mô hình gán cho BN có biến cố nguy cơ cao hơn. Với mô hình tiên lượng, chỉ số này được gọi là C-statistic.",
+"• 0,5: như tung đồng xu.\n• 0,6–0,7: kém đến tạm được.\n• 0,7–0,8: chấp nhận được.\n• 0,8–0,9: tốt.\n• > 0,9: rất tốt (cần nghi quá khớp nếu chưa kiểm định ngoài).",
+"Ví dụ giả định: một thang điểm tiên lượng tử vong 6 tháng sau hội chứng vành cấp có C-statistic 0,82 trên dữ liệu phát triển, và 0,76 khi kiểm định ở một bệnh viện khác.",
+"AUC cao không đảm bảo con số nguy cơ dự báo là đúng; cần xem thêm calibration."],
+["cd","Reference standard","gold standard|reference test","Tiêu chuẩn tham chiếu",
+"Phương pháp tốt nhất hiện có để xác định BN có hay không có bệnh, dùng làm “đáp án” khi đánh giá một xét nghiệm mới. Thường gọi là gold standard dù không phải lúc nào cũng hoàn hảo.",
+"Hỏi: tiêu chuẩn tham chiếu có phù hợp không, có được làm cho tất cả BN không, có được đọc độc lập với xét nghiệm mới không.",
+"Ví dụ giả định: đánh giá CT mạch vành (xét nghiệm mới) so với chụp mạch vành xâm lấn kèm FFR (tiêu chuẩn tham chiếu) để xác định hẹp có ý nghĩa huyết động.",
+""],
+["cd","Verification bias","partial verification|workup bias|work-up bias","Sai lệch kiểm chứng",
+"Chỉ những BN có kết quả xét nghiệm mới dương tính (hoặc nghi ngờ nhiều) mới được làm tiêu chuẩn tham chiếu. BN có kết quả âm tính không được kiểm chứng nên các ca âm tính giả bị bỏ sót, làm độ nhạy cao giả tạo.",
+"Xem sơ đồ STARD: bao nhiêu BN không được làm tiêu chuẩn tham chiếu, và kết quả xét nghiệm mới của họ thế nào.",
+"Ví dụ giả định: chỉ BN có nghiệm pháp gắng sức dương tính mới được chụp mạch vành. Những BN hẹp mạch vành nhưng nghiệm pháp âm tính không bao giờ được phát hiện, nên nghiệm pháp trông nhạy hơn thực tế.",
+""],
+["cd","Spectrum bias","spectrum effect","Sai lệch phổ bệnh",
+"Xét nghiệm được đánh giá trên BN bệnh rất rõ và người hoàn toàn khỏe mạnh, thay vì trên đúng loại BN còn nghi ngờ mà bác sĩ thực sự cần xét nghiệm. Kết quả là độ nhạy và độ đặc hiệu đẹp hơn thực tế.",
+"Hỏi: BN trong nghiên cứu có giống những BN mình vẫn phân vân hằng ngày không?",
+"Ví dụ giả định: đánh giá một dấu ấn sinh học bằng cách so 100 BN STEMI rõ ràng với 100 người hiến máu khỏe mạnh cho AUC 0,98. Khi dùng cho BN đau ngực ở cấp cứu chưa rõ chẩn đoán, AUC chỉ còn 0,75.",
+""],
+["cd","Calibration","calibration plot|calibrated|calibration slope|Hosmer-Lemeshow|Hosmer–Lemeshow","Hiệu chuẩn",
+"Mức độ khớp giữa nguy cơ mà mô hình dự báo và tỷ lệ biến cố thực tế xảy ra. Mô hình hiệu chuẩn tốt: nhóm BN được dự báo 10% thì thực tế khoảng 10% có biến cố.",
+"Đọc biểu đồ calibration: các điểm nằm sát đường chéo là tốt; các điểm nằm dưới đường chéo nghĩa là mô hình dự báo cao quá. Calibration slope gần 1 và calibration-in-the-large gần 0 là tốt.",
+"Ví dụ giả định: một thang điểm nguy cơ tim mạch 10 năm phát triển ở châu Âu dự báo 20% cho một nhóm BN Việt Nam, nhưng thực tế chỉ 12% có biến cố → hiệu chuẩn kém, cần hiệu chỉnh lại (recalibration) trước khi dùng.",
+"Mô hình có AUC tốt nhưng hiệu chuẩn kém vẫn có thể dẫn tới điều trị quá mức hoặc điều trị thiếu."],
+["cd","Discrimination","discriminative ability|discriminatory ability|discrimination","Khả năng phân biệt",
+"Khả năng của mô hình hay xét nghiệm tách người sẽ có biến cố khỏi người không có biến cố, tức là xếp hạng đúng ai có nguy cơ cao hơn ai. Đo bằng AUC (C-statistic).",
+"Khả năng phân biệt và hiệu chuẩn là hai mặt riêng biệt; một mô hình tốt cần cả hai.",
+"Ví dụ giả định: một mô hình luôn dự báo nguy cơ gấp đôi nguy cơ thật cho mọi BN vẫn xếp hạng BN đúng (phân biệt tốt), nhưng con số dự báo sai (hiệu chuẩn kém).",
+""],
+["cd","External validation","internal validation|derivation cohort|validation cohort|externally validated|derivation","Kiểm định ngoài",
+"Kiểm tra mô hình dự báo trên một bộ dữ liệu độc lập, khác với dữ liệu dùng để tạo ra nó (bệnh viện khác, nước khác, giai đoạn khác). Kiểm định trong (internal) dùng chính dữ liệu gốc bằng bootstrap hoặc chia mẫu, chỉ để kiểm tra quá khớp.",
+"Mô hình chưa có kiểm định ngoài thì chưa nên dùng trên lâm sàng. AUC và calibration thường giảm khi kiểm định ngoài; giảm ít là tốt.",
+"Thang điểm GRACE đã được kiểm định ngoài ở nhiều quần thể hội chứng vành cấp khác nhau, nên được dùng rộng rãi.\nVí dụ giả định: một mô hình AI dự báo tử vong có AUC 0,90 trên dữ liệu gốc nhưng chỉ 0,70 ở bệnh viện khác.",
+""],
+["cd","Overfitting","overfit|overfitted|events per variable|EPV","Quá khớp",
+"Mô hình học quá sát những chi tiết ngẫu nhiên của dữ liệu dùng để tạo ra nó (nhất là khi nhiều biến mà ít biến cố), nên cho kết quả rất đẹp trên dữ liệu gốc nhưng dự báo kém trên BN mới.",
+"Quy tắc thô: ít hơn 10–20 biến cố cho mỗi biến dự báo (events per variable) là nguy cơ cao. Chọn biến bằng p đơn biến cũng dễ gây quá khớp. Bài tốt dùng phương pháp co rút (shrinkage, LASSO) và kiểm định trong.",
+"Ví dụ giả định: mô hình có 25 biến dự báo được xây trên 120 biến cố (khoảng 5 biến cố cho mỗi biến) cho AUC 0,91; khi áp dụng cho dữ liệu mới, AUC rơi xuống 0,68.",
+""],
+["cd","Net reclassification improvement","NRI|net reclassification index|reclassification","Cải thiện phân loại lại",
+"Đo mức cải thiện việc xếp BN vào đúng nhóm nguy cơ (thấp, trung bình, cao) khi thêm một yếu tố mới (ví dụ một dấu ấn sinh học) vào mô hình cũ: bao nhiêu người có biến cố được xếp lên nhóm cao hơn, bao nhiêu người không có biến cố được xếp xuống nhóm thấp hơn.",
+"NRI = (tỷ lệ lên đúng − tỷ lệ xuống sai ở người có biến cố) + (tỷ lệ xuống đúng − tỷ lệ lên sai ở người không biến cố). Kết quả phụ thuộc vào cách chọn ngưỡng phân nhóm nguy cơ.",
+"Ví dụ giả định: thêm điểm canxi mạch vành vào mô hình nguy cơ.\n• Người có biến cố: 12% được xếp lên đúng, 3% xuống sai.\n• Người không có biến cố: 6% được xếp xuống đúng, 4% lên sai.\nNRI = (12 − 3) + (6 − 4) = 11%.",
+"NRI dương không nhất thiết có nghĩa là có ích trên lâm sàng; nên đọc cùng AUC và calibration."],
+["cd","Risk score","risk prediction model|prediction model|clinical prediction rule|risk model|risk scores|prediction models","Thang điểm nguy cơ / mô hình dự báo",
+"Công cụ kết hợp nhiều đặc điểm của BN thành một con số hoặc một xác suất biến cố, giúp ra quyết định nhất quán (có điều trị không, có nhập viện không, có dùng chống đông không).",
+"Khi đọc bài về một thang điểm, hỏi: được xây từ dữ liệu nào, đã kiểm định ngoài chưa, AUC và calibration ra sao, có dễ dùng tại giường bệnh không, có làm thay đổi kết cục khi áp dụng không.",
+"CHA₂DS₂-VASc ước tính nguy cơ đột quỵ ở BN rung nhĩ; HAS-BLED ước tính nguy cơ chảy máu; GRACE ước tính nguy cơ tử vong sau hội chứng vành cấp.",
+"Thang điểm cho biết nguy cơ trung bình của một nhóm BN giống nhau, không dự đoán chắc chắn điều gì sẽ xảy ra với từng BN."],
+
+["tq","Systematic review","systematic reviews|systematic literature review","Tổng quan hệ thống",
+"Tổng hợp tất cả nghiên cứu trả lời một câu hỏi cụ thể (theo PICO), bằng phương pháp được viết ra trước: tìm kiếm toàn diện trên nhiều cơ sở dữ liệu, chọn bài theo tiêu chí rõ ràng, đánh giá chất lượng từng nghiên cứu, rồi tổng hợp kết quả. Mục tiêu là có câu trả lời ít thiên vị nhất từ toàn bộ y văn.",
+"Đánh giá chất lượng bằng AMSTAR 2; báo cáo theo PRISMA. Tổng quan hệ thống có thể có hoặc không có phân tích gộp.",
+"Ví dụ giả định: tổng quan hệ thống các RCT về SGLT2i trong suy tim; tìm trên PubMed, Embase, Cochrane; chọn được 12 RCT; đánh giá bằng RoB 2; gộp kết quả tử vong tim mạch.",
+"Khác với tổng quan tường thuật (narrative review), loại bài mà chuyên gia chọn bài theo ý mình."],
+["tq","Meta-analysis","meta-analyses|meta analysis|meta-analytic","Phân tích gộp",
+"Kỹ thuật thống kê gộp kết quả của nhiều nghiên cứu thành một ước lượng chung, có trọng số (nghiên cứu lớn, chính xác hơn có trọng số lớn hơn). Giúp có câu trả lời chính xác hơn bất kỳ nghiên cứu đơn lẻ nào.",
+"Đọc theo thứ tự: các nghiên cứu được gộp có đủ giống nhau không (dân số, can thiệp, kết cục)? Chất lượng từng nghiên cứu ra sao? Heterogeneity (I²)? Sai lệch xuất bản? Cuối cùng là ước lượng gộp và CI.",
+"Ví dụ giả định: 5 RCT có HR lần lượt 0,70; 0,85; 0,78; 0,92; 0,74. Gộp lại được HR 0,80 (0,74–0,87), I² = 15%: kết quả nhất quán và chính xác hơn từng thử nghiệm riêng lẻ.",
+"Gộp nhiều nghiên cứu kém chất lượng cho ra một kết quả rất chính xác nhưng sai (“rác vào, rác ra”)."],
+["tq","Forest plot","forest plots","Biểu đồ rừng",
+"Biểu đồ trình bày kết quả của nhiều nghiên cứu (trong phân tích gộp) hoặc nhiều phân nhóm (trong một RCT) trên cùng một trục để dễ so sánh.",
+"Cách đọc:\n• Mỗi dòng: ô vuông là ước lượng (HR, RR…), kích thước ô tỷ lệ với trọng số, đường ngang là 95% CI.\n• Đường dọc tại 1 (hoặc 0) là mốc không khác biệt. Bên trái thường là “có lợi cho can thiệp” (xem nhãn trục).\n• Hình thoi ở cuối là ước lượng gộp; chiều rộng hình thoi là CI.\n• Kèm theo I² và p của heterogeneity.",
+"Ví dụ giả định: 6 nghiên cứu, 5 ô vuông nằm bên trái đường 1, 1 nghiên cứu nhỏ nằm bên phải với CI rất rộng; hình thoi gộp ở 0,82 (0,75–0,90) không chạm đường 1 → lợi ích nhất quán.",
+"Luôn xem nhãn hai bên trục; một số bài đặt phía “có lợi” ở bên phải."],
+["tq","Heterogeneity","I2|I²|I-squared|Cochran Q|Cochran's Q|heterogeneous|statistical heterogeneity","Tính không đồng nhất",
+"Mức độ kết quả của các nghiên cứu trong phân tích gộp khác nhau nhiều hơn mức có thể giải thích bằng ngẫu nhiên. Heterogeneity cao nghĩa là các nghiên cứu có thể đang đo những thứ khác nhau, nên một con số gộp duy nhất dễ gây hiểu lầm.",
+"I² là phần trăm biến thiên do khác biệt thật giữa các nghiên cứu. Gợi ý của Cochrane:\n• 0–40%: có thể không quan trọng.\n• 30–60%: trung bình.\n• 50–90%: đáng kể.\n• 75–100%: rất lớn.\nKhi I² cao, tìm nguyên nhân bằng phân tích phân nhóm hoặc meta-regression.",
+"Ví dụ giả định: gộp 8 nghiên cứu về một kỹ thuật can thiệp, I² = 78%. Tách theo loại BN: nhóm STEMI HR 0,70, nhóm bệnh mạch vành ổn định HR 1,02 → hiệu quả phụ thuộc bối cảnh, không nên báo một con số chung.",
+"I² thấp khi chỉ có ít nghiên cứu nhỏ không có nghĩa là các nghiên cứu thật sự đồng nhất."],
+["tq","Random-effects model","random-effects|random effects|fixed-effect|fixed effect|fixed-effects","Mô hình ảnh hưởng ngẫu nhiên / cố định",
+"Hai cách gộp kết quả trong phân tích gộp. Mô hình ảnh hưởng cố định (fixed-effect) giả định tất cả nghiên cứu cùng đo một hiệu quả thật duy nhất, khác nhau chỉ do ngẫu nhiên. Mô hình ảnh hưởng ngẫu nhiên (random-effects) giả định hiệu quả thật thay đổi giữa các nghiên cứu (do dân số, liều khác nhau) và ước lượng hiệu quả trung bình.",
+"Random-effects cho CI rộng hơn khi có heterogeneity và cho nghiên cứu nhỏ trọng số tương đối lớn hơn. Nếu hai mô hình cho kết quả khác nhau nhiều, cần xem kỹ các nghiên cứu nhỏ.",
+"Ví dụ giả định: fixed-effect cho RR 0,85 (0,80–0,90); random-effects cho RR 0,80 (0,68–0,94), vì vài nghiên cứu nhỏ có hiệu quả lớn được tăng trọng số.",
+""],
+["tq","Network meta-analysis","NMA|network meta-analyses|indirect comparison|indirect comparisons","Phân tích gộp mạng lưới",
+"Phân tích gộp so sánh nhiều can thiệp cùng lúc, kể cả những cặp chưa từng được so trực tiếp, bằng cách kết hợp so sánh trực tiếp và so sánh gián tiếp qua một đối chứng chung. Kết quả thường kèm bảng xếp hạng (SUCRA).",
+"Giả định then chốt: tính bắc cầu (transitivity), tức các thử nghiệm đủ giống nhau để so gián tiếp; và tính nhất quán giữa bằng chứng trực tiếp và gián tiếp.",
+"Ví dụ giả định: chưa có RCT nào so trực tiếp NOAC A với NOAC B. Có RCT A so với warfarin và RCT B so với warfarin; phân tích gộp mạng lưới dùng warfarin làm cầu nối để ước lượng A so với B.",
+"Bảng xếp hạng “thuốc tốt nhất” thường bị đọc quá mức; khác biệt giữa các thứ hạng có thể không có ý nghĩa."],
+["tq","PRISMA","PRISMA flow diagram|PRISMA 2020","PRISMA",
+"Hướng dẫn quốc tế về cách báo cáo tổng quan hệ thống và phân tích gộp (bản PRISMA 2020), gồm danh sách các mục cần báo cáo và sơ đồ luồng chọn bài.",
+"Sơ đồ PRISMA cho biết bao nhiêu bài được tìm thấy, bị loại ở mỗi bước vì lý do gì, và còn bao nhiêu bài được đưa vào.",
+"Ví dụ giả định: tìm được 2450 bài → bỏ trùng còn 1800 → đọc tiêu đề và tóm tắt, loại 1700 → đọc toàn văn 100 bài, loại 88 → 12 nghiên cứu được đưa vào.",
+""],
+["tq","PROSPERO","PROSPERO registration","Đăng ký đề cương tổng quan",
+"Cơ sở dữ liệu quốc tế để đăng ký đề cương tổng quan hệ thống trước khi thực hiện, có vai trò giống ClinicalTrials.gov đối với thử nghiệm.",
+"Tra mã PROSPERO (dạng CRD…) trong bài, rồi so câu hỏi và kết cục với đề cương đã đăng ký.",
+"Ví dụ giả định: đề cương đăng ký kết cục chính là tử vong, nhưng bài đăng lại báo nhập viện là kết cục chính → cần hỏi lý do thay đổi.",
+""],
+["tq","Sensitivity analysis","sensitivity analyses","Phân tích độ nhạy",
+"Làm lại phân tích với những giả định hoặc lựa chọn khác để xem kết luận có vững không. Ví dụ: bỏ các nghiên cứu có nguy cơ sai lệch cao, dùng cách xử lý dữ liệu thiếu khác, dùng định nghĩa kết cục khác.",
+"Nếu kết quả giữ nguyên qua các phân tích độ nhạy → kết luận vững. Nếu đổi chiều → kết luận phụ thuộc vào giả định đó.",
+"Ví dụ giả định: phân tích gộp 10 RCT cho RR 0,80 (0,70–0,91). Bỏ 3 RCT có nguy cơ sai lệch cao, RR còn 0,92 (0,79–1,07) → lợi ích chủ yếu đến từ các nghiên cứu chất lượng kém.",
+"Khác hoàn toàn với độ nhạy (sensitivity) của xét nghiệm."],
+["tq","Individual patient data","IPD|individual participant data|patient-level data|individual-patient data","Dữ liệu từng bệnh nhân",
+"Phân tích gộp dùng dữ liệu gốc của từng BN từ các thử nghiệm (do các nhóm tác giả cung cấp), thay vì chỉ dùng số liệu tổng hợp đã công bố. Cho phép phân tích phân nhóm và thời gian đến biến cố thống nhất, chính xác hơn.",
+"Được coi là chuẩn cao nhất của phân tích gộp, nhưng tốn công và phụ thuộc vào việc các nhóm có chia sẻ dữ liệu không.",
+"Ví dụ giả định: gộp dữ liệu từng BN của 5 thử nghiệm để xem lợi ích của thuốc có thay đổi theo eGFR không, điều mà số liệu tổng hợp đã công bố không trả lời được.",
+""],
+["tq","AMSTAR 2","AMSTAR|AMSTAR-2","AMSTAR 2",
+"Công cụ gồm 16 mục đánh giá chất lượng phương pháp của một tổng quan hệ thống, trong đó 7 mục được coi là then chốt: có đề cương trước, tìm kiếm toàn diện, liệt kê bài bị loại kèm lý do, đánh giá nguy cơ sai lệch, phương pháp gộp phù hợp, tính đến nguy cơ sai lệch khi diễn giải, đánh giá sai lệch xuất bản.",
+"Xếp độ tin cậy của tổng quan: cao, trung bình, thấp, rất thấp, chủ yếu dựa vào số mục then chốt không đạt.",
+"Ví dụ giả định: một tổng quan không đăng ký đề cương và không đánh giá nguy cơ sai lệch của các nghiên cứu → 2 mục then chốt không đạt → độ tin cậy rất thấp.",
+""],
+
+["kc","GRADE","certainty of evidence|quality of evidence|GRADE approach|certainty of the evidence","GRADE",
+"Hệ thống quốc tế để xếp độ tin cậy của bằng chứng (chúng ta chắc chắn đến đâu rằng hiệu quả ước tính gần với sự thật) và độ mạnh của khuyến cáo. Độ tin cậy có 4 mức: cao, trung bình, thấp, rất thấp.",
+"• Điểm xuất phát: RCT = cao; nghiên cứu quan sát = thấp.\n• Hạ bậc vì 5 lý do: nguy cơ sai lệch, không nhất quán, gián tiếp (dân số hay kết cục khác câu hỏi), không chính xác (CI rộng), sai lệch xuất bản.\n• Nâng bậc (chủ yếu với nghiên cứu quan sát): hiệu quả rất lớn, có quan hệ liều–đáp ứng, nhiễu có thể chỉ làm giảm hiệu quả.\n• Khuyến cáo: mạnh hoặc có điều kiện (yếu).",
+"Ví dụ giả định: có 3 RCT về một thuốc, nhưng nguy cơ sai lệch cao (hạ 1 bậc) và CI rộng (hạ thêm 1 bậc) → độ tin cậy thấp, dù bằng chứng đến từ RCT.",
+"GRADE đánh giá bằng chứng cho từng kết cục, không phải cho cả bài báo."],
+["kc","Class of recommendation","COR|class IIa|class IIb|class I recommendation|class III recommendation","Mức khuyến cáo",
+"Mức khuyến cáo trong guideline cho biết nên làm hay không làm một điều trị, và khuyến cáo mạnh đến đâu.\n• ESC: I (được khuyến cáo / có chỉ định), IIa (nên cân nhắc), IIb (có thể cân nhắc), III (không khuyến cáo, có thể có hại).\n• ACC/AHA: 1 (mạnh), 2a (vừa), 2b (yếu), 3 (không có lợi hoặc có hại).",
+"Luôn đọc mức khuyến cáo cùng mức bằng chứng (ví dụ “I A”, “IIa C”).",
+"Ví dụ: guideline suy tim ESC 2021 khuyến cáo SGLT2i (dapagliflozin hoặc empagliflozin) cho BN HFrEF ở mức I, mức bằng chứng A, dựa trên các RCT lớn như DAPA-HF và EMPEROR-Reduced.",
+"Khuyến cáo I không nhất thiết có bằng chứng A; nhiều khuyến cáo mạnh dựa trên đồng thuận chuyên gia."],
+["kc","Level of evidence","LOE|level of evidence A|levels of evidence|level of evidence B|level of evidence C","Mức bằng chứng",
+"Mức bằng chứng cho biết khuyến cáo dựa trên loại dữ liệu nào.\n• ESC: A (nhiều RCT hoặc phân tích gộp), B (một RCT hoặc các nghiên cứu không ngẫu nhiên lớn), C (đồng thuận chuyên gia, nghiên cứu nhỏ, hồi cứu, sổ bộ).\n• ACC/AHA: A, B-R (ngẫu nhiên), B-NR (không ngẫu nhiên), C-LD (dữ liệu hạn chế), C-EO (ý kiến chuyên gia).",
+"Mức C nghĩa là khuyến cáo có thể thay đổi khi có bằng chứng mới; nên áp dụng linh hoạt theo từng BN.",
+"Ví dụ giả định: một khuyến cáo IIa C về thời điểm làm một thủ thuật nghĩa là các chuyên gia nghiêng về việc nên làm, nhưng chưa có RCT chứng minh.",
+"Phần lớn khuyến cáo trong guideline tim mạch có mức bằng chứng B hoặc C."],
+["kc","Evidence hierarchy","evidence pyramid|hierarchy of evidence","Tháp bằng chứng",
+"Cách xếp các thiết kế nghiên cứu theo mức độ ít bị sai lệch khi trả lời câu hỏi về hiệu quả điều trị, từ cao xuống thấp: tổng quan hệ thống các RCT → RCT → đoàn hệ → bệnh–chứng → cắt ngang, loạt ca → ý kiến chuyên gia, nghiên cứu cơ chế.",
+"Tháp chỉ là điểm khởi đầu; chất lượng thực hiện mới là yếu tố quyết định. Với các câu hỏi khác (tiên lượng, tác dụng phụ hiếm), thứ tự có thể khác.",
+"Ví dụ giả định: về câu hỏi tác dụng phụ hiếm, một RCT 80 BN, nhãn mở, mất dấu 25% có thể kém tin cậy hơn một đoàn hệ tiến cứu 50.000 BN được thiết kế cẩn thận.",
+""],
+["kc","PICO","PICOT|PICOS","Khung PICO",
+"Khung 4 phần để đặt câu hỏi lâm sàng rõ ràng và kiểm tra bài báo có trả lời đúng câu hỏi của mình không:\n• P (Patient/Population): BN nào?\n• I (Intervention): can thiệp gì?\n• C (Comparison): so với gì?\n• O (Outcome): kết cục nào?\nCó thể thêm T (Time): theo dõi bao lâu.",
+"Khi đọc bài, viết ra PICO của bài và PICO của BN mình; chỗ nào khác nhau là chỗ cần cân nhắc khi áp dụng.",
+"Câu hỏi: “BN NSTEMI trên 80 tuổi có nên chụp và can thiệp sớm không?”\n• P: NSTEMI, ≥ 80 tuổi.\n• I: chiến lược xâm lấn sớm.\n• C: điều trị nội khoa tối ưu, chụp khi cần.\n• O: tử vong, nhồi máu, chảy máu.\n• T: 1 năm.",
+""],
+["kc","Internal validity","internally valid","Giá trị nội tại",
+"Mức độ kết quả của nghiên cứu phản ánh đúng sự thật trong chính nhóm BN được nghiên cứu, tức là không bị sai lệch, gây nhiễu hay ngẫu nhiên làm méo. Đây là câu hỏi “kết quả có đáng tin không”.",
+"Đánh giá bằng phần A của các bảng câu hỏi thẩm định và các công cụ đánh giá nguy cơ sai lệch.",
+"Ví dụ giả định: một RCT ngẫu nhiên tốt, mù đôi, mất dấu 1% có giá trị nội tại cao.",
+"Phải có giá trị nội tại trước rồi mới bàn đến khả năng khái quát hoá."],
+["kc","External validity","generalizability|generalisability|applicability|generalizable","Tính khái quát hoá",
+"Mức độ kết quả áp dụng được cho những BN ngoài nghiên cứu, tức BN của mình (khác về tuổi, bệnh kèm, chủng tộc, hệ thống y tế, khả năng chi trả).",
+"So tiêu chuẩn chọn, tiêu chuẩn loại và Bảng 1 với BN của mình. Câu hỏi then chốt: có lý do sinh học hay thực tế nào khiến BN mình đáp ứng khác hẳn không?",
+"Ví dụ giả định: một thử nghiệm loại BN có eGFR < 30; áp dụng kết quả cho BN đang chạy thận nhân tạo là ngoại suy, cần thận trọng.",
+"Khác biệt nhỏ (BN của mình già hơn 5 tuổi) thường không đủ để bác bỏ kết quả."],
+["kc","Conflict of interest","conflicts of interest|competing interests|COI|funded by|disclosures","Xung đột lợi ích",
+"Quan hệ tài chính (tài trợ, phí tư vấn, cổ phần) hoặc quan hệ nghề nghiệp có thể ảnh hưởng tới cách thiết kế, phân tích, diễn giải nghiên cứu. Thông tin này được công bố ở phần Funding và Disclosures.",
+"Tài trợ của hãng không làm bài sai, nhưng nên đọc kỹ: đối chứng có phù hợp không, liều đối chứng có tối ưu không, kết cục có được chọn theo hướng có lợi không, kết luận có vượt quá dữ liệu không.",
+"Ví dụ giả định: một thử nghiệm do hãng tài trợ so thuốc mới với thuốc cũ dùng liều thấp hơn liều khuyến cáo → thuốc mới dễ trông tốt hơn.",
+""],
+
+["kt","Cost-effectiveness analysis","cost-effectiveness|cost effectiveness|CEA|cost-utility analysis|cost-utility","Phân tích chi phí – hiệu quả",
+"So sánh hai hay nhiều lựa chọn điều trị về cả chi phí lẫn hiệu quả sức khỏe, để trả lời câu hỏi: số tiền chi thêm có đáng với lợi ích thêm không. Khi hiệu quả được đo bằng QALY, phân tích được gọi là chi phí – thỏa dụng (cost-utility).",
+"Kết quả chính là ICER, được so với ngưỡng sẵn sàng chi trả. Kiểm tra góc nhìn phân tích, khung thời gian, nguồn số liệu hiệu quả và phân tích độ nhạy.",
+"Ví dụ giả định: thuốc mới so với thuốc cũ làm tăng chi phí trọn đời 40 triệu đồng và thêm 0,25 QALY → ICER = 40 / 0,25 = 160 triệu đồng/QALY.",
+"Kết quả từ nước thu nhập cao (giá thuốc, chi phí nằm viện khác) khó áp dụng nguyên cho Việt Nam."],
+["kt","QALY","quality-adjusted life year|quality-adjusted life years|QALYs","Năm sống điều chỉnh theo chất lượng",
+"Kết hợp thời gian sống và chất lượng sống thành một con số. Mỗi năm sống được nhân với một hệ số thỏa dụng từ 0 (tử vong) đến 1 (hoàn toàn khỏe mạnh).",
+"QALY = số năm sống × hệ số thỏa dụng. Hệ số thường lấy từ bộ câu hỏi EQ-5D.",
+"Ví dụ giả định: BN suy tim sống thêm 4 năm với chất lượng 0,7 → 4 × 0,7 = 2,8 QALY. Một điều trị giúp sống 4 năm với chất lượng 0,8 → 3,2 QALY, tức thêm 0,4 QALY.",
+""],
+["kt","ICER","incremental cost-effectiveness ratio|ICERs","Tỷ số chi phí – hiệu quả gia tăng",
+"Chi phí phải bỏ thêm để có thêm một đơn vị hiệu quả (thường là 1 QALY) khi chọn lựa chọn A thay cho lựa chọn B.",
+"ICER = (chi phí A − chi phí B) / (hiệu quả A − hiệu quả B).\nSo với ngưỡng sẵn sàng chi trả: dưới ngưỡng → đáng tiền. Nếu A vừa rẻ hơn vừa hiệu quả hơn → A “chiếm ưu thế” (dominant).",
+"Ví dụ giả định: TAVI so với phẫu thuật ở một nhóm BN: chi phí thêm 300 triệu đồng, thêm 0,5 QALY → ICER = 300 / 0,5 = 600 triệu đồng/QALY.",
+""],
+["kt","Willingness-to-pay threshold","WTP|willingness to pay|willingness-to-pay|cost-effectiveness threshold","Ngưỡng sẵn sàng chi trả",
+"Mức tiền tối đa một xã hội (hoặc một bên chi trả như BHYT) chấp nhận bỏ ra để có thêm 1 QALY. Can thiệp có ICER dưới ngưỡng được coi là chi phí – hiệu quả.",
+"Mỗi nước có ngưỡng khác nhau. Cách lấy 1–3 lần GDP bình quân đầu người (theo một khuyến nghị cũ của WHO) hiện đang bị tranh luận, và nhiều nơi dùng ngưỡng thấp hơn.",
+"Ví dụ giả định: nếu ngưỡng là 200 triệu đồng/QALY, một can thiệp có ICER 150 triệu đồng/QALY được coi là đáng tiền; can thiệp có ICER 600 triệu đồng/QALY thì không.",
+""],
+["kt","Discounting","discount rate|discounted","Chiết khấu",
+"Quy đổi chi phí và lợi ích sức khỏe xảy ra trong tương lai về giá trị hiện tại, vì người ta thường coi lợi ích hôm nay giá trị hơn lợi ích nhiều năm sau. Tỷ lệ chiết khấu thường 3–5% mỗi năm.",
+"Giá trị hiện tại = giá trị tương lai / (1 + r)^t, với r là tỷ lệ chiết khấu, t là số năm.",
+"Ví dụ giả định: 1 QALY đạt được sau 10 năm, chiết khấu 3%/năm: 1 / 1,03^10 ≈ 0,74 QALY tính theo hiện tại.",
+""],
+["kt","Budget impact analysis","budget impact","Phân tích tác động ngân sách",
+"Ước tính tổng số tiền mà bên chi trả (BHYT, bệnh viện) phải bỏ thêm trong vài năm tới khi đưa một can thiệp vào sử dụng, dựa trên số BN đủ điều kiện và tốc độ áp dụng.",
+"Bổ sung cho phân tích chi phí – hiệu quả: một can thiệp đáng tiền cho từng BN vẫn có thể vượt khả năng ngân sách nếu số BN quá lớn.",
+"Ví dụ giả định: một thuốc có ICER chấp nhận được, nhưng có 200.000 BN đủ điều kiện, mỗi BN tốn 10 triệu đồng/năm → 2.000 tỷ đồng/năm, vượt ngân sách dành cho nhóm bệnh này.",
+""],
+["kt","Analytic perspective","societal perspective|payer perspective|healthcare perspective|health care payer perspective","Góc nhìn phân tích",
+"Phân tích chi phí theo góc nhìn của ai, quyết định những chi phí nào được tính:\n• Bên chi trả (BHYT): chỉ chi phí quỹ trả.\n• Hệ thống y tế: mọi chi phí y tế.\n• Xã hội: thêm chi phí BN tự trả, thu nhập bị mất, chi phí người chăm sóc.",
+"Xem góc nhìn của bài có phù hợp với câu hỏi mình quan tâm không.",
+"Ví dụ giả định: phục hồi chức năng tim tại nhà trông tốn kém theo góc nhìn BHYT, nhưng có lợi theo góc nhìn xã hội vì BN đi làm lại sớm hơn.",
+""]
 ];
+
 /* Bộ câu hỏi: g = A đáng tin? / B kết quả? / C áp dụng? / D bổ sung */
 const CL=[
 {id:"rct",name:"Thử nghiệm ngẫu nhiên (RCT)",when:"Câu hỏi về hiệu quả điều trị, can thiệp, chiến lược. Câu r1–r6 là bộ 6 câu cốt lõi; r7–r10 dùng khi cần soi kỹ.",src:"Gộp từ JAMA Users’ Guides to the Medical Literature (Guyatt và cs.), CASP Randomised Controlled Trial Checklist và Cochrane RoB 2.",rep:"CONSORT",rob:"RoB 2",qs:[
@@ -438,10 +999,13 @@ document.getElementById('rep').innerHTML=REPORT.map(r=>'<tr><td>'+r[0]+'</td><td
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const CATN=Object.fromEntries(CATS);
-const DICT=TERMS.map((t,i)=>({k:'d'+i,cat:t[0],en:t[1],al:t[2]?t[2].split('|'):[],vi:t[3],def:t[4],ex:t[5],pit:t[6]}));
+const DICT=TERMS.map((t,i)=>({k:'d'+i,cat:t[0],en:t[1],al:t[2]?t[2].split('|'):[],vi:t[3],d:t[4],h:t[5],e:t[6],p:t[7]}));
+const ART_URL='https://claude.ai/artifact/DsbtqxKA5prYkNznN6Uzds';
+const SEC=[['d','Hiểu đơn giản'],['h','Cách đọc / cách tính'],['e','Ví dụ minh hoạ'],['p','Dễ nhầm']];
+const bodyHTML=t=>SEC.filter(s=>t[s[0]]).map(s=>`<div class="tsec t${s[0]}"><h5>${s[1]}</h5><p>${esc(t[s[0]])}</p></div>`).join('');
 const CLN=Object.fromEntries(CL.map(c=>[c.id,c]));
 const fmt=(x,d=1)=>Number(x).toFixed(d).replace('.',',');
-let userTerms=[],papers=[],cur=null,store=null,busy=false,ctrl=null,mode='link',files=[],saving=Promise.resolve();
+let userTerms=[],papers=[],asking=false,cur=null,store=null,busy=false,ctrl=null,mode='link',files=[],saving=Promise.resolve();
 
 /* ---------- bộ so khớp thuật ngữ ---------- */
 const key=s=>s.toLowerCase().replace(/[\s\-–‑]+/g,'');
@@ -450,7 +1014,7 @@ const pat=s=>s.split(/[\s\-–‑]+/).filter(Boolean).map(p=>p.replace(/[.*+?^${
 let M={map:new Map(),byK:new Map(),ci:null,cs:null};
 function pendingTerms(){
   const nt=cur&&cur.analysis&&cur.analysis.new_terms||[];
-  return nt.map((t,i)=>t.status==='pending'?{k:'p'+i,i,cat:t.cat,en:t.en,al:t.match&&t.match!==t.en?[t.match]:[],vi:t.vi,def:t.def,ex:t.ex,pending:true}:null).filter(Boolean);
+  return nt.map((t,i)=>t.status==='pending'?{k:'p'+i,i,cat:t.cat,en:t.en,al:t.match&&t.match!==t.en?[t.match]:[],vi:t.vi,d:t.d||t.def,h:t.h||'',e:t.e||t.ex||'',p:t.p||'',pending:true}:null).filter(Boolean);
 }
 function buildMatcher(){
   const map=new Map(),byK=new Map(),ci=[],cs=[];
@@ -483,7 +1047,7 @@ function renderDoc(text){
 /* ---------- khung chọn thuật ngữ ---------- */
 const pop=$('#pop');
 function termHTML(t){
-  return `<div class="ph"><b>${esc(t.en)}</b>${t.vi?`<span>${esc(t.vi)}</span>`:''}</div><div class="pc">${esc(CATN[t.cat]||'Thuật ngữ')}${t.user?' · anh đã thêm':''}${t.pending?' · mới, chưa có trong từ điển':''}</div><p>${esc(t.def)}</p>${t.ex?`<p class="pe"><b>Ví dụ:</b> ${esc(t.ex)}</p>`:''}${t.pit?`<p class="pp"><b>Dễ nhầm:</b> ${esc(t.pit)}</p>`:''}`;
+  return `<div class="ph"><b>${esc(t.en)}</b>${t.vi?`<span>${esc(t.vi)}</span>`:''}</div><div class="pc">${esc(CATN[t.cat]||'Thuật ngữ')}${t.user?(t.auto?' · Claude soạn khi anh tra':' · anh đã thêm'):''}${t.pending?' · mới, chưa có trong từ điển':''}</div>${bodyHTML(t)}`;
 }
 function openPop(t,el){
   let h=termHTML(t)+'<div class="pa">';
@@ -496,23 +1060,23 @@ function openPop(t,el){
 const closePop=()=>{pop.hidden=true;};
 
 /* ---------- lưu trữ ---------- */
-const toTerm=(id,d)=>({k:'u'+id,id,cat:CATN[d.cat]?d.cat:'tk',en:d.en,al:d.al||[],vi:d.vi||'',def:d.def||'',ex:d.ex||'',pit:'',user:true,src:d.src||''});
+const toTerm=(id,d,coll)=>({k:'u'+id,id,coll,cat:CATN[d.cat]?d.cat:'tk',en:d.en,al:Array.isArray(d.al)?d.al:[],vi:d.vi||'',d:d.d||d.def||'',h:d.h||'',e:d.e||d.ex||'',p:d.p||'',user:true,auto:!!d.auto,src:d.src||''});
 function libNote(s){$('#libNote').textContent=s;}
 async function initStore(){
   const C=window.claude;
-  if(!C||!C.use){libNote('Mở trang này trên claude.ai để lưu thư viện; hiện chỉ lưu tạm trong lần mở này.');return;}
+  if(!C||!C.use){libNote('');$('#lib').innerHTML=offlineHTML('Thư viện bài đã đọc chỉ xem được trên bản Claude của sổ tay.');return;}
   const [db,user]=await Promise.all([C.use('db'),C.use('user')]);
   const uid=db&&user?await user.id().catch(()=>null):null;
   if(!uid){libNote('Chưa lưu được thư viện ở chế độ xem này; bài phân tích chỉ giữ tạm đến khi đóng trang.');return;}
   const base=db.doc('data/users/'+uid+'/lib');
-  store={papers:base.collection('papers'),terms:base.collection('terms')};
+  store={papers:base.collection('papers'),terms:base.collection('terms'),gloss:db.collection('glossary')};
   libNote('Đang tải thư viện…');
   let timer;
   try{
-    const [ps,ts]=await Promise.race([Promise.all([store.papers.get(),store.terms.get()]),new Promise((_,rej)=>{timer=setTimeout(()=>rej({code:'timeout'}),10000);})]);
+    const [ps,ts,gs]=await Promise.race([Promise.all([store.papers.get(),store.terms.get(),store.gloss.get().catch(()=>({docs:[]}))]),new Promise((_,rej)=>{timer=setTimeout(()=>rej({code:'timeout'}),10000);})]);
     clearTimeout(timer);
     papers=ps.docs.map(d=>({id:d.id,...d.data()}));
-    userTerms=ts.docs.map(d=>toTerm(d.id,d.data()));
+    userTerms=[...gs.docs.map(d=>toTerm(d.id,d.data(),'gloss')),...ts.docs.map(d=>toTerm(d.id,d.data(),'terms'))];
     libNote('');buildMatcher();renderLib();renderGloss();if(cur)renderResult();
   }catch(e){clearTimeout(timer);libNote(e.code==='timeout'?'Thư viện chưa phản hồi; bài mới vẫn được lưu khi kết nối lại.':'Không tải được thư viện ('+(e.code||e.message)+').');}
 }
@@ -532,10 +1096,11 @@ function savePaper(){
 }
 async function addTerm(rec){
   let id='tam'+Date.now();
-  if(store){const ref=store.terms.doc();await ref.set(clean(rec));id=ref.id;}
-  userTerms.push(toTerm(id,rec));
+  let coll='';
+  if(store){try{const ref=store.gloss.doc();await ref.set(clean(rec));id=ref.id;coll='gloss';}catch(e){const ref=store.terms.doc();await ref.set(clean(rec));id=ref.id;coll='terms';}}
+  const t=toTerm(id,rec,coll);userTerms.push(t);return t;
 }
-async function delTerm(id){if(store&&!id.startsWith('tam'))await store.terms.doc(id).delete();userTerms=userTerms.filter(t=>t.id!==id);}
+async function delTerm(id){const t=userTerms.find(x=>x.id===id);if(store&&t&&t.coll)await store[t.coll].doc(id).delete();userTerms=userTerms.filter(x=>x.id!==id);}
 
 /* ---------- PubMed qua connector ---------- */
 function unwrap(r){
@@ -547,7 +1112,7 @@ function unwrap(r){
 }
 async function pm(tool,input){
   const C=window.claude,m=C&&C.use?await C.use('mcp'):null;
-  if(!m)throw new Error('Trang chưa dùng được connector PubMed ở chế độ xem này. Hãy dán văn bản, tải PDF hoặc chụp ảnh bài báo.');
+  if(!m)throw new Error(C&&C.use?'Trang chưa dùng được connector PubMed ở chế độ xem này. Hãy dán văn bản, tải PDF hoặc chụp ảnh bài báo.':'OFFLINE');
   if(typeof m.callTool==='function')return unwrap(await m.callTool('PubMed',tool,input));
   const s=await m.server('PubMed');return unwrap(await s[tool](input));
 }
@@ -599,10 +1164,10 @@ async function shrink(f){
   c.width=Math.round(b.width*s);c.height=Math.round(b.height*s);c.getContext('2d').drawImage(b,0,0,c.width,c.height);
   return new Promise(r=>c.toBlob(r,'image/jpeg',0.86));
 }
-async function need(name){const C=window.claude,x=C&&C.use?await C.use(name):null;if(!x)throw new Error('Trang chưa gọi được Claude ở chế độ xem này. Hãy mở trang trên claude.ai.');return x;}
-async function ask(prompt,opts){
+async function need(name){const C=window.claude;if(!C||!C.use)throw new Error('OFFLINE');const x=await C.use(name);if(!x)throw new Error('Trang chưa gọi được Claude. Mở lại trang trong ứng dụng Claude và chấp nhận khi được hỏi quyền.');return x;}
+async function ask(prompt,opts,st=status){
   const sample=await need('sample');ctrl=new AbortController();
-  const r=await sample(prompt,{...opts,signal:ctrl.signal,onText:({text})=>status(`Claude đang viết… ${text.length.toLocaleString('vi-VN')} ký tự`)});
+  const r=await sample(prompt,{...opts,signal:ctrl.signal,onText:({text})=>st(`Claude đang viết… ${text.length.toLocaleString('vi-VN')} ký tự`)});
   return r;
 }
 const OCR='Chép lại nguyên văn toàn bộ chữ trong các ảnh trang bài báo khoa học này, theo thứ tự ảnh và thứ tự đọc (hết cột trái mới sang cột phải). Tiêu đề mục để trên dòng riêng; các đoạn cách nhau một dòng trống. Bảng: mỗi hàng một dòng, các ô cách nhau bằng ký tự tab. Bỏ header, footer lặp lại và số trang. Chỉ trả về văn bản đã chép, không thêm bình luận.';
@@ -623,7 +1188,7 @@ async function getSource(){
 }
 
 /* ---------- phân tích ---------- */
-const SCHEMA=`{"title":"tiêu đề bài (giữ tiếng Anh)","citation":"tác giả đầu · tạp chí · năm (nếu có)","design":"mã thiết kế","design_label":"mô tả thiết kế bằng tiếng Việt, vd: RCT mù đôi, đa trung tâm, so với placebo","summary":"2–3 câu: bài hỏi gì, làm gì, thấy gì","pico":{"P":"","I":"","C":"","O":"","T":""},"primary":{"outcome":"","treat_label":"","control_label":"","treat_pct":null,"control_pct":null,"effect":"vd HR 0.74 (95% CI 0.65–0.85); P<0.001","follow_up":""},"other_results":[{"label":"","value":"","note":""}],"checklist":[{"id":"r1","answer":"yes|no|unclear","evidence":""}],"pros":[""],"cons":[""],"bias_risk":"thấp|trung bình|cao|không rõ","bias_reason":"","applicability":"","bottom_line":"","new_terms":[{"en":"","match":"","vi":"","cat":"","def":"","ex":""}]}`;
+const SCHEMA=`{"title":"tiêu đề bài (giữ tiếng Anh)","citation":"tác giả đầu · tạp chí · năm (nếu có)","design":"mã thiết kế","design_label":"mô tả thiết kế bằng tiếng Việt, vd: RCT mù đôi, đa trung tâm, so với placebo","summary":"2–3 câu: bài hỏi gì, làm gì, thấy gì","pico":{"P":"","I":"","C":"","O":"","T":""},"primary":{"outcome":"","treat_label":"","control_label":"","treat_pct":null,"control_pct":null,"effect":"vd HR 0.74 (95% CI 0.65–0.85); P<0.001","follow_up":""},"other_results":[{"label":"","value":"","note":""}],"checklist":[{"id":"r1","answer":"yes|no|unclear","evidence":""}],"pros":[""],"cons":[""],"bias_risk":"thấp|trung bình|cao|không rõ","bias_reason":"","applicability":"","bottom_line":"","new_terms":[{"en":"","match":"","vi":"","cat":"","d":"","h":"","e":"","p":""}]}`;
 function buildPrompt(text,meta){
   const cut=text.length>60000,t=text.slice(0,60000);
   const cl=CL.map(c=>c.id+' ('+c.name+'):\n'+c.qs.map(q=>'  '+q[1]+': '+q[2]).join('\n')).join('\n');
@@ -643,7 +1208,7 @@ Hướng dẫn:
 - primary: treat_pct và control_pct là số (không kèm %), chỉ điền khi bài nêu trực tiếp tỷ lệ biến cố của kết cục chính ở từng nhóm; nếu không thì null; không tự tính. Nghiên cứu không có hai nhóm so sánh thì primary = null.
 - pros, cons: mỗi bên 3–6 ý, cụ thể cho bài này.
 - bottom_line: 1–2 câu, bác sĩ lâm sàng nên hiểu và dùng kết quả này thế nào.
-- new_terms: tối đa 10 thuật ngữ phương pháp, thống kê hoặc lâm sàng chuyên sâu có trong bài mà KHÔNG nằm trong danh sách "Đã có". match phải là chuỗi xuất hiện y nguyên trong văn bản. def 1–2 câu tiếng Việt; ex là ví dụ tim mạch ngắn hoặc chuỗi rỗng. cat chọn một: ${CATS.map(c=>c[0]+' = '+c[1]).join('; ')}.
+- new_terms: tối đa 10 thuật ngữ phương pháp, thống kê hoặc lâm sàng chuyên sâu có trong bài mà KHÔNG nằm trong danh sách "Đã có". match phải là chuỗi xuất hiện y nguyên trong văn bản. Viết cho người mới học: d = hiểu đơn giản (3–4 câu: là gì, đo gì, vì sao quan trọng); h = cách đọc hoặc cách tính (công thức viết bằng chữ, ngưỡng thường dùng); e = ví dụ tim mạch có con số, tính từng bước, mở đầu bằng “Ví dụ giả định:” nếu không phải số liệu thật bạn chắc chắn; p = 1–2 lỗi hiểu sai hay gặp. cat chọn một: ${CATS.map(c=>c[0]+' = '+c[1]).join('; ')}.
 
 Bộ câu hỏi theo thiết kế:
 ${cl}
@@ -661,14 +1226,14 @@ async function analyze(){
   let a;try{a=parseJSON(r.text);}catch(e){throw new Error(r.truncated?'Kết quả bị cắt giữa chừng. Thử lại với văn bản ngắn hơn (vd bỏ phần References).':'Không đọc được kết quả của Claude. Bấm Phân tích lần nữa.');}
   a.checklist=Array.isArray(a.checklist)?a.checklist:[];a.pros=Array.isArray(a.pros)?a.pros:[];a.cons=Array.isArray(a.cons)?a.cons:[];a.other_results=Array.isArray(a.other_results)?a.other_results:[];
   const low=cur.text.toLowerCase();
-  a.new_terms=(Array.isArray(a.new_terms)?a.new_terms:[]).filter(t=>t&&t.en&&t.def&&!lookup(t.en)&&(!t.match||low.includes(String(t.match).toLowerCase()))).slice(0,10).map(t=>({...t,cat:CATN[t.cat]?t.cat:'tk',status:'pending'}));
+  a.new_terms=(Array.isArray(a.new_terms)?a.new_terms:[]).filter(t=>t&&t.en&&(t.d||t.def)&&!lookup(t.en)&&(!t.match||low.includes(String(t.match).toLowerCase()))).slice(0,10).map(t=>({...t,cat:CATN[t.cat]?t.cat:'tk',status:'pending'}));
   return a;
 }
 
 /* ---------- chạy ---------- */
 function status(s,err){const el=$('#stat');el.textContent=s||'';el.classList.toggle('err',!!err);}
 function setBusy(b){busy=b;$('#bGo').disabled=b;$('#bHl').disabled=b;$('#bStop').hidden=!b;$$('[data-act=analyze]').forEach(x=>x.disabled=b);}
-const errMsg=e=>{if(ctrl&&ctrl.signal.aborted)return'Đã dừng.';const c=e&&e.code;if(c==='not_granted')return'Anh chưa cho phép trang gọi Claude hoặc PubMed. Mở lại và chấp nhận khi được hỏi.';if(c==='rate_limited')return'Claude đang giới hạn lượt dùng; đợi một lúc rồi thử lại.';return(e&&e.message)||'Có lỗi, thử lại.';};
+const errMsg=e=>{if(ctrl&&ctrl.signal.aborted)return'Đã dừng.';if(e&&e.message==='OFFLINE')return'Bản GitHub không gọi được Claude. Bấm “Mở bản đầy đủ trên Claude” ở đầu trang.';const c=e&&e.code;if(c==='not_granted')return'Anh chưa cho phép trang gọi Claude hoặc PubMed. Mở lại và chấp nhận khi được hỏi.';if(c==='rate_limited')return'Claude đang giới hạn lượt dùng; đợi một lúc rồi thử lại.';return(e&&e.message)||'Có lỗi, thử lại.';};
 async function run(doAnalyze){
   if(busy)return;setBusy(true);closePop();
   try{
@@ -727,7 +1292,7 @@ function newTermsHTML(a){
   const nt=a&&a.new_terms||[];
   if(!a)return'<p class="empty">Thuật ngữ mới chỉ có sau khi phân tích bài bằng Claude.</p>';
   if(!nt.length)return'<p class="empty">Bài này không có thuật ngữ nào ngoài từ điển.</p>';
-  return '<p class="mini">Các thuật ngữ trong bài chưa có trong từ điển. Duyệt cái nào thì cái đó được thêm vào từ điển của anh.</p><div class="ntl">'+nt.map((t,i)=>`<article class="nt"><div class="ph"><b>${esc(t.en)}</b>${t.vi?`<span>${esc(t.vi)}</span>`:''}</div><div class="pc">${esc(CATN[t.cat]||'')}</div><p>${esc(t.def)}</p>${t.ex?`<p class="pe"><b>Ví dụ:</b> ${esc(t.ex)}</p>`:''}<div class="pa">${t.status==='pending'?`<button class="pri sm" data-act="ok" data-i="${i}">Thêm vào từ điển</button><button class="sec sm" data-act="no" data-i="${i}">Bỏ qua</button>`:`<span class="done">${t.status==='ok'?'Đã thêm vào từ điển':'Đã bỏ qua'}</span>`}</div></article>`).join('')+'</div>';
+  return '<p class="mini">Các thuật ngữ trong bài chưa có trong từ điển. Duyệt cái nào thì cái đó được thêm vào từ điển của anh.</p><div class="ntl">'+nt.map((t,i)=>`<article class="nt"><div class="ph"><b>${esc(t.en)}</b>${t.vi?`<span>${esc(t.vi)}</span>`:''}</div><div class="pc">${esc(CATN[t.cat]||'')}</div>${bodyHTML({d:t.d||t.def,h:t.h,e:t.e||t.ex,p:t.p})}<div class="pa">${t.status==='pending'?`<button class="pri sm" data-act="ok" data-i="${i}">Thêm vào từ điển</button><button class="sec sm" data-act="no" data-i="${i}">Bỏ qua</button>`:`<span class="done">${t.status==='ok'?'Đã thêm vào từ điển':'Đã bỏ qua'}</span>`}</div></article>`).join('')+'</div>';
 }
 function renderResult(p){
   if(p)pane=p;const R=$('#result');if(!cur){R.hidden=true;return;}
@@ -750,7 +1315,7 @@ ${m.kind==='abstract'?'<p class="warn">Chỉ lấy được abstract vì bài kh
 async function decide(i,ok){
   const t=cur&&cur.analysis&&cur.analysis.new_terms[i];if(!t||t.status!=='pending')return;
   try{
-    if(ok)await addTerm({en:t.en,vi:t.vi||'',cat:t.cat,def:t.def||'',ex:t.ex||'',al:t.match&&t.match!==t.en?[t.match]:[],src:cur.meta.title||'',at:new Date().toISOString()});
+    if(ok)await addTerm({en:t.en,vi:t.vi||'',cat:t.cat,d:t.d||t.def||'',h:t.h||'',e:t.e||t.ex||'',p:t.p||'',al:t.match&&t.match!==t.en?[t.match]:[],src:cur.meta.title||'',at:new Date().toISOString()});
     t.status=ok?'ok':'no';closePop();buildMatcher();renderResult();renderGloss();
     if(cur.id)savePaper().catch(()=>{});
   }catch(e){status('Chưa lưu được thuật ngữ: '+(e.code||e.message),true);}
@@ -768,10 +1333,12 @@ function renderGloss(){
   const all=[...DICT,...userTerms];
   const chips=[['all','Tất cả',all.length],...CATS.map(c=>[c[0],c[1],all.filter(t=>t.cat===c[0]).length]),['user','Anh đã thêm',userTerms.length]];
   $('#gchips').innerHTML=chips.map(c=>`<button class="chip" aria-pressed="${gCat===c[0]}" data-g="${c[0]}">${esc(c[1])} <i>${c[2]}</i></button>`).join('');
-  const list=all.filter(t=>(gCat==='all'||(gCat==='user'?t.user:t.cat===gCat))&&(!q||[t.en,t.vi,t.def,...(t.al||[])].join(' ').toLowerCase().includes(q)));
+  const list=all.filter(t=>(gCat==='all'||(gCat==='user'?t.user:t.cat===gCat))&&(!q||[t.en,t.vi,t.d,...(t.al||[])].join(' ').toLowerCase().includes(q)));
   $('#gcount').textContent=list.length+' thuật ngữ';
   const by=CATS.map(c=>[c,list.filter(t=>t.cat===c[0])]).filter(x=>x[1].length);
-  $('#glist').innerHTML=by.length?by.map(([c,ts])=>`<h3 class="gh">${esc(c[1])}</h3><div class="gg">${ts.map(t=>`<article class="term" id="term-${t.k}"><h4>${esc(t.en)}${t.vi?`<span>${esc(t.vi)}</span>`:''}</h4>${t.al.length?`<div class="al">${esc(t.al.slice(0,6).join(' · '))}</div>`:''}<p>${esc(t.def)}</p>${t.ex?`<p class="pe"><b>Ví dụ:</b> ${esc(t.ex)}</p>`:''}${t.pit?`<p class="pp"><b>Dễ nhầm:</b> ${esc(t.pit)}</p>`:''}${t.user?`<div class="ut">Anh đã thêm${t.src?' · từ bài: '+esc(t.src):''} <button class="lnkb" data-act="delterm" data-id="${esc(t.id)}">Xoá</button></div>`:''}</article>`).join('')}</div>`).join(''):'<p class="empty">Không có thuật ngữ nào khớp.</p>';
+  $('#glist').innerHTML=by.length?by.map(([c,ts])=>`<h3 class="gh">${esc(c[1])}</h3><div class="gg">${ts.map(t=>`<article class="term" id="term-${t.k}"><h4>${esc(t.en)}${t.vi?`<span>${esc(t.vi)}</span>`:''}</h4>${t.al.length?`<div class="al">${esc(t.al.slice(0,6).join(' · '))}</div>`:''}${bodyHTML(t)}${t.user?`<div class="ut">${t.auto?'Claude soạn khi anh tra':'Anh đã duyệt thêm'}${t.src?' · '+esc(t.src):''} <button class="lnkb" data-act="delterm" data-id="${esc(t.id)}">Xoá</button></div>`:''}</article>`).join('')}</div>`).join(''):'';
+  const exact=q&&lookup(q);
+  $('#gask').innerHTML=q.length>=2&&!exact?`<div class="askc"><p>${list.length?'Không thấy đúng':'Chưa có'} “<b>${esc($('#gq').value.trim())}</b>” trong từ điển.</p><button class="pri" data-act="askterm">Nhờ Claude soạn và thêm vào từ điển</button><p class="mini">Hoặc nhấn Enter. Claude viết đủ 4 phần như các mục khác và tự lưu vào từ điển.</p></div>`:'';
 }
 
 /* ---------- bảng câu hỏi ---------- */
@@ -806,6 +1373,63 @@ function openPaper(id){
   buildMatcher();location.hash='#phan-tich';renderResult(cur.analysis?'a':'t');status('');
   $('#result').scrollIntoView({behavior:'smooth',block:'start'});
 }
+
+
+/* ---------- tra thuật ngữ mới bằng Claude ---------- */
+function offlineHTML(msg){return `<div class="askc off"><p>${esc(msg)} Bản GitHub chỉ để tra từ điển và bảng câu hỏi.</p><a class="pri lnkbtn" href="${ART_URL}" target="_blank" rel="noopener">Mở bản đầy đủ trên Claude</a><p class="mini">Trên điện thoại, link mở trong ứng dụng Claude (đăng nhập đúng tài khoản của anh).</p></div>`;}
+function gStat(s,err){const el=$('#gstat');el.textContent=s||'';el.classList.toggle('err',!!err);}
+function termPrompt(q,ctx){
+  return `Bạn là giảng viên dịch tễ học lâm sàng và thống kê y học, giải thích cho một bác sĩ tim mạch người Việt Nam mới bắt đầu học nghiên cứu khoa học.
+Người dùng muốn tra: "${q}"${ctx?'\nThuật ngữ xuất hiện trong đoạn bài báo sau:\n<<<'+ctx+'>>>':''}
+
+Nếu đây không phải thuật ngữ về nghiên cứu khoa học, thống kê, dịch tễ, y học hay lâm sàng, hoặc viết sai chính tả, chỉ trả: {"not_term":true,"suggest":"thuật ngữ đúng nếu đoán được, nếu không thì chuỗi rỗng"}.
+Ngược lại, trả MỘT object JSON (không markdown, không lời nào ngoài JSON):
+{"en":"tên chuẩn tiếng Anh","vi":"tên tiếng Việt","cat":"mã nhóm","al":["viết tắt và biến thể hay gặp trong bài báo"],"d":"","h":"","e":"","p":""}
+Yêu cầu nội dung, viết tiếng Việt, rõ ràng cho người mới:
+- d (Hiểu đơn giản): 3–5 câu: nó là gì, đo hoặc trả lời câu hỏi gì, vì sao quan trọng. Không dùng thuật ngữ chưa giải thích.
+- h (Cách đọc / cách tính): công thức nếu có (viết bằng chữ, không LaTeX), cách diễn giải kết quả, các ngưỡng hay mốc thường dùng. Dùng \\n để xuống dòng, dấu • cho từng ý.
+- e (Ví dụ minh hoạ): một ví dụ tim mạch cụ thể có con số; nếu có công thức thì tính từng bước. Nếu số liệu không phải từ một nghiên cứu có thật mà bạn chắc chắn, mở đầu bằng "Ví dụ giả định:". Không bịa tên thử nghiệm hay kết quả.
+- p (Dễ nhầm): 1–3 lỗi hiểu sai hay gặp, hoặc chuỗi rỗng.
+- cat chọn một: ${CATS.map(c=>c[0]+' = '+c[1]).join('; ')}.`;
+}
+function showTerm(t){
+  closePop();gCat='all';$('#gq').value=t.en;renderGloss();
+  if(location.hash!=='#tu-dien')location.hash='#tu-dien';
+  setTimeout(()=>{const el=document.getElementById('term-'+t.k);if(el){el.scrollIntoView({block:'start'});el.classList.add('flash');}},80);
+}
+async function askTerm(q,ctx){
+  q=String(q||'').trim().replace(/\s+/g,' ');if(q.length<2||asking)return;
+  const ex=lookup(q);if(ex){showTerm(ex);return;}
+  const C=window.claude;if(!C||!C.use){$('#gask').innerHTML=offlineHTML('Tra thuật ngữ mới cần Claude.');return;}
+  asking=true;if(location.hash!=='#tu-dien')location.hash='#tu-dien';gStat('Claude đang soạn mục “'+q+'”…');
+  try{
+    const r=await ask(termPrompt(q,ctx&&ctx.text),{modelTier:'default'},gStat);
+    const o=parseJSON(r.text);
+    if(o.not_term){gStat(o.suggest?`“${q}” có vẻ không phải thuật ngữ hoặc bị gõ sai. Có phải anh muốn tra “${o.suggest}”?`:`“${q}” có vẻ không phải thuật ngữ nghiên cứu hay y học.`,true);return;}
+    if(!o.en||!o.d)throw new Error('Claude trả về thiếu nội dung. Thử lại.');
+    const dup=lookup(o.en)||(Array.isArray(o.al)?o.al:[]).map(lookup).find(Boolean);
+    if(dup){showTerm(dup);gStat('Thuật ngữ này đã có trong từ điển dưới tên “'+dup.en+'”.');return;}
+    const al=[...new Set([...(Array.isArray(o.al)?o.al:[]),q].map(x=>String(x).trim()).filter(x=>x&&key(x)!==key(o.en)))].slice(0,10);
+    const t=await addTerm({en:String(o.en),vi:String(o.vi||''),cat:o.cat,al,d:String(o.d),h:String(o.h||''),e:String(o.e||''),p:String(o.p||''),auto:true,src:ctx&&ctx.title?'tra từ bài: '+ctx.title:'tra trong từ điển',at:new Date().toISOString()});
+    buildMatcher();if(cur)renderResult();showTerm(t);gStat('Đã thêm “'+t.en+'” vào từ điển.');
+  }catch(e){gStat(errMsg(e),true);}
+  finally{asking=false;}
+}
+const selBtn=$('#selBtn');let selText='',selCtx='';
+function onSel(){
+  const s=getSelection(),txt=s&&s.rangeCount?s.toString().trim().replace(/\s+/g,' '):'';
+  const node=s&&s.anchorNode,el=node?(node.nodeType===1?node:node.parentElement):null;
+  if(!el||!el.closest('.doc')||txt.length<2||txt.length>80){selBtn.hidden=true;return;}
+  selText=txt;const block=el.closest('p,h4,.tbl');selCtx=block?block.textContent.slice(0,600):'';
+  const ex=lookup(txt);selBtn.textContent=ex?'Xem định nghĩa “'+ex.en+'”':'Tra “'+(txt.length>28?txt.slice(0,28)+'…':txt)+'” và thêm vào từ điển';
+  const r=s.getRangeAt(0).getBoundingClientRect();selBtn.hidden=false;
+  const w=Math.min(selBtn.offsetWidth||260,innerWidth-16);
+  selBtn.style.left=Math.max(8,Math.min(r.left+r.width/2-w/2,innerWidth-w-8))+'px';
+  let top=r.bottom+10;if(top>innerHeight-70)top=Math.max(8,r.top-56);selBtn.style.top=top+'px';
+}
+let selT;document.addEventListener('selectionchange',()=>{clearTimeout(selT);selT=setTimeout(onSel,250);});
+selBtn.addEventListener('mousedown',e=>e.preventDefault());
+selBtn.addEventListener('click',()=>{selBtn.hidden=true;const ex=lookup(selText);if(ex){const mk=document.querySelector('.doc mark.t[data-k="'+ex.k+'"]');if(mk)openPop(ex,mk);else showTerm(ex);return;}askTerm(selText,{text:selCtx,title:cur&&cur.meta.title});});
 
 /* ---------- điều hướng ---------- */
 const VIEWS=['phan-tich','tu-dien','cau-hoi','thu-vien'];
@@ -842,6 +1466,7 @@ document.addEventListener('click',e=>{
   else if(act==='ok'||act==='no')decide(Number(b.dataset.i),act==='ok');
   else if(act==='goto'){const t=M.byK.get(b.dataset.k);closePop();if(!t)return;gCat='all';$('#gq').value=t.en;renderGloss();location.hash='#tu-dien';setTimeout(()=>{const el=document.getElementById('term-'+t.k);if(el)el.scrollIntoView({block:'center'});},50);}
   else if(act==='analyze')analyzeCurrent();
+  else if(act==='askterm')askTerm($('#gq').value);
   else if(act==='save'){savePaper().then(r=>{renderResult();status(r==='ok'?'Đã lưu vào thư viện.':'Đã giữ tạm trong lần mở này.');},er=>status('Chưa lưu được: '+(er.code||er.message),true));}
   else if(act==='copy')copySummary();
   else if(act==='open')openPaper(b.dataset.id);
@@ -849,7 +1474,7 @@ document.addEventListener('click',e=>{
   else if(act==='delterm'){delTerm(b.dataset.id).then(()=>{buildMatcher();renderGloss();if(cur)renderResult();},er=>libNote('Chưa xoá được: '+(er.code||er.message)));}
 });
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closePop();});
-document.addEventListener('scroll',()=>{if(!pop.hidden&&!pop.classList.contains('sheet'))closePop();},true);
+document.addEventListener('scroll',()=>{if(!pop.hidden&&!pop.classList.contains('sheet'))closePop();selBtn.hidden=true;},true);
 $('#bGo').addEventListener('click',()=>run(true));
 $('#bHl').addEventListener('click',()=>run(false));
 $('#bStop').addEventListener('click',()=>{if(ctrl)ctrl.abort();});
@@ -859,7 +1484,8 @@ const dz=$('#drop');
 dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('on');});
 dz.addEventListener('dragleave',()=>dz.classList.remove('on'));
 dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('on');files=[...e.dataTransfer.files];showFiles();});
-$('#gq').addEventListener('input',renderGloss);
+$('#gq').addEventListener('input',()=>{gStat('');renderGloss();});
+$('#gq').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();askTerm($('#gq').value);}});
 $('#cT').addEventListener('input',calcNNT);$('#cC').addEventListener('input',calcNNT);
 addEventListener('hashchange',route);
 document.addEventListener('paste',e=>{
@@ -871,7 +1497,7 @@ document.addEventListener('paste',e=>{
 buildMatcher();setMode('link');route();renderGloss();renderCL();calcNNT();renderLib();
 $('#termCount').textContent=DICT.length;
 initStore().catch(e=>libNote('Không mở được thư viện ('+(e.code||e.message)+').'));
-(async()=>{const C=window.claude;if(!C||!C.use){$('#capNote').textContent='Đang xem ngoài claude.ai: từ điển, bảng câu hỏi và nút “Chỉ highlight” với văn bản dán vẫn dùng được.';return;}
+(async()=>{const C=window.claude;if(!C||!C.use){$('#offBanner').innerHTML=offlineHTML('Anh đang mở bản GitHub: không phân tích bài, không tra thuật ngữ mới, không xem thư viện được.');$('#offBanner').hidden=false;return;}
   const [s,m]=await Promise.all([C.use('sample'),C.use('mcp')]);
   const msg=[];if(!s)msg.push('chưa gọi được Claude ở chế độ xem này');if(!m)msg.push('chưa dùng được PubMed');
   $('#capNote').textContent=msg.length?'Lưu ý: '+msg.join(', ')+'. Từ điển và highlight văn bản dán vẫn dùng được.':'';})();
